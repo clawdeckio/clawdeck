@@ -2,6 +2,7 @@ class SessionsController < ApplicationController
   allow_unauthenticated_access only: %i[ new create verify ]
   redirect_authenticated_users only: %i[ new verify ]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  layout "auth", only: %i[ new verify ]
 
   def new
   end
