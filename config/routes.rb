@@ -33,7 +33,9 @@ Rails.application.routes.draw do
   # Kanban Board (main authenticated view)
   resource :board, only: [ :show ], controller: "board" do
     patch :update_task_status
-    resources :tasks, only: [ :show, :new, :create, :edit, :update, :destroy ], controller: "board/tasks"
+    resources :tasks, only: [ :show, :new, :create, :edit, :update, :destroy ], controller: "board/tasks" do
+      resources :comments, only: [ :create ], controller: "board/comments"
+    end
   end
   get "pages/home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

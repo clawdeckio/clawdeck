@@ -1,0 +1,54 @@
+<div id="task-comments-<%= task.id %>" class="space-y-4">
+  <%# Existing comments %>
+  <% if task.comments.any? %>
+    <div class="space-y-3">
+      <% task.comments.order(created_at: :asc).each do |comment| %>
+        <div class="flex items-start gap-3">
+          <%# Avatar/Icon based on author type %>
+          <div class="flex-shrink-0">
+            <% if comment.author_type == "agent" %>
+              <div class="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center">
+                <span class="text-sm">🦊</span>
+              </div>
+            <% else %>
+              <div class="w-7 h-7 rounded-full bg-bg-elevated flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-content-muted">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+              </div>
+            <% end %>
+          </div>
+          <%# Comment content %>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-content"><%= comment.author_name || "User" %></span>
+              <span class="text-xs text-content-muted"><%= time_ago_in_words(comment.created_at) %> ago</span>
+            </div>
+            <p class="text-sm text-content-secondary mt-1 whitespace-pre-wrap"><%= comment.body %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-content-muted italic">No comments yet</p>
+  <% end %>
+
+  <%# New comment form %>
+  <div class="mt-4 pt-4 border-t border-border">
+    <%= form_with url: board_task_comments_path(task), method: :post, local: false, data: { controller: "comment-form" } do |form| %>
+      <%= form.hidden_field :comment, value: "", name: "comment[author_type]" %>
+      <%= form.hidden_field :comment, value: current_user.agent_name || "User", name: "comment[author_name]" %>
+      <div class="flex gap-2">
+        <%= form.text_area :body, 
+            name: "comment[body]",
+            placeholder: "Add a comment...",
+            rows: 1,
+            class: "flex-1 text-sm bg-bg-elevated border border-border rounded-lg px-3 py-2 text-content placeholder-content-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none",
+            data: { comment_form_target: "input", action: "keydown.enter->comment-form#submitOnEnter input->comment-form#autoResize" } %>
+        <%= form.submit "Post",
+            class: "px-3 py-2 text-sm font-medium bg-accent text-content rounded-lg hover:bg-accent-hover transition-colors cursor-pointer disabled:opacity-50",
+            data: { comment_form_target: "submit" } %>
+      </div>
+    <% end %>
+  </div>
+</div>
