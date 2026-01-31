@@ -17,11 +17,13 @@ export default class extends Controller {
   }
 
   showSpinner(event) {
+    if (!this.hasSpinnerTarget) return
     this.spinnerTarget.classList.remove("opacity-0")
     this.spinnerTarget.classList.add("opacity-100")
   }
 
   hideSpinner(event) {
+    if (!this.hasSpinnerTarget) return
     this.spinnerTarget.classList.remove("opacity-100")
     this.spinnerTarget.classList.add("opacity-0")
   }

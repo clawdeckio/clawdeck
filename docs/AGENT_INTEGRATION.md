@@ -1,6 +1,6 @@
 # Agent Integration Spec
 
-ClawDeck is designed as a **personal mission control for your AI agent**. This document specifies how an OpenClaw agent (or any compatible agent) integrates with ClawDeck.
+ClawDeck is designed as a **personal mission control for your AI agent**. This document specifies how an AI agent integrates with ClawDeck via the REST API.
 
 ---
 
@@ -19,7 +19,7 @@ The agent's personality is part of the product. Names, avatars, emoji — all vi
 
 ## Authentication
 
-### API Token (Simple & Recommended)
+### API Token
 
 - User creates an API token in ClawDeck settings
 - Agent stores token in its config
@@ -27,50 +27,218 @@ The agent's personality is part of the product. Names, avatars, emoji — all vi
 
 ```bash
 curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
-  https://your-clawdeck.com/api/v1/tasks
+  https://clawdeck.io/api/v1/tasks
 ```
 
-No OAuth complexity. Self-hosted, single-user — keep it simple.
+### Agent Identity Headers
+
+Every request should include headers that identify the agent:
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `X-Agent-Name` | Yes | Agent's display name (e.g., "Maxie") |
+| `X-Agent-Emoji` | Yes | Agent's emoji (e.g., "🦊") |
+
+These headers are used to:
+- Track agent's last active time
+- Display agent identity in the UI
+- Attribute activity notes to the agent
+
+```bash
+curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
+     -H "X-Agent-Name: Maxie" \
+     -H "X-Agent-Emoji: 🦊" \
+     https://clawdeck.io/api/v1/tasks
+```
 
 ---
 
 ## Agent Workflow
 
 ```
-┌─────────────┐      poll/webhook     ┌─────────────┐
-│  ClawDeck   │◄────────────────────►│  OpenClaw   │
-│  (Board)    │       API calls       │  (Agent)    │
-└─────────────┘                       └─────────────┘
+┌─────────────┐        polling         ┌─────────────┐
+│  ClawDeck   │◄──────────────────────►│   Agent     │
+│  (Board)    │       API calls        │             │
+└─────────────┘                        └─────────────┘
 ```
 
 ### Task Lifecycle (from agent perspective)
 
-1. **Discover work** — Poll or receive webhook for tasks with `status=up_next`
-2. **Claim task** — Move first available task to `in_progress`
-3. **Work on it** — Add comments for progress updates
-4. **Get stuck?** — Set `blocked=true`, add comment explaining why
-5. **Finish** — Move to `in_review`, add summary comment
+1. **Wait for assignment** — Poll for tasks with `assigned=true`
+2. **Start work** — Move assigned task to `in_progress`, add activity note
+3. **Work on it** — Add activity notes for progress updates
+4. **Get stuck?** — Set `blocked=true`, add note explaining why
+5. **Finish** — Move to `in_review`, add summary note
 6. **Human reviews** — User moves to `done` (or back for revisions)
 
-### Auto-Assign Behavior
+### Assignment-Based Workflow
 
-- Agent automatically picks the **first task** in `up_next` (by position)
-- Tasks are processed in order — drag to reprioritize
-- Only one task `in_progress` at a time (unless configured otherwise)
+Unlike auto-pickup systems, ClawDeck uses **explicit assignment**:
+
+- Human assigns tasks to the agent using the "Assign to Agent" button
+- Agent polls for `assigned=true` tasks
+- Agent works on assigned tasks in order (by position)
+- This gives humans full control over what the agent works on
 
 ---
 
 ## API Endpoints
 
-### Get Work Queue
+### Base URL
 
-```http
-GET /api/v1/tasks?status=up_next
+```
+https://clawdeck.io/api/v1
 ```
 
-Returns tasks ready for the agent to pick up, ordered by position.
+---
 
-### Claim a Task
+## Boards API
+
+### List All Boards
+
+```http
+GET /api/v1/boards
+```
+
+**Response:**
+```json
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Personal",
+      "icon": "📋",
+      "color": "gray",
+      "position": 1,
+      "tasks_count": 12
+    }
+  ]
+}
+```
+
+### Get Single Board
+
+```http
+GET /api/v1/boards/:id
+```
+
+**Response:**
+```json
+{
+  "board": {
+    "id": 1,
+    "name": "Personal",
+    "icon": "📋",
+    "color": "gray",
+    "position": 1
+  }
+}
+```
+
+### Create Board
+
+```http
+POST /api/v1/boards
+Content-Type: application/json
+
+{
+  "board": {
+    "name": "Work Projects",
+    "icon": "💼",
+    "color": "blue"
+  }
+}
+```
+
+### Update Board
+
+```http
+PATCH /api/v1/boards/:id
+Content-Type: application/json
+
+{
+  "board": {
+    "name": "Updated Name"
+  }
+}
+```
+
+### Delete Board
+
+```http
+DELETE /api/v1/boards/:id
+```
+
+---
+
+## Tasks API
+
+### List Tasks
+
+```http
+GET /api/v1/tasks
+```
+
+**Query Parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `board_id` | Filter by board ID |
+| `status` | Filter by status: `inbox`, `up_next`, `in_progress`, `in_review`, `done` |
+| `assigned` | Filter by assignment: `true` for assigned tasks |
+| `blocked` | Filter by blocked state: `true` or `false` |
+| `tag` | Filter by tag name |
+
+**Example — Get assigned tasks:**
+```http
+GET /api/v1/tasks?assigned=true
+```
+
+**Response:**
+```json
+{
+  "tasks": [
+    {
+      "id": 42,
+      "name": "Fix login bug",
+      "description": "Users can't log in with email containing +",
+      "status": "up_next",
+      "position": 1,
+      "blocked": false,
+      "assigned": true,
+      "tags": ["bug", "auth"],
+      "board_id": 1,
+      "created_at": "2026-01-30T10:00:00Z",
+      "updated_at": "2026-01-30T10:00:00Z"
+    }
+  ]
+}
+```
+
+### Get Single Task
+
+```http
+GET /api/v1/tasks/:id
+```
+
+### Create Task
+
+```http
+POST /api/v1/tasks
+Content-Type: application/json
+
+{
+  "task": {
+    "name": "Refactor auth module",
+    "description": "Found some tech debt while working on login",
+    "status": "inbox",
+    "board_id": 1,
+    "tags": ["tech-debt", "auth"]
+  }
+}
+```
+
+### Update Task
 
 ```http
 PATCH /api/v1/tasks/:id
@@ -79,42 +247,86 @@ Content-Type: application/json
 {
   "task": {
     "status": "in_progress"
-  }
+  },
+  "activity_note": "Starting work on this now! 🔧"
 }
 ```
 
-### Add Progress Comment
+The `activity_note` parameter is optional but recommended. It creates an activity entry that appears in the task's activity feed, attributed to your agent.
+
+### Delete Task
 
 ```http
-POST /api/v1/tasks/:id/comments
+DELETE /api/v1/tasks/:id
+```
+
+---
+
+## Activity Notes
+
+Activity notes are the primary communication channel between agent and human. They appear in the task's activity feed alongside status changes.
+
+### Adding Activity Notes
+
+Include `activity_note` when updating a task:
+
+```http
+PATCH /api/v1/tasks/:id
 Content-Type: application/json
 
 {
-  "comment": {
-    "author_type": "agent",
-    "author_name": "Maxie",
-    "body": "Working on this now! Found the issue in the auth flow. 🔧"
-  }
+  "task": {
+    "status": "in_progress"
+  },
+  "activity_note": "Starting work! Found the issue in the auth flow. 🔧"
 }
 ```
 
-### Check for Comments Needing Reply
-
-Poll for tasks where a user has commented and the agent hasn't replied yet:
+You can also add a note without changing any task fields:
 
 ```http
-GET /api/v1/tasks?needs_reply=true
+PATCH /api/v1/tasks/:id
+Content-Type: application/json
+
+{
+  "activity_note": "Made good progress. About 50% done."
+}
 ```
 
-This returns tasks where `needs_agent_reply=true`. The flag is automatically:
-- Set to `true` when a user adds a comment
-- Set to `false` when the agent adds a comment
+### Best Practices
 
-**Recommended polling pattern:**
-1. Check `?needs_reply=true` on each heartbeat
-2. For each task returned, read the latest comment
-3. Reply to that specific task (not any other task!)
-4. Your reply automatically clears the `needs_agent_reply` flag
+- Add a note when starting work on a task
+- Add notes for significant progress milestones
+- Always explain why when setting `blocked=true`
+- Add a summary note when moving to `in_review`
+
+---
+
+## Common Agent Workflows
+
+### Poll for Assigned Work
+
+```bash
+# Check for assigned tasks
+curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
+     -H "X-Agent-Name: Maxie" \
+     -H "X-Agent-Emoji: 🦊" \
+     "https://clawdeck.io/api/v1/tasks?assigned=true&status=up_next"
+```
+
+### Start Working on a Task
+
+```http
+PATCH /api/v1/tasks/:id
+Content-Type: application/json
+
+{
+  "task": {
+    "status": "in_progress"
+  },
+  "activity_note": "Starting work on this now!"
+}
+```
 
 ### Mark as Blocked
 
@@ -125,22 +337,8 @@ Content-Type: application/json
 {
   "task": {
     "blocked": true
-  }
-}
-```
-
-Always add a comment explaining why:
-
-```http
-POST /api/v1/tasks/:id/comments
-Content-Type: application/json
-
-{
-  "comment": {
-    "author_type": "agent",
-    "author_name": "Maxie",
-    "body": "🚫 Blocked: I need the API credentials to continue. Can you add them to the .env file?"
-  }
+  },
+  "activity_note": "🚫 Blocked: I need the API credentials to continue. Can you add them to the .env file?"
 }
 ```
 
@@ -154,141 +352,24 @@ Content-Type: application/json
   "task": {
     "status": "in_review",
     "blocked": false
-  }
-}
-```
-
-### Create a Task (Agent-Initiated)
-
-```http
-POST /api/v1/tasks
-Content-Type: application/json
-
-{
-  "task": {
-    "name": "Refactor auth module",
-    "description": "Found some tech debt while working on login",
-    "status": "inbox",
-    "tags": ["tech-debt", "auth"]
-  }
+  },
+  "activity_note": "Done! Implemented the fix and added tests. Ready for review."
 }
 ```
 
 ---
 
-## Polling vs Webhooks
+## Polling Pattern
 
-### Polling (Always Available)
-
-Agent periodically checks for new tasks:
+Recommended polling implementation:
 
 ```
-Every 5 minutes (or on heartbeat):
-  GET /api/v1/tasks?status=up_next
-  If tasks exist and auto_pickup enabled:
-    Claim first task
-```
-
-### Webhooks (Real-Time, Optional)
-
-ClawDeck can notify the agent instantly when:
-- Task moved to `up_next`
-- Comment added to agent's `in_progress` task
-- Task unblocked
-
-Webhook payload:
-```json
-{
-  "event": "task.ready",
-  "task_id": 123,
-  "task_name": "Fix login bug",
-  "timestamp": "2026-01-30T16:00:00Z"
-}
-```
-
-**Recommendation:** Implement both. Polling as reliable fallback, webhooks for speed.
-
----
-
-## UI: Agent Controls
-
-### Header Bar
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│ 🦊 Maxie                              [● Auto] [○ Pause]     │
-│ Currently working on: Fix login bug                          │
-├──────────────────────────────────────────────────────────────┤
-│ Inbox │ Up Next │ In Progress │ In Review │ Done             │
-└──────────────────────────────────────────────────────────────┘
-```
-
-**Elements:**
-- **Agent identity:** Emoji + name (e.g., `🦊 Maxie`)
-- **Status:** What they're working on (or "Idle")
-- **Auto/Pause toggle:**
-  - **Auto:** Agent picks up `up_next` tasks automatically
-  - **Pause:** Agent finishes current task but doesn't pick new ones
-
-### Task Cards
-
-When agent is working on a task:
-```
-┌─────────────────────────────┐
-│ Fix login bug               │
-│ #auth #urgent               │
-│ 🦊 In progress · 2 comments │
-└─────────────────────────────┘
-```
-
-When blocked:
-```
-┌─────────────────────────────┐
-│ 🚫 Fix login bug            │  ← Red border or indicator
-│ #auth #urgent               │
-│ 🦊 Blocked · Needs input    │
-└─────────────────────────────┘
-```
-
-### Comments Thread
-
-```
-┌─────────────────────────────────────┐
-│ 🦊 Maxie · 2 min ago                │
-│ Working on this now! Found the      │
-│ issue in the auth flow. 🔧          │
-├─────────────────────────────────────┤
-│ 👤 Max · 5 min ago                  │
-│ Can you check the login page?       │
-└─────────────────────────────────────┘
-```
-
-- Agent comments: Show emoji + name, personality allowed
-- User comments: Show avatar or generic user icon
-
----
-
-## OpenClaw Configuration
-
-```yaml
-# clawdeck.yaml or in main config
-clawdeck:
-  enabled: true
-  url: "https://your-clawdeck.example.com"
-  api_token: "cd_xxxxxxxxxxxx"
-  
-  agent:
-    name: "Maxie"
-    emoji: "🦊"
-  
-  behavior:
-    auto_pickup: true      # Pick up tasks automatically
-    poll_interval: 300     # Seconds between polls (0 = heartbeat only)
-    max_concurrent: 1      # Tasks in progress at once
-  
-  webhook:
-    enabled: true
-    endpoint: "/webhooks/clawdeck"  # Where ClawDeck sends events
+Every 30-60 seconds:
+  1. GET /api/v1/tasks?assigned=true&status=up_next
+  2. If tasks exist:
+       - Claim first task (move to in_progress)
+       - Work on it
+  3. Also check for in_progress tasks that might be unblocked
 ```
 
 ---
@@ -298,8 +379,8 @@ clawdeck:
 | Status | Meaning | Who moves it here |
 |--------|---------|-------------------|
 | `inbox` | Ideas, backlog — agent sees but ignores | User |
-| `up_next` | Ready for agent to pick up | User |
-| `in_progress` | Agent is actively working | Agent (auto) |
+| `up_next` | Ready for work, awaiting assignment | User |
+| `in_progress` | Agent is actively working | Agent |
 | `in_review` | Agent finished, needs human review | Agent |
 | `done` | Approved and complete | User |
 
@@ -309,10 +390,10 @@ clawdeck:
 
 - Free-form, user-created
 - Displayed as pills on task cards
-- Filterable in sidebar
-- Agent can add tags when creating tasks
+- Filterable in sidebar and via API
+- Agent can add tags when creating/updating tasks
 
-Examples: `#urgent`, `#bug`, `#feature`, `#research`, `#maxie`
+Examples: `bug`, `feature`, `research`, `urgent`, `tech-debt`
 
 ---
 
@@ -322,35 +403,45 @@ A task can be `blocked` in any status (usually `in_progress`).
 
 **When blocked:**
 - Red visual indicator on card
-- Agent adds comment explaining why
-- User gets notified (if webhooks configured)
+- Agent should add activity note explaining why
 - Agent waits for user to respond/unblock
 
 **Unblocking:**
-- User responds in comments
-- User sets `blocked: false`
+- User sets `blocked: false` via UI
+- Or agent clears it: `{ "task": { "blocked": false } }`
 - Agent continues work
 
 ---
 
-## Future Considerations
+## Error Responses
 
-- **Multiple agents:** Support for multiple OpenClaw agents (separate boards or shared)
-- **Agent capabilities:** What can this agent do? (code, research, email, etc.)
-- **Estimated time:** Agent provides time estimates for tasks
-- **Recurring tasks:** Tasks that reset to `up_next` on schedule
+The API returns standard HTTP status codes:
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created |
+| 401 | Invalid or missing API token |
+| 404 | Resource not found |
+| 422 | Validation error |
+
+**Error response format:**
+```json
+{
+  "error": "Task not found"
+}
+```
 
 ---
 
 ## Summary
 
-ClawDeck + OpenClaw = a visual mission control for your AI agent.
+ClawDeck provides a visual mission control for your AI agent.
 
-- You queue work in `Up Next`
-- Agent picks it up automatically
-- You see progress in real-time
-- Comments for back-and-forth
+- Human assigns tasks via UI
+- Agent polls for assigned work
+- Agent updates status and adds activity notes
 - Blocked state when agent needs help
-- Review before marking done
+- Human reviews before marking done
 
-Simple. Visual. Personal. 🦊
+Simple. Visual. Personal.

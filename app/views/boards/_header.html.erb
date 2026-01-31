@@ -201,7 +201,11 @@
       <div>
         <label class="block text-sm font-medium text-content-secondary mb-2">Icon</label>
         <div class="flex flex-wrap gap-2" id="icon-group">
-          <% Board::DEFAULT_ICONS.each do |icon| %>
+          <% available_icons = Board::DEFAULT_ICONS.dup %>
+          <% if current_user.agent_last_active_at.present? && current_user.agent_emoji.present? && !available_icons.include?(current_user.agent_emoji) %>
+            <% available_icons << current_user.agent_emoji %>
+          <% end %>
+          <% available_icons.each do |icon| %>
             <button type="button"
                     onclick="selectBoardIcon(this, '<%= icon %>')"
                     data-icon="<%= icon %>"
@@ -270,7 +274,15 @@
       <div>
         <label class="block text-sm font-medium text-content-secondary mb-2">Icon</label>
         <div class="flex flex-wrap gap-2" id="edit-icon-group">
-          <% Board::DEFAULT_ICONS.each do |icon| %>
+          <% edit_icons = Board::DEFAULT_ICONS.dup %>
+          <% if current_user.agent_last_active_at.present? && current_user.agent_emoji.present? && !edit_icons.include?(current_user.agent_emoji) %>
+            <% edit_icons << current_user.agent_emoji %>
+          <% end %>
+          <%# Also include the current board's icon if it's custom %>
+          <% if @board.icon.present? && !edit_icons.include?(@board.icon) %>
+            <% edit_icons << @board.icon %>
+          <% end %>
+          <% edit_icons.each do |icon| %>
             <button type="button"
                     onclick="selectEditBoardIcon(this, '<%= icon %>')"
                     data-icon="<%= icon %>"
