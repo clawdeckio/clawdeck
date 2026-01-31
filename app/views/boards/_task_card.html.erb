@@ -6,47 +6,49 @@
     data-task-position="<%= task.position %>"
     data-action="contextmenu->dropdown#openAtCursor">
 
-  <%# Context Menu (right-click) %>
-  <button data-dropdown-target="button" class="hidden" aria-expanded="false"></button>
-  <div data-dropdown-target="menu" class="hidden fixed z-[100] min-w-[160px] bg-bg-elevated border border-border rounded-lg shadow-lg py-1">
-    <%# Agent Assignment %>
-    <% agent_connected = current_user.agent_last_active_at.present? %>
-    <% if agent_connected %>
-      <% agent_emoji = current_user.agent_emoji || "🦞" %>
-      <% agent_name = current_user.agent_name || "Agent" %>
-      <% if task.assigned_to_agent? %>
-        <%= button_to unassign_board_task_path(task.board, task),
-            method: :patch,
-            data: { action: "click->dropdown#close" },
-            class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
-          <span class="w-4 text-center"><%= agent_emoji %></span>
-          Unassign from <%= agent_name %>
+  <%# Context Menu (right-click) - only rendered when current_user is available (not during broadcasts) %>
+  <% if defined?(current_user) && current_user %>
+    <button data-dropdown-target="button" class="hidden" aria-expanded="false"></button>
+    <div data-dropdown-target="menu" class="hidden fixed z-[100] min-w-[160px] bg-bg-elevated border border-border rounded-lg shadow-lg py-1">
+      <%# Agent Assignment %>
+      <% agent_connected = current_user.agent_last_active_at.present? %>
+      <% if agent_connected %>
+        <% agent_emoji = current_user.agent_emoji || "🦞" %>
+        <% agent_name = current_user.agent_name || "Agent" %>
+        <% if task.assigned_to_agent? %>
+          <%= button_to unassign_board_task_path(task.board, task),
+              method: :patch,
+              data: { action: "click->dropdown#close" },
+              class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
+            <span class="w-4 text-center"><%= agent_emoji %></span>
+            Unassign from <%= agent_name %>
+          <% end %>
+        <% else %>
+          <%= button_to assign_board_task_path(task.board, task),
+              method: :patch,
+              data: { action: "click->dropdown#close" },
+              class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
+            <span class="w-4 text-center"><%= agent_emoji %></span>
+            Assign to <%= agent_name %>
+          <% end %>
         <% end %>
-      <% else %>
-        <%= button_to assign_board_task_path(task.board, task),
-            method: :patch,
-            data: { action: "click->dropdown#close" },
-            class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
-          <span class="w-4 text-center"><%= agent_emoji %></span>
-          Assign to <%= agent_name %>
-        <% end %>
+        <div class="border-t border-border my-1"></div>
       <% end %>
-      <div class="border-t border-border my-1"></div>
-    <% end %>
 
-    <%# Delete %>
-    <div data-controller="delete-confirm" data-delete-confirm-item-name-value="<%= task.name.truncate(30) %>">
-      <button type="button"
-              data-action="click->delete-confirm#open click->dropdown#close"
-              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-        </svg>
-        Delete
-      </button>
-      <%= render "application/delete_modal", url: board_task_path(task.board, task) %>
+      <%# Delete %>
+      <div data-controller="delete-confirm" data-delete-confirm-item-name-value="<%= task.name.truncate(30) %>">
+        <button type="button"
+                data-action="click->delete-confirm#open click->dropdown#close"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+          </svg>
+          Delete
+        </button>
+        <%= render "application/delete_modal", url: board_task_path(task.board, task) %>
+      </div>
     </div>
-  </div>
+  <% end %>
 
   <%= link_to board_task_path(task.board, task), data: { turbo_frame: "task_panel" }, class: "block p-3" do %>
 
@@ -104,7 +106,7 @@
 
     <%# Agent Assignment Badge %>
     <% if task.assigned_to_agent? %>
-      <span class="text-xs" title="Assigned to <%= current_user.agent_name || 'Agent' %>"><%= current_user.agent_emoji || "🦞" %></span>
+      <span class="text-xs" title="Assigned to <%= task.user.agent_name || 'Agent' %>"><%= task.user.agent_emoji || "🦞" %></span>
     <% end %>
   </div>
   <% end %>
