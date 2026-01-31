@@ -1,9 +1,4 @@
 <%# Update the comments section %>
 <%= turbo_stream.replace "task-comments-#{@task.id}" do %>
-  <%= render "shared/task_comments", task: @task %>
-<% end %>
-
-<%# Update the comments count on the card %>
-<%= turbo_stream.replace "task_#{@task.id}" do %>
-  <%= render "board/task_card", task: @task %>
+  <%= render "shared/task_comments", task: @task.reload %>
 <% end %>

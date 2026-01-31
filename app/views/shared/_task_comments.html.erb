@@ -35,19 +35,19 @@
 
   <%# New comment form %>
   <div class="mt-4 pt-4 border-t border-border">
-    <%= form_with url: board_task_comments_path(task), method: :post, local: false, data: { controller: "comment-form" } do |form| %>
-      <%= form.hidden_field :comment, value: "", name: "comment[author_type]" %>
-      <%= form.hidden_field :comment, value: current_user.agent_name || "User", name: "comment[author_name]" %>
+    <%= form_with url: board_task_comments_path(task), method: :post, data: { controller: "comment-form" } do |form| %>
+      <input type="hidden" name="comment[author_type]" value="user">
+      <input type="hidden" name="comment[author_name]" value="<%= current_user.agent_name || 'User' %>">
       <div class="flex gap-2">
-        <%= form.text_area :body, 
-            name: "comment[body]",
-            placeholder: "Add a comment...",
-            rows: 1,
-            class: "flex-1 text-sm bg-bg-elevated border border-border rounded-lg px-3 py-2 text-content placeholder-content-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none",
-            data: { comment_form_target: "input", action: "keydown.enter->comment-form#submitOnEnter input->comment-form#autoResize" } %>
-        <%= form.submit "Post",
-            class: "px-3 py-2 text-sm font-medium bg-accent text-content rounded-lg hover:bg-accent-hover transition-colors cursor-pointer disabled:opacity-50",
-            data: { comment_form_target: "submit" } %>
+        <textarea name="comment[body]"
+            placeholder="Add a comment..."
+            rows="1"
+            class="flex-1 text-sm bg-bg-elevated border border-border rounded-lg px-3 py-2 text-content placeholder-content-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+            data-comment-form-target="input"
+            data-action="keydown.enter->comment-form#submitOnEnter input->comment-form#autoResize"></textarea>
+        <button type="submit"
+            class="px-3 py-2 text-sm font-medium bg-accent text-content rounded-lg hover:bg-accent-hover transition-colors cursor-pointer disabled:opacity-50"
+            data-comment-form-target="submit">Post</button>
       </div>
     <% end %>
   </div>

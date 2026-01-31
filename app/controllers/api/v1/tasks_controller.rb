@@ -25,6 +25,40 @@ module Api
         end
       end
 
+      # GET /api/v1/tasks/pending_attention - tasks needing agent attention
+      # Returns tasks that:
+      # 1. Are in "in_progress" and were claimed by agent (need continued work)
+      # 2. Have new comments since last_agent_read_at
+      # Also marks returned tasks as "read" by updating last_agent_read_at
+      def pending_attention
+        unless current_user.agent_auto_mode?
+          render json: []
+          return
+        end
+
+        # Tasks in progress that agent claimed
+        in_progress_tasks = current_user.tasks
+          .where(status: :in_progress)
+          .where.not(agent_claimed_at: nil)
+
+        # Tasks with unread comments (comments created after last_agent_read_at)
+        tasks_with_new_comments = current_user.tasks
+          .joins(:comments)
+          .where("comments.created_at > COALESCE(tasks.last_agent_read_at, tasks.created_at)")
+          .where("comments.author_type != 'agent'")  # Only human comments
+          .where(status: [:in_progress, :in_review, :up_next])  # Not done/inbox
+          .distinct
+
+        # Combine and dedupe
+        task_ids = (in_progress_tasks.pluck(:id) + tasks_with_new_comments.pluck(:id)).uniq
+        @tasks = current_user.tasks.where(id: task_ids).includes(:comments)
+
+        # Mark as read
+        @tasks.update_all(last_agent_read_at: Time.current)
+
+        render json: @tasks.map { |task| task_json_with_comments(task) }
+      end
+
       # PATCH /api/v1/tasks/:id/claim - agent claims a task
       def claim
         @task.activity_source = "api"
@@ -147,6 +181,20 @@ module Api
           created_at: task.created_at.iso8601,
           updated_at: task.updated_at.iso8601
         }
+      end
+
+      def task_json_with_comments(task)
+        task_json(task).merge(
+          comments: task.comments.order(created_at: :desc).limit(10).map do |comment|
+            {
+              id: comment.id,
+              author_type: comment.author_type,
+              author_name: comment.author_name,
+              body: comment.body,
+              created_at: comment.created_at.iso8601
+            }
+          end
+        )
       end
     end
   end

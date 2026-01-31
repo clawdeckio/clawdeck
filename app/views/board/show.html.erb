@@ -2,7 +2,7 @@
 <% @board_page = true %>
 
 <%# Subscribe to real-time updates for this user's board %>
-<%= turbo_stream_from current_user, :board %>
+<%= turbo_stream_from "user_#{current_user.id}_board" %>
 
 <div class="h-full flex flex-col" data-controller="board">
   <%# Board Header %>

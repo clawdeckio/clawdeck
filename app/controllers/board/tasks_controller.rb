@@ -13,6 +13,7 @@ class Board::TasksController < ApplicationController
   def create
     @task = current_user.tasks.new(task_params)
     @task.status ||= :inbox
+    @task.activity_source = "web"
 
     if @task.save
       respond_to do |format|
@@ -29,6 +30,7 @@ class Board::TasksController < ApplicationController
   end
 
   def update
+    @task.activity_source = "web"
     if @task.update(task_params)
       respond_to do |format|
         format.turbo_stream
@@ -41,6 +43,7 @@ class Board::TasksController < ApplicationController
 
   def destroy
     @status = @task.status
+    @task.activity_source = "web"
     @task.destroy
     respond_to do |format|
       format.turbo_stream

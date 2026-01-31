@@ -10,10 +10,11 @@ class Task < ApplicationRecord
   validates :priority, inclusion: { in: priorities.keys }
   validates :status, inclusion: { in: statuses.keys }
 
-  # Real-time broadcasts to user's board
-  after_create_commit :broadcast_create
-  after_update_commit :broadcast_update
-  after_destroy_commit :broadcast_destroy
+  # Real-time broadcasts to user's board (only for API/background changes)
+  # Skip broadcasts when activity_source is "web" since turbo_stream templates handle it
+  after_create_commit :broadcast_create, unless: -> { activity_source == "web" }
+  after_update_commit :broadcast_update, unless: -> { activity_source == "web" }
+  after_destroy_commit :broadcast_destroy, unless: -> { activity_source == "web" }
 
   # Activity tracking
   attr_accessor :activity_source
@@ -72,8 +73,7 @@ class Task < ApplicationRecord
 
   # Turbo Streams broadcasts for real-time updates
   def broadcast_create
-    broadcast_action_to(
-      user, :board,
+    broadcast_to_board(
       action: :prepend,
       target: "column-#{status}",
       partial: "board/task_card",
@@ -87,10 +87,9 @@ class Task < ApplicationRecord
     if saved_change_to_status?
       old_status, new_status = saved_change_to_status
       # Remove from old column
-      broadcast_action_to(user, :board, action: :remove, target: "task_#{id}")
+      broadcast_to_board(action: :remove, target: "task_#{id}")
       # Add to new column
-      broadcast_action_to(
-        user, :board,
+      broadcast_to_board(
         action: :prepend,
         target: "column-#{new_status}",
         partial: "board/task_card",
@@ -100,8 +99,7 @@ class Task < ApplicationRecord
       broadcast_column_count(new_status)
     else
       # Just update the card in place
-      broadcast_action_to(
-        user, :board,
+      broadcast_to_board(
         action: :replace,
         target: "task_#{id}",
         partial: "board/task_card",
@@ -111,21 +109,38 @@ class Task < ApplicationRecord
   end
 
   def broadcast_destroy
-    broadcast_action_to(user, :board, action: :remove, target: "task_#{id}")
-    broadcast_column_count(status)
+    # Cache values before they become inaccessible
+    cached_user_id = user_id
+    cached_status = status
+    cached_id = id
+    stream = "user_#{cached_user_id}_board"
+    
+    Turbo::StreamsChannel.broadcast_action_to(stream, action: :remove, target: "task_#{cached_id}")
+    
+    # Update column count
+    count = User.find(cached_user_id).tasks.where(status: cached_status).count
+    Turbo::StreamsChannel.broadcast_action_to(
+      stream,
+      action: :replace,
+      target: "column-#{cached_status}-count",
+      html: %(<span id="column-#{cached_status}-count" class="ml-auto text-xs text-content-secondary bg-bg-elevated px-1.5 py-0.5 rounded">#{count}</span>)
+    )
   end
 
   def broadcast_column_count(column_status)
     count = user.tasks.where(status: column_status).count
-    broadcast_action_to(
-      user, :board,
+    broadcast_to_board(
       action: :replace,
       target: "column-#{column_status}-count",
       html: %(<span id="column-#{column_status}-count" class="ml-auto text-xs text-content-secondary bg-bg-elevated px-1.5 py-0.5 rounded">#{count}</span>)
     )
   end
 
-  def broadcast_action_to(*streamables, action:, target:, **options)
-    Turbo::StreamsChannel.broadcast_action_to(*streamables, action: action, target: target, **options)
+  def board_stream_name
+    "user_#{user_id}_board"
+  end
+
+  def broadcast_to_board(action:, target:, **options)
+    Turbo::StreamsChannel.broadcast_action_to(board_stream_name, action: action, target: target, **options)
   end
 end
