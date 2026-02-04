@@ -1,6 +1,6 @@
 <% has_current_user = defined?(current_user) && current_user %>
 <li id="task_<%= task.id %>"
-    class="group bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
+    class="group w-full bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover overflow-hidden <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
     <% if has_current_user %>
       data-controller="dropdown delete-confirm"
       data-action="contextmenu->dropdown#openAtCursor"
@@ -110,8 +110,8 @@
   <%= link_to board_task_path(task.board, task), data: { turbo_frame: "task_panel" }, class: "block p-3" do %>
 
   <%# Task Name %>
-  <div class="flex items-start gap-2">
-    <span class="flex-1 text-sm font-medium text-content leading-tight">
+  <div class="flex items-start gap-2 min-w-0">
+    <span class="flex-1 text-sm font-medium text-content leading-tight overflow-hidden text-ellipsis" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word; max-width: 100%;">
       <%= task.name %>
     </span>
     <% if task.blocked? %>
@@ -161,10 +161,21 @@
       <% end %>
     </div>
 
-    <%# Agent Assignment Badge %>
-    <% if task.assigned_to_agent? %>
-      <span class="text-xs" title="Assigned to <%= task.user.agent_name || 'Agent' %>"><%= task.user.agent_emoji || "🦞" %></span>
-    <% end %>
+    <%# Model + Agent badges %>
+    <div class="flex items-center gap-1">
+      <% if task.model.present? %>
+        <span class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-purple-500/20 text-purple-400" title="Model: <%= task.model %>">
+          <%= task.model.upcase %>
+        </span>
+      <% end %>
+      <% if task.recurring? %>
+        <span class="text-[10px]" title="Recurring: <%= task.recurrence_rule %>">🔄</span>
+      <% end %>
+      <%# Agent Assignment Badge %>
+      <% if task.assigned_to_agent? %>
+        <span class="text-xs" title="Assigned to <%= task.user.agent_name || 'Agent' %>"><%= task.user.agent_emoji || "🦞" %></span>
+      <% end %>
+    </div>
   </div>
   <% end %>
 </li>

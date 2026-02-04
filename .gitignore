@@ -45,3 +45,6 @@
 /.kamal/secrets
 
 tpush/
+
+# Ignore bundled gems
+/vendor/bundle

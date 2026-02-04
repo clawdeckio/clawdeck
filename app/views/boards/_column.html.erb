@@ -15,7 +15,7 @@
   }
 %>
 
-<div class="flex-1 min-w-0 flex flex-col bg-bg-surface rounded-lg border border-border transition-colors"
+<div class="w-72 sm:w-64 md:w-72 lg:flex-1 lg:min-w-[240px] lg:max-w-[320px] flex-shrink-0 flex flex-col bg-bg-surface rounded-lg border border-border transition-colors"
      data-controller="inline-add"
      data-inline-add-status-value="<%= status %>"
      data-inline-add-url-value="<%= board_tasks_path(@board) %>"
@@ -29,7 +29,7 @@
 
   <%# Tasks List - no overflow, grows with content, min height for empty drop target %>
   <ul id="column-<%= status %>"
-      class="px-2 pb-2 space-y-2 min-h-[2rem]"
+      class="px-2 pb-2 space-y-2 min-h-[2rem] w-full overflow-hidden"
       data-controller="sortable"
       data-sortable-group-value="board"
       data-sortable-status-value="<%= status %>"

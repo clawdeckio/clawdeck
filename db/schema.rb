@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_04_225556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -155,6 +155,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
 
   create_table "tasks", force: :cascade do |t|
     t.datetime "agent_claimed_at"
+    t.string "agent_session_id"
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
@@ -167,12 +168,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.date "due_date"
     t.integer "effort", default: 0, null: false
     t.integer "impact", default: 0, null: false
+    t.string "model"
     t.string "name"
+    t.datetime "next_recurrence_at"
     t.integer "original_position"
+    t.bigint "parent_task_id"
     t.integer "position"
     t.integer "priority", default: 0, null: false
     t.integer "project_id"
     t.integer "reach", default: 0, null: false
+    t.string "recurrence_rule"
+    t.time "recurrence_time"
+    t.boolean "recurring", default: false, null: false
     t.integer "status", default: 0, null: false
     t.string "tags", default: [], array: true
     t.bigint "task_list_id"
@@ -181,8 +188,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["assigned_to_agent"], name: "index_tasks_on_assigned_to_agent"
     t.index ["blocked"], name: "index_tasks_on_blocked"
     t.index ["board_id"], name: "index_tasks_on_board_id"
+    t.index ["next_recurrence_at"], name: "index_tasks_on_next_recurrence_at"
+    t.index ["parent_task_id"], name: "index_tasks_on_parent_task_id"
     t.index ["position"], name: "index_tasks_on_position"
     t.index ["project_id"], name: "index_tasks_on_project_id"
+    t.index ["recurring"], name: "index_tasks_on_recurring"
     t.index ["status"], name: "index_tasks_on_status"
     t.index ["task_list_id"], name: "index_tasks_on_task_list_id"
     t.index ["user_id"], name: "index_tasks_on_user_id"
@@ -222,5 +232,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
   add_foreign_key "tasks", "boards"
   add_foreign_key "tasks", "projects"
   add_foreign_key "tasks", "task_lists"
+  add_foreign_key "tasks", "tasks", column: "parent_task_id", on_delete: :nullify
   add_foreign_key "tasks", "users"
 end

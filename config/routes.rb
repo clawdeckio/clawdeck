@@ -10,6 +10,7 @@ Rails.application.routes.draw do
         collection do
           get :next
           get :pending_attention
+          get :recurring
         end
         member do
           patch :complete
@@ -17,6 +18,7 @@ Rails.application.routes.draw do
           patch :unclaim
           patch :assign
           patch :unassign
+          get :agent_log
         end
       end
     end

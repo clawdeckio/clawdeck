@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="task-modal"
 export default class extends Controller {
-  static targets = ["modal", "backdrop", "form", "nameField", "descriptionField", "submitButton", "priorityField", "priorityButton", "priorityGroup", "dueDateField", "dueDateDisplay"]
+  static targets = ["modal", "backdrop", "form", "nameField", "descriptionField", "submitButton", "priorityField", "priorityButton", "priorityGroup", "dueDateField", "dueDateDisplay", "recurringCheckbox", "recurringOptions"]
   static values = { taskId: Number }
 
   connect() {
@@ -194,5 +194,15 @@ export default class extends Controller {
   onDueDateChange() {
     // Due date changed via datepicker - save the form
     this.save()
+  }
+
+  toggleRecurring() {
+    if (!this.hasRecurringOptionsTarget) return
+    const checkbox = this.recurringCheckboxTarget
+    if (checkbox.checked) {
+      this.recurringOptionsTarget.classList.remove('hidden')
+    } else {
+      this.recurringOptionsTarget.classList.add('hidden')
+    }
   }
 }

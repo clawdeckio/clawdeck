@@ -83,7 +83,7 @@
           class="px-3 py-3 text-xs font-mono text-content-secondary whitespace-pre-wrap break-words leading-relaxed"
 ># ClawDeck — Your Task Dashboard
 
-ClawDeck is where your human manages your work queue. Think of it as your shared kanban board.
+ClawDeck is where your human manages your work queue. Think of it as your shared kanban board with live agent activity tracking.
 
 ## How it works
 
@@ -91,7 +91,7 @@ ClawDeck is where your human manages your work queue. Think of it as your shared
 2. Your human explicitly assigns tasks to you when ready
 3. You poll for assigned tasks and work on them
 4. You update progress and mark things done
-5. Your human sees everything in real-time
+5. Your human sees everything in real-time, including live agent activity
 
 ## Connection
 
@@ -111,14 +111,17 @@ Include these headers with every request so your human knows who's connected:
 1. Call `GET /tasks?assigned=true` to get tasks assigned to you
 2. Pick the first task (oldest assignment)
 3. Move it to "in_progress" and start working
+4. If spawning a sub-agent, save the `agent_session_id` to enable live view
 
 ### When working on a task:
 - **Need help:** Set `blocked: true` — your human will unblock you
 - **Finished:** Move to "in_review" (needs human review) or "done" (complete)
+- **Sub-agents:** Update `agent_session_id` with the OpenClaw session ID for live activity tracking
 
 ### You can also:
 - Create new tasks (ideas, follow-ups, things you noticed)
 - Check task details and history
+- Set model preferences for task routing
 
 ## API Reference
 
@@ -134,29 +137,53 @@ Returns tasks assigned to you, ordered by assignment time (oldest first).
 
 **Update task:**
 `PATCH /tasks/:id`
-Body: `{ "status": "in_progress" }` or `{ "blocked": true }`
+Body: `{ "status": "in_progress" }` or `{ "blocked": true }` or `{ "agent_session_id": "..." }`
 
 **Complete task:**
 `PATCH /tasks/:id/complete`
 
 **Create task:**
 `POST /tasks`
-Body: `{ "name": "Task title", "status": "inbox" }`
+Body: `{ "name": "Task title", "status": "inbox", "model": "opus" }`
 
-## Statuses
-- `inbox` — New, not prioritized
-- `up_next` — Prioritized, waiting to be assigned
-- `in_progress` — You're working on it
-- `in_review` — Done, needs human review
-- `done` — Complete
+**Get agent activity log (live view):**
+`GET /tasks/:id/agent_log`
+Returns transcript messages from the agent working on this task.
+Supports `?since=N` for polling efficiency.
 
-## Priorities
-`none`, `low`, `medium`, `high`
+**Get recurring task templates:**
+`GET /tasks/recurring`
+
+## Task Fields
+- `name` — Task title
+- `description` — Task details/notes
+- `status` — inbox, up_next, in_progress, in_review, done
+- `priority` — none, low, medium, high
+- `model` — Preferred model: opus, codex, gemini, glm, sonnet (or null for default)
+- `agent_session_id` — OpenClaw session ID for live activity tracking
+- `recurring` — Boolean, enables auto-recreation
+- `recurrence_rule` — daily, weekly, monthly
+- `recurrence_time` — HH:MM for scheduled tasks
+
+## Model Routing
+When a task has a `model` field, use that model for the work:
+- `opus` → Complex reasoning, orchestration
+- `codex` → Code generation, refactoring
+- `gemini` → Research, analysis
+- `glm` → Simple tasks, bulk operations
+- `sonnet` → General purpose
+
+## Live Activity Tracking
+To enable live view in the ClawDeck UI:
+1. When spawning a sub-agent, get its session ID
+2. Update the task: `PATCH /tasks/:id` with `{ "agent_session_id": "<session-id>" }`
+3. Your human can watch the agent work in real-time from the task modal
 
 ## Tips
 - Poll for assigned tasks frequently — your human assigns work explicitly
 - When stuck, mark blocked — your human will unblock you
-- Create tasks for things you notice but can't tackle now</pre>
+- Create tasks for things you notice but can't tackle now
+- Always set agent_session_id when spawning sub-agents for visibility</pre>
       </div>
       <div class="flex items-center gap-3 mt-2">
         <button

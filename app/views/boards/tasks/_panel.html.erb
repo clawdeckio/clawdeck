@@ -68,6 +68,56 @@
 
             <!-- Properties -->
             <div class="space-y-4">
+              <!-- Model Selection -->
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-content-muted">Model</span>
+                <%= form.select :model,
+                    options_for_select([["Default", ""], ["Opus", "opus"], ["Codex", "codex"], ["Gemini", "gemini"], ["GLM", "glm"], ["Sonnet", "sonnet"]], task.model),
+                    {},
+                    class: "bg-bg-elevated border-none rounded-md text-sm text-content-secondary px-2 py-1.5 focus:ring-0 focus:outline-none",
+                    data: { action: "change->task-modal#scheduleAutoSave" } %>
+              </div>
+
+              <!-- Recurring -->
+              <% unless task.recurring_instance? %>
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-content-muted">Recurring</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <%= form.check_box :recurring, class: "sr-only peer", data: { task_modal_target: "recurringCheckbox", action: "change->task-modal#toggleRecurring change->task-modal#scheduleAutoSave" } %>
+                      <div class="w-9 h-5 bg-bg-elevated rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                    </label>
+                  </div>
+                  <div data-task-modal-target="recurringOptions" class="<%= task.recurring? ? '' : 'hidden' %> space-y-2 pl-4 border-l-2 border-border">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-content-muted">Repeat</span>
+                      <%= form.select :recurrence_rule,
+                          options_for_select([["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"]], task.recurrence_rule || "daily"),
+                          {},
+                          class: "bg-bg-elevated border-none rounded-md text-xs text-content-secondary px-2 py-1 focus:ring-0 focus:outline-none",
+                          data: { action: "change->task-modal#scheduleAutoSave" } %>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-content-muted">At time</span>
+                      <%= form.time_field :recurrence_time,
+                          value: task.recurrence_time&.strftime("%H:%M") || "09:00",
+                          class: "bg-bg-elevated border-none rounded-md text-xs text-content-secondary px-2 py-1 focus:ring-0 focus:outline-none",
+                          data: { action: "change->task-modal#scheduleAutoSave" } %>
+                    </div>
+                    <% if task.next_recurrence_at.present? %>
+                      <div class="text-xs text-content-muted">
+                        Next: <%= task.next_recurrence_at.strftime("%b %d, %Y at %H:%M") %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% else %>
+                <div class="flex items-center gap-2 text-xs text-content-muted">
+                  <span>🔄</span>
+                  <span>Instance of recurring task</span>
+                </div>
+              <% end %>
+
               <!-- Priority -->
               <div class="flex items-center justify-between">
                 <span class="text-sm text-content-muted">Priority</span>
@@ -108,6 +158,59 @@
 
         <!-- Agent Assignment (outside form to avoid nested forms) -->
         <%= render "boards/tasks/agent_assignment", task: task, board: @board %>
+
+        <!-- Agent Activity Section (Live View) -->
+        <% if task.agent_session_id.present? || task.status == "in_progress" %>
+          <div class="border-t border-border pt-4"
+               data-controller="agent-activity"
+               data-agent-activity-task-id-value="<%= task.id %>"
+               data-agent-activity-session-id-value="<%= task.agent_session_id %>"
+               data-agent-activity-task-status-value="<%= task.status %>">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-semibold text-content font-display">Agent Activity</h3>
+                <span data-agent-activity-target="statusBadge"
+                      class="text-[10px] font-medium px-1.5 py-0.5 rounded <%= task.status == 'in_progress' ? 'bg-accent/20 text-accent' : 'bg-bg-elevated text-content-muted' %>">
+                  <%= task.status == 'in_progress' ? 'Live' : task.status.humanize %>
+                </span>
+              </div>
+              <button type="button"
+                      data-action="click->agent-activity#refresh"
+                      class="cursor-pointer p-1.5 rounded text-content-muted hover:text-content hover:bg-bg-elevated transition-colors"
+                      title="Refresh">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div data-agent-activity-target="loadingState" class="flex items-center justify-center py-8">
+              <div class="flex items-center gap-2 text-content-muted">
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm">Loading activity...</span>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div data-agent-activity-target="emptyState" class="hidden text-center py-8">
+              <div class="text-content-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mx-auto mb-2 opacity-50">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+                <p class="text-sm empty-message">No agent activity</p>
+              </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div data-agent-activity-target="log"
+                 class="hidden space-y-2 max-h-64 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+            </div>
+          </div>
+        <% end %>
 
         <!-- Activity Section -->
         <div class="border-t border-border pt-4">

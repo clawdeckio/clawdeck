@@ -96,7 +96,7 @@ class Boards::TasksController < ApplicationController
   end
 
   def task_params
-    permitted = params.require(:task).permit(:name, :title, :description, :priority, :status, :blocked, :due_date, :completed, tags: [])
+    permitted = params.require(:task).permit(:name, :title, :description, :priority, :status, :blocked, :due_date, :completed, :model, :recurring, :recurrence_rule, :recurrence_time, tags: [])
     # Allow 'title' as alias for 'name'
     permitted[:name] = permitted.delete(:title) if permitted[:title].present? && permitted[:name].blank?
     permitted

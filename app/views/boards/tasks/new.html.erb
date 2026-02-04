@@ -50,6 +50,41 @@
           <div class="space-y-4">
 <%= form.hidden_field :status, value: "inbox" %>
 
+            <!-- Model Selection -->
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-content-muted">Model</span>
+              <%= form.select :model,
+                  options_for_select([["Default", ""], ["Opus", "opus"], ["Codex", "codex"], ["Gemini", "gemini"], ["GLM", "glm"], ["Sonnet", "sonnet"]], @task.model),
+                  {},
+                  class: "bg-bg-elevated border-none rounded-md text-sm text-content-secondary px-2 py-1.5 focus:ring-0 focus:outline-none" %>
+            </div>
+
+            <!-- Recurring -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-content-muted">Recurring</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <%= form.check_box :recurring, class: "sr-only peer", data: { action: "change->new-task-modal#toggleRecurring" } %>
+                  <div class="w-9 h-5 bg-bg-elevated rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                </label>
+              </div>
+              <div id="recurring-options" class="<%= @task.recurring? ? '' : 'hidden' %> space-y-2 pl-4 border-l-2 border-border">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-content-muted">Repeat</span>
+                  <%= form.select :recurrence_rule,
+                      options_for_select([["Daily", "daily"], ["Weekly", "weekly"], ["Monthly", "monthly"]], @task.recurrence_rule || "daily"),
+                      {},
+                      class: "bg-bg-elevated border-none rounded-md text-xs text-content-secondary px-2 py-1 focus:ring-0 focus:outline-none" %>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-content-muted">At time</span>
+                  <%= form.time_field :recurrence_time,
+                      value: @task.recurrence_time&.strftime("%H:%M") || "09:00",
+                      class: "bg-bg-elevated border-none rounded-md text-xs text-content-secondary px-2 py-1 focus:ring-0 focus:outline-none" %>
+                </div>
+              </div>
+            </div>
+
             <!-- Priority -->
             <div class="flex items-center justify-between">
               <span class="text-sm text-content-muted">Priority</span>

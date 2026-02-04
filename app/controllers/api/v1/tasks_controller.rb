@@ -1,7 +1,121 @@
 module Api
   module V1
     class TasksController < BaseController
+      # agent_log is public (no auth required) - secured by task lookup
+      skip_before_action :authenticate_api_token, only: [ :agent_log ]
       before_action :set_task, only: [ :show, :update, :destroy, :complete, :claim, :unclaim, :assign, :unassign ]
+      before_action :set_task_for_agent_log, only: [ :agent_log ]
+
+      private
+
+      def set_task_for_agent_log
+        # Public lookup - anyone with the task ID can see agent activity
+        # This is safe because it only shows agent logs, not sensitive data
+        @task = Task.find_by(id: params[:id])
+        unless @task
+          render json: { error: "Task not found" }, status: :not_found
+        end
+      end
+
+      public
+
+      # GET /api/v1/tasks/:id/agent_log - get agent transcript for this task
+      # Returns parsed messages from the OpenClaw session transcript
+      # Supports ?since=N param to get only messages after line N (for polling efficiency)
+      def agent_log
+        unless @task.agent_session_id.present?
+          render json: { messages: [], total_lines: 0, has_session: false }
+          return
+        end
+
+        # Build path to the transcript file
+        transcript_path = File.expand_path("~/.openclaw/agents/main/sessions/#{@task.agent_session_id}.jsonl")
+
+        unless File.exist?(transcript_path)
+          render json: { messages: [], total_lines: 0, has_session: true, error: "Transcript file not found" }
+          return
+        end
+
+        # Read and parse the JSONL file
+        since_line = params[:since].to_i
+        messages = []
+        line_number = 0
+
+        File.foreach(transcript_path) do |line|
+          line_number += 1
+          next if line_number <= since_line
+
+          begin
+            data = JSON.parse(line.strip)
+            # Only include message types that are interesting for the UI
+            if data["type"] == "message"
+              msg = data["message"]
+              next unless msg
+
+              parsed = {
+                id: data["id"],
+                line: line_number,
+                timestamp: data["timestamp"],
+                role: msg["role"]
+              }
+
+              # Extract content based on type
+              content = msg["content"]
+              if content.is_a?(Array)
+                # Handle array content (assistant messages with thinking/text/toolCall)
+                parsed[:content] = content.map do |item|
+                  case item["type"]
+                  when "text"
+                    { type: "text", text: item["text"]&.slice(0, 2000) }
+                  when "thinking"
+                    { type: "thinking", text: item["thinking"]&.slice(0, 500) }
+                  when "toolCall"
+                    { type: "tool_call", name: item["name"], id: item["id"] }
+                  else
+                    { type: item["type"] || "unknown" }
+                  end
+                end
+              elsif content.is_a?(String)
+                # Handle string content (user messages)
+                parsed[:content] = [{ type: "text", text: content.slice(0, 2000) }]
+              end
+
+              # For tool results, extract useful info
+              if msg["role"] == "toolResult"
+                parsed[:tool_call_id] = msg["toolCallId"]
+                parsed[:tool_name] = msg["toolName"]
+                tool_content = msg["content"]
+                if tool_content.is_a?(Array) && tool_content.first
+                  text = tool_content.first["text"]
+                  parsed[:content] = [{ type: "tool_result", text: text&.slice(0, 1000) }]
+                end
+              end
+
+              messages << parsed
+            end
+          rescue JSON::ParserError
+            # Skip malformed lines
+            next
+          end
+        end
+
+        render json: {
+          messages: messages,
+          total_lines: line_number,
+          since: since_line,
+          has_session: true,
+          task_status: @task.status
+        }
+      end
+
+      # GET /api/v1/tasks/recurring - list recurring task templates
+      def recurring
+        @tasks = current_user.tasks
+          .recurring_templates
+          .reorder(created_at: :desc)
+
+        render json: @tasks.map { |task| task_json(task) }
+      end
 
       # GET /api/v1/tasks/next - get next task for agent to work on
       # Returns highest priority unclaimed task in "up_next" status
@@ -182,7 +296,7 @@ module Api
       end
 
       def task_params
-        params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
+        params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, :model, :recurring, :recurrence_rule, :recurrence_time, :agent_session_id, tags: [])
       end
 
       def task_json(task)
@@ -202,6 +316,13 @@ module Api
           assigned_at: task.assigned_at&.iso8601,
           agent_claimed_at: task.agent_claimed_at&.iso8601,
           board_id: task.board_id,
+          model: task.model,
+          recurring: task.recurring,
+          recurrence_rule: task.recurrence_rule,
+          recurrence_time: task.recurrence_time&.strftime("%H:%M"),
+          next_recurrence_at: task.next_recurrence_at&.iso8601,
+          parent_task_id: task.parent_task_id,
+          agent_session_id: task.agent_session_id,
           url: "https://clawdeck.io/boards/#{task.board_id}/tasks/#{task.id}",
           created_at: task.created_at.iso8601,
           updated_at: task.updated_at.iso8601

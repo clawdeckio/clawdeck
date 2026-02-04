@@ -30,6 +30,39 @@
   }
 }
 
+/* Kanban responsive improvements */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth horizontal scroll for kanban on mobile */
+@media (max-width: 640px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  
+  /* Snap columns for easier scrolling */
+  .flex-shrink-0 {
+    scroll-snap-align: start;
+  }
+}
+
+/* Hide scrollbar on mobile for cleaner look (still scrollable) */
+@media (max-width: 640px) {
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
 /* Remove default browser focus outline */
 input:focus,
 textarea:focus,

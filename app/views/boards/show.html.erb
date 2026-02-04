@@ -23,9 +23,9 @@
     </div>
   <% end %>
 
-  <%# Kanban Columns - scrollable page, variable height columns %>
-  <div class="flex-1 overflow-auto bg-bg-base">
-    <div class="flex gap-4 px-6 py-4 items-start min-h-full">
+  <%# Kanban Columns - horizontal scroll on mobile, variable height columns %>
+  <div class="flex-1 overflow-x-auto overflow-y-auto bg-bg-base">
+    <div class="flex gap-3 sm:gap-4 px-4 sm:px-6 py-4 items-start min-h-full min-w-max sm:min-w-0">
       <% Task.statuses.keys.each do |status| %>
         <%= render "boards/column", status: status, tasks: @columns[status.to_sym] %>
       <% end %>

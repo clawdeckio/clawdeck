@@ -34,4 +34,16 @@ export default class extends Controller {
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false')
     })
   }
+
+  toggleRecurring(event) {
+    const checkbox = event.currentTarget
+    const recurringOptions = document.getElementById('recurring-options')
+    if (!recurringOptions) return
+
+    if (checkbox.checked) {
+      recurringOptions.classList.remove('hidden')
+    } else {
+      recurringOptions.classList.add('hidden')
+    }
+  }
 }
