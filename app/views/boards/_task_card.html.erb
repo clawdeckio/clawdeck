@@ -1,10 +1,15 @@
 <% has_current_user = defined?(current_user) && current_user %>
+<% show_agent_preview = task.status == 'in_progress' && task.agent_session_id.present? %>
 <li id="task_<%= task.id %>"
-    class="group relative w-full bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover overflow-hidden <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
+    class="group relative w-full bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover overflow-visible <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
     <% if has_current_user %>
-      data-controller="dropdown delete-confirm"
-      data-action="contextmenu->dropdown#openAtCursor"
+      data-controller="dropdown delete-confirm<%= ' agent-preview' if show_agent_preview %>"
+      data-action="contextmenu->dropdown#openAtCursor<%= ' mouseenter->agent-preview#show mouseleave->agent-preview#hide' if show_agent_preview %>"
       data-delete-confirm-item-name-value="<%= h(task.name.truncate(30)) %>"
+      <% if show_agent_preview %>
+        data-agent-preview-task-id-value="<%= task.id %>"
+        data-agent-preview-board-id-value="<%= task.board_id %>"
+      <% end %>
     <% end %>
     data-task-id="<%= task.id %>"
     data-task-status="<%= task.status %>"
@@ -157,30 +162,6 @@
     <%= render "application/delete_modal", url: board_task_path(task.board, task) %>
   <% end %>
 
-  <%# Quick Action Buttons (on hover) %>
-  <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
-    <%# NEXT button - promote to next status %>
-    <% next_status = { 'inbox' => 'up_next', 'up_next' => 'in_progress', 'in_progress' => 'in_review', 'in_review' => 'done' }[task.status] %>
-    <% if next_status %>
-      <%= button_to move_board_task_path(task.board, task, status: next_status),
-          method: :patch,
-          class: "px-2 py-1 text-xs bg-accent hover:bg-accent-hover text-white rounded transition-colors",
-          title: "Move to #{next_status.humanize}" do %>
-        NEXT →
-      <% end %>
-    <% end %>
-
-    <%# Follow-up button %>
-    <% if task.status.in?(['in_review', 'done']) %>
-      <%= link_to followup_modal_board_task_path(task.board, task),
-          class: "px-2 py-1 text-xs bg-bg-surface hover:bg-bg-hover text-content-secondary rounded transition-colors",
-          data: { turbo_frame: "followup_modal" },
-          title: "Create follow-up" do %>
-        ↪️
-      <% end %>
-    <% end %>
-  </div>
-
   <%= link_to board_task_path(task.board, task), data: { turbo_frame: "task_panel" }, class: "block p-3" do %>
 
   <%# Task ID + Name %>
@@ -204,10 +185,10 @@
     </div>
   <% end %>
 
-  <%# Footer: Priority + Agent %>
-  <div class="flex items-center justify-between mt-2">
+  <%# Footer: Priority + Actions + Model + Agent %>
+  <div class="flex items-center justify-between mt-2 gap-1">
     <%# Priority Indicator %>
-    <div class="flex items-center">
+    <div class="flex items-center flex-shrink-0">
       <% flame_count = case task.priority
         when "high" then 3
         when "medium" then 2
@@ -235,8 +216,30 @@
       <% end %>
     </div>
 
-    <%# Model + Agent badges %>
-    <div class="flex items-center gap-1">
+    <%# Action Buttons + Model + Agent badges %>
+    <div class="flex items-center gap-1 flex-wrap justify-end">
+      <%# NEXT button - always visible for non-done tasks %>
+      <% next_status = { 'inbox' => 'up_next', 'up_next' => 'in_progress', 'in_progress' => 'in_review', 'in_review' => 'done' }[task.status] %>
+      <% if next_status %>
+        <%= button_to move_board_task_path(task.board, task, status: next_status),
+            method: :patch,
+            class: "px-1.5 py-0.5 text-[10px] bg-accent/80 hover:bg-accent text-white rounded transition-colors",
+            title: "Move to #{next_status.humanize}" do %>
+          NEXT →
+        <% end %>
+      <% end %>
+
+      <%# Follow-up button - show for in_review and done %>
+      <% if task.status.in?(['in_review', 'done']) %>
+        <%= link_to followup_modal_board_task_path(task.board, task),
+            class: "px-1.5 py-0.5 text-[10px] bg-bg-surface hover:bg-bg-hover text-content-muted rounded transition-colors",
+            data: { turbo_frame: "followup_modal" },
+            title: "Create follow-up" do %>
+          ↪️
+        <% end %>
+      <% end %>
+
+      <%# Model badge %>
       <% if task.model.present? %>
         <span class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-purple-500/20 text-purple-400" title="Model: <%= task.model %>">
           <%= task.model.upcase %>
@@ -257,5 +260,13 @@
       <% end %>
     </div>
   </div>
+  <% end %>
+
+  <%# Agent Preview Popover (for in_progress tasks with agent) %>
+  <% if show_agent_preview %>
+    <div data-agent-preview-target="preview" 
+         class="hidden absolute left-0 right-0 top-full mt-1 p-2 bg-bg-surface border border-border rounded-lg shadow-lg z-20 max-h-32 overflow-hidden">
+      <div class="text-xs text-content-muted">Loading...</div>
+    </div>
   <% end %>
 </li>
