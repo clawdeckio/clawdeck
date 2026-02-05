@@ -280,7 +280,7 @@ export default class extends Controller {
     const taskName = btn.dataset.taskName || `Task #${taskId}`
     
     // Dispatch custom event for terminal panel to catch
-    window.dispatchEvent(new CustomEvent('agent-terminal:pin', {
+    document.dispatchEvent(new CustomEvent('agent-terminal:pin', {
       detail: { taskId, taskName }
     }))
     
