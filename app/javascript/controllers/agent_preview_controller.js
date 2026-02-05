@@ -16,6 +16,11 @@ export default class extends Controller {
     // Hide preview when dropdowns open (context menus shouldn't overlap with previews)
     this.hideOnDropdown = () => this.hideImmediately()
     document.addEventListener("dropdown:opened", this.hideOnDropdown)
+    
+    // Hide preview on click (user is opening the task panel)
+    this.hideOnClick = () => this.hideImmediately()
+    this.element.addEventListener('click', this.hideOnClick)
+    this.element.addEventListener('mousedown', this.hideOnClick)
   }
 
   disconnect() {
@@ -23,6 +28,10 @@ export default class extends Controller {
     clearTimeout(this.showTimeout)
     clearTimeout(this.hideTimeout)
     document.removeEventListener("dropdown:opened", this.hideOnDropdown)
+    if (this.hideOnClick) {
+      this.element.removeEventListener('click', this.hideOnClick)
+      this.element.removeEventListener('mousedown', this.hideOnClick)
+    }
   }
 
   show() {

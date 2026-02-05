@@ -73,7 +73,7 @@ export default class extends Controller {
       } else if (this.lastLine === 0) {
         this.hideLoadingState()
         if (data.has_session) {
-          this.showWaitingState()
+          this.showWaitingState(data.task_status)
         } else {
           this.showEmptyState()
         }
@@ -159,11 +159,19 @@ export default class extends Controller {
     if (this.hasLogTarget) this.logTarget.classList.remove('hidden')
   }
 
-  showWaitingState() {
+  showWaitingState(taskStatus = null) {
     if (this.hasEmptyStateTarget) {
       this.emptyStateTarget.classList.remove('hidden')
       const msgEl = this.emptyStateTarget.querySelector('.empty-message')
-      if (msgEl) msgEl.textContent = 'Waiting for agent...'
+      if (msgEl) {
+        // For completed tasks, show appropriate message
+        const completedStatuses = ['in_review', 'done']
+        if (taskStatus && completedStatuses.includes(taskStatus)) {
+          msgEl.textContent = 'No activity log available'
+        } else {
+          msgEl.textContent = 'Waiting for agent...'
+        }
+      }
     }
     if (this.hasLogTarget) this.logTarget.classList.add('hidden')
   }
