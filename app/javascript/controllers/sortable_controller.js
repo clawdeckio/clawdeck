@@ -11,6 +11,9 @@ export default class extends Controller {
   }
 
   connect() {
+    // Disable sorting within in_review and done columns (they auto-sort by date)
+    const isAutoSortColumn = ['in_review', 'done'].includes(this.statusValue)
+    
     const options = {
       animation: 150,
       ghostClass: "sortable-ghost",
@@ -21,6 +24,7 @@ export default class extends Controller {
       emptyInsertThreshold: 50,
       swapThreshold: 0.65,
       invertSwap: true,
+      sort: !isAutoSortColumn, // Disable reordering within in_review/done
       filter: '[style*="display: none"]',
       onStart: this.handleStart.bind(this),
       onEnd: this.handleEnd.bind(this),

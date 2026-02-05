@@ -344,7 +344,7 @@ class Task < ApplicationRecord
       old_status, new_status = saved_change_to_status
       # Remove from old column
       broadcast_to_board(action: :remove, target: "task_#{id}")
-      # Add to new column
+      # Add to new column (prepend = newest first, which is correct for in_review/done)
       broadcast_to_board(
         action: :prepend,
         target: "column-#{new_status}",
@@ -354,13 +354,25 @@ class Task < ApplicationRecord
       broadcast_column_count(old_status)
       broadcast_column_count(new_status)
     else
-      # Just update the card in place
-      broadcast_to_board(
-        action: :replace,
-        target: "task_#{id}",
-        partial: "boards/task_card",
-        locals: { task: self }
-      )
+      # For in_review and done, remove and re-add at top to maintain date order
+      # For other columns, just update in place (position-based order)
+      if %w[in_review done].include?(status)
+        broadcast_to_board(action: :remove, target: "task_#{id}")
+        broadcast_to_board(
+          action: :prepend,
+          target: "column-#{status}",
+          partial: "boards/task_card",
+          locals: { task: self }
+        )
+      else
+        # Just update the card in place
+        broadcast_to_board(
+          action: :replace,
+          target: "task_#{id}",
+          partial: "boards/task_card",
+          locals: { task: self }
+        )
+      end
     end
   end
 
