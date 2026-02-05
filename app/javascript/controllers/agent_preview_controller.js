@@ -12,6 +12,11 @@ export default class extends Controller {
     this.polling = false
     this.showTimeout = null
     this.hideTimeout = null
+    
+    // Hide preview when dropdowns open (context menus shouldn't overlap with previews)
+    this.hideOnDropdown = () => this.hideImmediately()
+    document.addEventListener("dropdown:opened", this.hideOnDropdown)
+    
     console.log("[agent-preview] connected for task", this.taskIdValue)
   }
 
@@ -19,6 +24,7 @@ export default class extends Controller {
     this.stopPolling()
     clearTimeout(this.showTimeout)
     clearTimeout(this.hideTimeout)
+    document.removeEventListener("dropdown:opened", this.hideOnDropdown)
   }
 
   show() {
@@ -63,6 +69,16 @@ export default class extends Controller {
       }
       this.stopPolling()
     }, 100)
+  }
+
+  // Hide immediately without delay (used when dropdown opens)
+  hideImmediately() {
+    clearTimeout(this.showTimeout)
+    clearTimeout(this.hideTimeout)
+    if (this.hasPreviewTarget) {
+      this.previewTarget.classList.add('hidden')
+    }
+    this.stopPolling()
   }
 
   startPolling() {

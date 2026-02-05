@@ -45,6 +45,8 @@ export default class extends Controller {
   open() {
     // Close any other open dropdowns first
     document.dispatchEvent(new CustomEvent("dropdown:close-all", { detail: { except: this.element } }))
+    // Hide any visible agent previews (they shouldn't overlap context menus)
+    document.dispatchEvent(new CustomEvent("dropdown:opened"))
 
     this.menuTarget.classList.remove("hidden")
     const triggerEl = this.hasTriggerTarget ? this.triggerTarget : this.buttonTarget
@@ -66,6 +68,8 @@ export default class extends Controller {
 
     // Close any other open dropdowns first
     document.dispatchEvent(new CustomEvent("dropdown:close-all", { detail: { except: this.element } }))
+    // Hide any visible agent previews (they shouldn't overlap context menus)
+    document.dispatchEvent(new CustomEvent("dropdown:opened"))
 
     const isOpen = !this.menuTarget.classList.contains("hidden")
     if (isOpen) {
