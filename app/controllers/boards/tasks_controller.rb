@@ -96,7 +96,8 @@ class Boards::TasksController < ApplicationController
   end
 
   def followup_modal
-    @task.suggested_followup ||= @task.generate_followup_suggestion
+    # Don't generate suggestion here - let it load async via JS
+    # @task.suggested_followup will be fetched by Stimulus controller
     render layout: false
   end
 
@@ -114,11 +115,17 @@ class Boards::TasksController < ApplicationController
     followup_name = params[:followup_name].presence || "Follow up: #{@task.name}"
     followup_description = params[:followup_description]
     destination = params[:destination] || "inbox"
+    selected_model = params[:model].presence  # nil means inherit
 
     @followup = @task.create_followup_task!(
       followup_name: followup_name,
       followup_description: followup_description
     )
+
+    # Override model if specified (otherwise inherits from parent)
+    if selected_model.present?
+      @followup.update!(model: selected_model)
+    end
 
     # Handle destination
     case destination

@@ -1,5 +1,5 @@
 <%= turbo_frame_tag "followup_modal" do %>
-  <div class="fixed inset-0 z-50 flex items-center justify-center" data-controller="modal" data-action="keydown.esc->modal#close">
+  <div class="fixed inset-0 z-50 flex items-center justify-center" data-controller="modal followup-modal" data-action="keydown.esc->modal#close" data-followup-modal-url-value="<%= generate_followup_api_v1_task_path(@task, format: :json) %>">
     <div class="absolute inset-0 bg-black/60" data-action="click->modal#close"></div>
     <div class="relative bg-bg-surface border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
 
@@ -13,18 +13,23 @@
         <% end %>
       </div>
 
-      <%= form_with url: create_followup_board_task_path(@board, @task), method: :post, class: "px-5 py-6 space-y-6" do |form| %>
+      <%= form_with url: create_followup_board_task_path(@board, @task), method: :post, class: "px-5 py-6 space-y-5" do |form| %>
         <!-- Original Task Reference -->
         <div class="p-3 bg-bg-elevated rounded-lg">
           <span class="text-xs text-content-muted block mb-1">Following up on:</span>
           <span class="text-sm font-medium text-content"><%= @task.name %></span>
+          <% if @task.model.present? %>
+            <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400">
+              <%= @task.model.upcase %>
+            </span>
+          <% end %>
         </div>
 
         <!-- Follow-up Title -->
         <div>
           <label class="text-sm font-medium text-content-muted block mb-2">Follow-up Title</label>
           <%= form.text_field :followup_name,
-              value: "Follow up: #{@task.name}",
+              value: "Follow up: #{@task.name.truncate(40)}",
               required: true,
               autofocus: true,
               placeholder: "Follow-up task title",
@@ -34,7 +39,7 @@
         <!-- Suggested Follow-up / Description -->
         <div data-controller="enhance-followup" data-enhance-followup-url-value="<%= enhance_followup_board_task_path(@board, @task, format: :json) %>">
           <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-medium text-content-muted">Description (suggested)</label>
+            <label class="text-sm font-medium text-content-muted">Description</label>
             <% if current_user.ai_api_key.present? %>
               <button
                 type="button"
@@ -50,37 +55,61 @@
               </button>
             <% end %>
           </div>
+          
+          <%# Loading indicator %>
+          <div data-followup-modal-target="loading" class="flex items-center justify-center p-4 bg-bg-elevated border border-border rounded-lg">
+            <svg class="animate-spin h-5 w-5 text-accent mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-sm text-content-muted">Generating AI suggestion...</span>
+          </div>
+          
           <%= form.text_area :followup_description,
-              value: @task.suggested_followup,
+              value: "",
               placeholder: "Add notes for the follow-up task...",
               rows: 4,
-              data: { enhance_followup_target: "textarea" },
-              class: "w-full text-sm leading-snug bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-content-secondary placeholder-content-muted resize-none px-3 py-3" %>
+              data: { enhance_followup_target: "textarea", followup_modal_target: "textarea" },
+              class: "hidden w-full text-sm leading-snug bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-content-secondary placeholder-content-muted resize-none px-3 py-3" %>
+        </div>
+
+        <!-- Model Selection -->
+        <div>
+          <label class="text-sm font-medium text-content-muted block mb-2">Model</label>
+          <div class="flex items-center gap-2">
+            <%= form.select :model,
+                options_for_select([
+                  ["Inherit from parent (#{@task.model&.upcase || 'default'})", ""],
+                  ["Opus", "opus"],
+                  ["Codex", "codex"],
+                  ["Gemini", "gemini"],
+                  ["GLM", "glm"],
+                  ["Sonnet", "sonnet"]
+                ], ""),
+                {},
+                class: "flex-1 text-sm bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-content px-3 py-2" %>
+          </div>
         </div>
 
         <!-- Destination -->
         <div>
           <label class="text-sm font-medium text-content-muted block mb-3">Send to</label>
-          <div class="space-y-2">
-            <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer">
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer border border-transparent has-[:checked]:border-accent/50 has-[:checked]:bg-accent/10">
               <%= form.radio_button :destination, "inbox", checked: true, class: "text-accent focus:ring-accent" %>
               <span class="text-sm text-content">📥 Inbox</span>
-              <span class="text-xs text-content-muted">— triage later</span>
             </label>
-            <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer">
+            <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer border border-transparent has-[:checked]:border-accent/50 has-[:checked]:bg-accent/10">
               <%= form.radio_button :destination, "up_next", class: "text-accent focus:ring-accent" %>
               <span class="text-sm text-content">⏳ Up Next</span>
-              <span class="text-xs text-content-muted">— next heartbeat picks it up</span>
             </label>
-            <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer">
+            <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer border border-transparent has-[:checked]:border-accent/50 has-[:checked]:bg-accent/10">
               <%= form.radio_button :destination, "in_progress", class: "text-accent focus:ring-accent" %>
-              <span class="text-sm text-content">🚀 Execute Now</span>
-              <span class="text-xs text-content-muted">— assign & start immediately</span>
+              <span class="text-sm text-content">🚀 Execute</span>
             </label>
-            <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer">
+            <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-bg-elevated cursor-pointer border border-transparent has-[:checked]:border-accent/50 has-[:checked]:bg-accent/10">
               <%= form.radio_button :destination, "nightly", class: "text-accent focus:ring-accent" %>
               <span class="text-sm text-content">🌙 Nightly</span>
-              <span class="text-xs text-content-muted">— runs tonight or on "good night"</span>
             </label>
           </div>
         </div>

@@ -224,6 +224,7 @@
       <% if next_status %>
         <%= button_to move_board_task_path(task.board, task, status: next_status),
             method: :patch,
+            form: { data: { turbo_frame: "_top" } },
             class: "px-1.5 py-0.5 text-[10px] bg-accent/80 hover:bg-accent text-white rounded transition-colors",
             title: "Move to #{next_status.humanize}" do %>
           NEXT →
