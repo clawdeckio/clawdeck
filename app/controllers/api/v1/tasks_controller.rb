@@ -163,7 +163,12 @@ module Api
       # Toggles task between done and inbox status
       def complete
         set_task_activity_info(@task)
-        new_status = @task.status == "done" ? "inbox" : "done"
+
+        # Toggle completion based on either column status or completed flag.
+        # (Some callers may set `completed=true` without moving the task to the "done" column.)
+        should_uncomplete = (@task.status == "done") || @task.completed
+        new_status = should_uncomplete ? "inbox" : "done"
+
         @task.update!(status: new_status)
         render json: task_json(@task)
       end

@@ -4,6 +4,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :settings, only: [ :show, :update ]
 
+      resources :agents, only: [ :index, :show, :create, :update, :destroy ]
+
+      resources :activities, only: [ :index, :show ]
+
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
@@ -18,6 +22,10 @@ Rails.application.routes.draw do
           patch :assign
           patch :unassign
         end
+
+        resources :comments, controller: "task_comments", only: [ :index, :show, :create, :update, :destroy ]
+        resources :artifacts, controller: "task_artifacts", only: [ :index, :show, :create, :update, :destroy ]
+        resources :activities, only: [ :index ], controller: "activities"
       end
     end
   end
