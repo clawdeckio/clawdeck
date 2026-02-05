@@ -113,8 +113,9 @@
 }
 
 .agent-modal.open {
-  /* Mobile: slide up from bottom */
-  transform: translateY(0);
+  /* Mobile: slide up from bottom - !important to override Tailwind utility */
+  transform: translateY(0) !important;
+  opacity: 1 !important;
 }
 
 @media (min-width: 768px) {
