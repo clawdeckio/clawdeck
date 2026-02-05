@@ -10,24 +10,59 @@ export default class extends Controller {
 
   connect() {
     this.polling = false
+    this.showTimeout = null
+    this.hideTimeout = null
     console.log("[agent-preview] connected for task", this.taskIdValue)
   }
 
   disconnect() {
     this.stopPolling()
+    clearTimeout(this.showTimeout)
+    clearTimeout(this.hideTimeout)
   }
 
   show() {
-    console.log("[agent-preview] show() called, hasPreviewTarget:", this.hasPreviewTarget)
     if (!this.hasPreviewTarget) return
-    this.previewTarget.classList.remove("hidden")
-    this.startPolling()
+    clearTimeout(this.hideTimeout)
+    
+    // Delay before showing to avoid flicker on quick mouse movements
+    this.showTimeout = setTimeout(() => {
+      const rect = this.element.getBoundingClientRect()
+      const preview = this.previewTarget
+      
+      // Use fixed positioning to escape overflow:hidden containers
+      preview.style.position = 'fixed'
+      preview.style.left = `${rect.left}px`
+      preview.style.width = `${rect.width}px`
+      preview.style.zIndex = '9999'
+      
+      // Reset both top/bottom before calculating
+      preview.style.top = 'auto'
+      preview.style.bottom = 'auto'
+      
+      // Try below first, then above if not enough space
+      const spaceBelow = window.innerHeight - rect.bottom
+      if (spaceBelow > 150) {
+        preview.style.top = `${rect.bottom + 4}px`
+      } else {
+        preview.style.bottom = `${window.innerHeight - rect.top + 4}px`
+      }
+      
+      preview.classList.remove('hidden')
+      this.startPolling()
+    }, 150)
   }
 
   hide() {
-    if (!this.hasPreviewTarget) return
-    this.previewTarget.classList.add("hidden")
-    this.stopPolling()
+    clearTimeout(this.showTimeout)
+    
+    // Small delay to allow mouse to enter the preview
+    this.hideTimeout = setTimeout(() => {
+      if (this.hasPreviewTarget) {
+        this.previewTarget.classList.add('hidden')
+      }
+      this.stopPolling()
+    }, 100)
   }
 
   startPolling() {
