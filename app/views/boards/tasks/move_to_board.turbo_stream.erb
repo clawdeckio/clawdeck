@@ -1,0 +1,17 @@
+<%# Remove from current board view %>
+<%= turbo_stream.remove "task_#{@task.id}" %>
+
+<%# Update the column count %>
+<%= turbo_stream.replace "column-#{@task.status}-count" do %>
+  <span id="column-<%= @task.status %>-count" class="ml-auto text-xs text-content-secondary bg-bg-elevated px-1.5 py-0.5 rounded"><%= @old_board.tasks.where(status: @task.status).count %></span>
+<% end %>
+
+<%# Show toast notification %>
+<%= turbo_stream.prepend "toast-container" do %>
+  <div class="bg-bg-elevated border border-border rounded-lg px-4 py-3 shadow-lg flex items-center gap-2"
+       data-controller="toast"
+       data-toast-duration-value="3000">
+    <span class="text-green-400">✓</span>
+    <span class="text-sm text-content">Task moved to <%= @task.board.icon %> <%= @task.board.name %></span>
+  </div>
+<% end %>

@@ -5,7 +5,8 @@ export default class extends Controller {
   static values = { 
     taskId: Number,
     boardId: Number,
-    taskName: String
+    taskName: String,
+    boardIcon: { type: String, default: '📋' }
   }
 
   connect() {
@@ -176,7 +177,8 @@ export default class extends Controller {
       bubbles: true,
       detail: {
         taskId: this.taskIdValue,
-        taskName: this.taskNameValue || `Task #${this.taskIdValue}`
+        taskName: this.taskNameValue || `Task #${this.taskIdValue}`,
+        boardIcon: this.boardIconValue || '📋'
       }
     })
     

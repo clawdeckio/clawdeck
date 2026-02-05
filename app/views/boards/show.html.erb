@@ -4,7 +4,11 @@
 <%# Subscribe to real-time updates for this board %>
 <%= turbo_stream_from "board_#{@board.id}" %>
 
-<div class="h-full flex flex-col" data-controller="board">
+<div class="h-full flex flex-col" 
+     data-controller="board kanban-refresh"
+     data-kanban-refresh-board-id-value="<%= @board.id %>"
+     data-kanban-refresh-interval-value="15000"
+     data-kanban-refresh-api-path-value="<%= status_api_v1_board_path(@board) %>">
   <%# Board Header %>
   <%= render "boards/header" %>
 

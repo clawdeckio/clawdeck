@@ -75,7 +75,10 @@ export default class extends Controller {
   // ========================================
 
   pinTask(event) {
-    const { taskId, taskName } = event.detail
+    // Always use integer keys for consistency (Map is type-strict)
+    const taskId = parseInt(event.detail.taskId, 10)
+    const taskName = event.detail.taskName
+    const boardIcon = event.detail.boardIcon || '📋'
     
     if (this.pinnedTasks.has(taskId)) {
       // Already pinned, just switch to it
@@ -85,6 +88,7 @@ export default class extends Controller {
     
     this.pinnedTasks.set(taskId, {
       name: taskName || `Task #${taskId}`,
+      boardIcon: boardIcon,
       lastLine: 0,
       content: [],
       polling: false
@@ -97,11 +101,17 @@ export default class extends Controller {
     this.startPolling(taskId)
   }
 
-  unpinTask(taskId) {
-    if (typeof taskId === 'object' && taskId.currentTarget) {
-      // Called from button click
-      const btn = taskId.currentTarget
+  unpinTask(taskIdOrEvent) {
+    let taskId
+    if (typeof taskIdOrEvent === 'object' && taskIdOrEvent.currentTarget) {
+      // Called from button click - stop propagation to prevent switchTab from firing
+      taskIdOrEvent.stopPropagation()
+      taskIdOrEvent.preventDefault()
+      const btn = taskIdOrEvent.currentTarget
       taskId = parseInt(btn.dataset.taskId, 10)
+    } else {
+      // Ensure integer for programmatic calls
+      taskId = parseInt(taskIdOrEvent, 10)
     }
     
     this.stopPolling(taskId)
@@ -120,9 +130,13 @@ export default class extends Controller {
     let taskId = taskIdOrEvent
     if (typeof taskIdOrEvent === 'object' && taskIdOrEvent.currentTarget) {
       taskId = parseInt(taskIdOrEvent.currentTarget.dataset.taskId, 10)
+    } else {
+      // Ensure integer for programmatic calls
+      taskId = parseInt(taskId, 10)
     }
     
     this.activeTabId = taskId
+    this.saveToStorage() // Persist active tab
     this.render()
     this.scrollToBottom()
   }
@@ -145,6 +159,7 @@ export default class extends Controller {
   // ========================================
 
   startPolling(taskId) {
+    taskId = parseInt(taskId, 10) // Ensure integer key
     const task = this.pinnedTasks.get(taskId)
     if (!task || task.polling) return
     
@@ -153,6 +168,7 @@ export default class extends Controller {
   }
 
   stopPolling(taskId) {
+    taskId = parseInt(taskId, 10) // Ensure integer key
     const task = this.pinnedTasks.get(taskId)
     if (task) {
       task.polling = false
@@ -160,6 +176,7 @@ export default class extends Controller {
   }
 
   async poll(taskId) {
+    taskId = parseInt(taskId, 10) // Ensure integer key
     const task = this.pinnedTasks.get(taskId)
     if (!task || !task.polling) return
     
@@ -182,6 +199,9 @@ export default class extends Controller {
             this.renderContent()
             this.scrollToBottom()
           }
+          
+          // Save to storage for persistence across tab switches and reloads
+          this.saveToStorage()
         }
         
         // Update task status
@@ -287,17 +307,21 @@ export default class extends Controller {
         
         if (parsed.pinnedTaskIds && Array.isArray(parsed.pinnedTaskIds)) {
           parsed.pinnedTaskIds.forEach(id => {
-            this.pinnedTasks.set(id, {
-              name: parsed.taskNames?.[id] || `Task #${id}`,
-              lastLine: 0,
-              content: [],
+            // Always use integer keys for consistency
+            const taskId = parseInt(id, 10)
+            this.pinnedTasks.set(taskId, {
+              name: parsed.taskNames?.[id] || parsed.taskNames?.[taskId] || `Task #${taskId}`,
+              boardIcon: parsed.boardIcons?.[id] || parsed.boardIcons?.[taskId] || '📋',
+              lastLine: parsed.lastLines?.[taskId] || 0,
+              content: parsed.contentCache?.[taskId] || [],
               polling: false
             })
           })
         }
         
-        if (parsed.activeTabId && this.pinnedTasks.has(parsed.activeTabId)) {
-          this.activeTabId = parsed.activeTabId
+        const activeId = parseInt(parsed.activeTabId, 10)
+        if (activeId && this.pinnedTasks.has(activeId)) {
+          this.activeTabId = activeId
         } else if (this.pinnedTasks.size > 0) {
           this.activeTabId = Array.from(this.pinnedTasks.keys())[0]
         }
@@ -314,13 +338,24 @@ export default class extends Controller {
   saveToStorage() {
     try {
       const taskNames = {}
+      const boardIcons = {}
+      const lastLines = {}
+      const contentCache = {}
+      
       this.pinnedTasks.forEach((task, id) => {
         taskNames[id] = task.name
+        boardIcons[id] = task.boardIcon || '📋'
+        lastLines[id] = task.lastLine || 0
+        // Cache last 50 messages per task (enough to restore context, not too much for localStorage)
+        contentCache[id] = (task.content || []).slice(-50)
       })
       
       const data = {
         pinnedTaskIds: Array.from(this.pinnedTasks.keys()),
         taskNames,
+        boardIcons,
+        lastLines,
+        contentCache,
         activeTabId: this.activeTabId,
         isCollapsed: this.isCollapsed,
         panelHeight: this.panelHeight,
@@ -381,6 +416,10 @@ export default class extends Controller {
         ? `<span class="w-2 h-2 rounded-full bg-${accentColor}-500 animate-pulse"></span>`
         : '<span class="w-2 h-2 rounded-full bg-content-muted"></span>'
       
+      // Show board icon + task ID (e.g., "🦞 #60")
+      const boardIcon = task.boardIcon || '📋'
+      const tabLabel = `${boardIcon} #${taskId}`
+      
       html += `
         <button 
           data-task-id="${taskId}"
@@ -392,13 +431,14 @@ export default class extends Controller {
           }"
         >
           ${statusDot}
-          <span class="truncate max-w-[120px]">#${taskId}</span>
-          <span 
+          <span class="truncate max-w-[120px]">${tabLabel}</span>
+          <button 
+            type="button"
             data-task-id="${taskId}"
             data-action="click->agent-terminal#unpinTask"
-            class="ml-1 opacity-0 group-hover:opacity-100 hover:text-accent transition-opacity text-xs"
+            class="ml-1 opacity-0 group-hover:opacity-100 hover:text-accent transition-opacity text-xs leading-none"
             title="Unpin"
-          >×</span>
+          >×</button>
         </button>
       `
     })

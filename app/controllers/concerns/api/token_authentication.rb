@@ -10,15 +10,27 @@ module Api
     private
 
     def authenticate_api_token
+      # Try token authentication first
       token = extract_token_from_header
-      @current_user = ApiToken.authenticate(token)
+      @current_user = ApiToken.authenticate(token) if token.present?
+
+      # Fall back to session authentication (for browser-based API calls)
+      @current_user ||= authenticate_from_session
 
       unless @current_user
         render json: { error: "Unauthorized" }, status: :unauthorized
         return
       end
 
-      update_agent_info_from_headers
+      # Only update agent info for token-based auth (not browser polling)
+      update_agent_info_from_headers if token.present?
+    end
+
+    def authenticate_from_session
+      return nil unless respond_to?(:cookies, true)
+      session_id = cookies.signed[:session_id]
+      return nil unless session_id
+      Session.find_by(id: session_id)&.user
     end
 
     def extract_token_from_header

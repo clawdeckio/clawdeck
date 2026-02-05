@@ -1,6 +1,6 @@
 class Boards::TasksController < ApplicationController
   before_action :set_board
-  before_action :set_task, only: [:show, :edit, :update, :destroy, :assign, :unassign, :move, :followup_modal, :create_followup, :generate_followup, :enhance_followup, :handoff_modal, :handoff]
+  before_action :set_task, only: [:show, :edit, :update, :destroy, :assign, :unassign, :move, :move_to_board, :followup_modal, :create_followup, :generate_followup, :enhance_followup, :handoff_modal, :handoff]
 
   def show
     @api_token = current_user.api_token
@@ -92,6 +92,20 @@ class Boards::TasksController < ApplicationController
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to board_path(@board), notice: "Task moved." }
+    end
+  end
+
+  def move_to_board
+    target_board = current_user.boards.find(params[:target_board_id])
+    @old_board = @board
+    @task.activity_source = "web"
+    @task.update!(board_id: target_board.id)
+    respond_to do |format|
+      format.turbo_stream do
+        # Remove from current board and redirect to target board
+        render turbo_stream: turbo_stream.action(:redirect, board_path(target_board))
+      end
+      format.html { redirect_to board_path(target_board), notice: "Task moved to #{target_board.icon} #{target_board.name}." }
     end
   end
 

@@ -4,7 +4,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :settings, only: [ :show, :update ]
 
-      resources :boards, only: [ :index, :show, :create, :update, :destroy ]
+      resources :boards, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          get :status
+        end
+      end
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
         collection do
@@ -56,6 +60,7 @@ Rails.application.routes.draw do
         patch :assign
         patch :unassign
         patch :move
+        patch :move_to_board
         get :followup_modal
         get :handoff_modal
         post :generate_followup

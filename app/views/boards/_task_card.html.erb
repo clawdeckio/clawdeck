@@ -12,12 +12,14 @@
         data-agent-preview-task-id-value="<%= task.id %>"
         data-agent-preview-board-id-value="<%= task.board_id %>"
         data-agent-preview-task-name-value="<%= h(task.name.truncate(50)) %>"
+        data-agent-preview-board-icon-value="<%= task.board.icon %>"
       <% end %>
       <% if show_agent_modal_btn %>
         data-agent-modal-task-id-value="<%= task.id %>"
         data-agent-modal-board-id-value="<%= task.board_id %>"
         data-agent-modal-session-id-value="<%= task.agent_session_id %>"
         data-agent-modal-task-status-value="<%= task.status %>"
+        data-agent-modal-board-icon-value="<%= task.board.icon %>"
       <% end %>
     <% end %>
     data-task-id="<%= task.id %>"
@@ -90,6 +92,46 @@
           <% end %>
         </div>
       </div>
+
+      <%# Move to Board - Submenu %>
+      <% user_boards = current_user.boards %>
+      <% if user_boards.count > 1 %>
+        <div class="relative group/board">
+          <button type="button" class="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors">
+            <span class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+              </svg>
+              Move to board
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+          <%# Board Submenu %>
+          <div class="absolute left-full top-0 ml-1 hidden group-hover/board:block min-w-[160px] bg-bg-elevated border border-border rounded-lg shadow-lg py-1">
+            <% user_boards.each do |board| %>
+              <% is_current = task.board_id == board.id %>
+              <% if is_current %>
+                <div class="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-content-muted bg-bg-hover cursor-default">
+                  <span><%= board.icon %> <%= board.name %></span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-accent">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                </div>
+              <% else %>
+                <%= button_to move_to_board_board_task_path(task.board, task),
+                    method: :patch,
+                    params: { target_board_id: board.id },
+                    data: { action: "click->dropdown#close" },
+                    class: "w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
+                  <span><%= board.icon %> <%= board.name %></span>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
       <%# Priority Selection - Submenu %>
       <div class="relative group/priority">

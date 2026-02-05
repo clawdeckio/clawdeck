@@ -15,6 +15,7 @@ export default class extends Controller {
     boardId: Number,
     sessionId: String,
     taskStatus: String,
+    boardIcon: { type: String, default: '📋' },
     pollInterval: { type: Number, default: 5000 }
   }
 
@@ -278,10 +279,11 @@ export default class extends Controller {
     const btn = event.currentTarget
     const taskId = btn.dataset.taskId || this.taskIdValue
     const taskName = btn.dataset.taskName || `Task #${taskId}`
+    const boardIcon = btn.dataset.boardIcon || this.boardIconValue || '📋'
     
     // Dispatch custom event for terminal panel to catch
     document.dispatchEvent(new CustomEvent('agent-terminal:pin', {
-      detail: { taskId, taskName }
+      detail: { taskId, taskName, boardIcon }
     }))
     
     // Visual feedback

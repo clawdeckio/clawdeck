@@ -1,7 +1,7 @@
 module Api
   module V1
     class BoardsController < BaseController
-      before_action :set_board, only: [ :show, :update, :destroy ]
+      before_action :set_board, only: [ :show, :update, :destroy, :status ]
 
       # GET /api/v1/boards
       def index
@@ -16,6 +16,30 @@ module Api
       # GET /api/v1/boards/:id
       def show
         render json: board_json(@board, include_tasks: params[:include_tasks] == "true")
+      end
+
+      # GET /api/v1/boards/:id/status
+      # Lightweight endpoint for polling - returns a fingerprint based on task state
+      def status
+        tasks = @board.tasks.unscope(:order)
+
+        # Build a fingerprint from task count and latest modification
+        task_count = tasks.count
+        latest_task = tasks.order(updated_at: :desc).first
+        latest_update = latest_task&.updated_at&.to_i || 0
+
+        # Include status counts for more granular change detection
+        status_counts = tasks.group(:status).count
+
+        # Create a fingerprint hash
+        fingerprint_data = "#{task_count}-#{latest_update}-#{status_counts.to_json}"
+        fingerprint = Digest::MD5.hexdigest(fingerprint_data)
+
+        render json: {
+          fingerprint: fingerprint,
+          task_count: task_count,
+          updated_at: latest_task&.updated_at&.iso8601
+        }
       end
 
       # POST /api/v1/boards

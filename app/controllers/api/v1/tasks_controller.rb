@@ -334,6 +334,10 @@ module Api
           followup_name: followup_name,
           followup_description: followup_description
         )
+
+        # Auto-complete parent task when follow-up is created
+        @task.update!(status: 'done', completed: true, completed_at: Time.current)
+
         render json: { followup: task_json(followup), source_task: task_json(@task) }, status: :created
       end
 
