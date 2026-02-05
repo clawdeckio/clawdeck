@@ -32,6 +32,20 @@ module Api
         transcript_path = File.expand_path("~/.openclaw/agents/main/sessions/#{@task.agent_session_id}.jsonl")
 
         unless File.exist?(transcript_path)
+          # Fallback: extract "## Agent Output" from task description if present
+          if @task.description.present? && @task.description.include?("## Agent Output")
+            output_match = @task.description.match(/## Agent Output\s*\n(.*)/m)
+            if output_match
+              extracted_output = output_match[1].strip
+              render json: { 
+                messages: [{ role: "assistant", content: [{ type: "text", text: extracted_output }] }], 
+                total_lines: 1, 
+                has_session: true, 
+                fallback: true 
+              }
+              return
+            end
+          end
           render json: { messages: [], total_lines: 0, has_session: true, error: "Transcript file not found" }
           return
         end

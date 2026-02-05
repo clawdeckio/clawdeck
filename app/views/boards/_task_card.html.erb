@@ -6,7 +6,7 @@
     class="group relative w-full bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover overflow-visible <%= 'border-l-4 border-l-status-warning' if task.blocked? %> <%= 'border-l-4 border-l-red-500' if show_error_state %>"
     <% if has_current_user %>
       data-controller="dropdown delete-confirm<%= ' agent-preview' if show_agent_preview %><%= ' agent-modal' if show_agent_modal_btn %>"
-      data-action="contextmenu->dropdown#openAtCursor<%= ' mouseenter->agent-preview#show mouseleave->agent-preview#hide' if show_agent_preview %>"
+      data-action="contextmenu->dropdown#openAtCursor<%= ' mouseenter->agent-modal#open' if show_agent_preview %>"
       data-delete-confirm-item-name-value="<%= h(task.name.truncate(30)) %>"
       <% if show_agent_preview %>
         data-agent-preview-task-id-value="<%= task.id %>"
