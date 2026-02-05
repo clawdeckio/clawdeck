@@ -27,7 +27,7 @@
   <%# Context Menu (right-click) - only rendered when current_user is available (not during broadcasts) %>
   <% if has_current_user %>
     <button data-dropdown-target="button" class="hidden" aria-expanded="false"></button>
-    <div data-dropdown-target="menu" class="hidden fixed z-[100] min-w-[160px] bg-bg-elevated border border-border rounded-lg shadow-lg py-1">
+    <div data-dropdown-target="menu" class="hidden fixed z-[10000] min-w-[160px] bg-bg-elevated border border-border rounded-lg shadow-lg py-1">
       <%# Agent Assignment %>
       <% agent_connected = current_user.agent_last_active_at.present? %>
       <% if agent_connected %>
