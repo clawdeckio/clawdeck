@@ -138,6 +138,16 @@ export default class extends Controller {
 
       if (!response.ok) {
         console.error("Failed to update task status")
+        return
+      }
+
+      // Replace the card HTML to update status-dependent elements (NEXT button, etc.)
+      const data = await response.json()
+      if (data.html && data.task_id) {
+        const cardElement = document.getElementById(`task_${data.task_id}`)
+        if (cardElement) {
+          cardElement.outerHTML = data.html
+        }
       }
     } catch (error) {
       console.error("Error updating task status:", error)

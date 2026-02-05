@@ -53,32 +53,49 @@
                 class: "w-full text-base bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-content placeholder-content-muted px-3 py-2" %>
           </div>
 
-          <!-- Description with AI Generate button -->
-          <div data-controller="followup-suggestion" 
+          <!-- Description with AI Generate and Enhance buttons -->
+          <div data-controller="followup-suggestion enhance-followup" 
                data-followup-suggestion-url-value="<%= generate_followup_api_v1_task_path(@task, format: :json) %>"
-               data-followup-suggestion-cached-value="<%= @task.suggested_followup.present? %>">
+               data-followup-suggestion-cached-value="<%= @task.suggested_followup.present? %>"
+               data-enhance-followup-url-value="<%= enhance_followup_board_task_path(@board, @task, format: :json) %>">
             <div class="flex items-center justify-between mb-2">
               <label class="text-sm font-medium text-content-muted">Description</label>
-              <% if current_user.ai_api_key.present? && @task.suggested_followup.blank? %>
-                <button
-                  type="button"
-                  data-followup-suggestion-target="generateBtn"
-                  data-action="click->followup-suggestion#generate"
-                  class="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-accent hover:text-accent-hover bg-accent/10 hover:bg-accent/20 rounded transition-colors"
-                >
-                  <svg data-followup-suggestion-target="spinner" class="hidden animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span data-followup-suggestion-target="label">🤖 Generate AI Suggestion</span>
-                </button>
-              <% end %>
+              <div class="flex items-center gap-2">
+                <% if current_user.ai_api_key.present? %>
+                  <!-- Generate AI Suggestion button (hidden if already has suggestion) -->
+                  <button
+                    type="button"
+                    data-followup-suggestion-target="generateBtn"
+                    data-action="click->followup-suggestion#generate"
+                    class="<%= @task.suggested_followup.present? ? 'hidden' : '' %> flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-accent hover:text-accent-hover bg-accent/10 hover:bg-accent/20 rounded transition-colors"
+                  >
+                    <svg data-followup-suggestion-target="spinner" class="hidden animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span data-followup-suggestion-target="label">🤖 Generate AI Suggestion</span>
+                  </button>
+                  <!-- Enhance button -->
+                  <button
+                    type="button"
+                    data-enhance-followup-target="button"
+                    data-action="click->enhance-followup#enhance"
+                    class="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 rounded transition-colors"
+                  >
+                    <svg data-enhance-followup-target="spinner" class="hidden animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span data-enhance-followup-target="label">✨ Enhance</span>
+                  </button>
+                <% end %>
+              </div>
             </div>
             <%= form.text_area :followup_description,
                 value: @task.suggested_followup || "",
                 placeholder: "Describe what needs to be done next...",
                 rows: 5,
-                data: { followup_suggestion_target: "textarea" },
+                data: { followup_suggestion_target: "textarea", enhance_followup_target: "textarea" },
                 class: "w-full text-sm leading-snug bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-content-secondary placeholder-content-muted resize-none px-3 py-3" %>
           </div>
 

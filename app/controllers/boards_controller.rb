@@ -86,6 +86,11 @@ class BoardsController < ApplicationController
       @task = @board.tasks.find(params[:task_id])
       @task.activity_source = "web"
       @task.update!(status: params[:status])
+
+      # Return rendered HTML so JS can replace the card (updates NEXT button, etc.)
+      html = render_to_string(partial: "boards/task_card", locals: { task: @task })
+      render json: { success: true, html: html, task_id: @task.id }
+      return
     end
 
     head :ok
