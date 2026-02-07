@@ -36,14 +36,27 @@ class Api::V1::LiveFeedControllerTest < ActionDispatch::IntegrationTest
     assert body.key?("artifacts")
     assert body.key?("items")
     assert body.key?("cursor")
+    assert body["cursor"].is_a?(Hash)
+    assert body["cursor"].key?("next_before")
 
     assert_kind_of Array, body["tasks"]
     assert_kind_of Array, body["comments"]
     assert_kind_of Array, body["artifacts"]
     assert_kind_of Array, body["items"]
 
+    # With fixtures present, items should not be empty.
+    assert body["items"].any?
+
     # Items are typed + time ordered newest-first
     assert body["items"].all? { |i| i.key?("type") && i.key?("at") }
+
+    times = body["items"].map { |i| Time.iso8601(i["at"]) }
+    assert_equal times.sort.reverse, times
+
+    # Cursor should point to the oldest returned event for stable pagination.
+    next_before = body.dig("cursor", "next_before")
+    assert next_before.present?
+    assert_equal body["items"].last["at"], next_before
   end
 
   test "types filter includes only requested resource types" do

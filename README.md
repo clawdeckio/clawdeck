@@ -51,6 +51,12 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 - PostgreSQL
 - Bundler
 
+**macOS (Homebrew Ruby) note:** if you install Ruby via `brew install ruby@3.3`, ensure your PATH includes the Homebrew Ruby bin so the expected Bundler version is available:
+
+```bash
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
+```
+
 ### Setup
 ```bash
 git clone https://github.com/clawdeckio/clawdeck.git

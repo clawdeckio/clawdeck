@@ -137,9 +137,9 @@ module Api
         tasks.each do |t|
           items << {
             type: "task",
-            at: t["updated_at"],
-            board_id: t["board_id"],
-            task_id: t["id"],
+            at: t[:updated_at],
+            board_id: t[:board_id],
+            task_id: t[:id],
             task: t
           }
         end
@@ -147,9 +147,9 @@ module Api
         comments.each do |c|
           items << {
             type: "comment",
-            at: c["created_at"],
-            board_id: c["board_id"],
-            task_id: c["task_id"],
+            at: c[:created_at],
+            board_id: c[:board_id],
+            task_id: c[:task_id],
             comment: c
           }
         end
@@ -157,16 +157,16 @@ module Api
         artifacts.each do |a|
           items << {
             type: "artifact",
-            at: a["created_at"],
-            board_id: a["board_id"],
-            task_id: a["task_id"],
+            at: a[:created_at],
+            board_id: a[:board_id],
+            task_id: a[:task_id],
             artifact: a
           }
         end
 
         # Sort newest-first; cap overall size for easy pagination.
         items.sort_by { |i| Time.iso8601(i[:at]) }.reverse.first(limit_param)
-      rescue ArgumentError
+      rescue ArgumentError, TypeError
         []
       end
 
@@ -176,14 +176,14 @@ module Api
         return items.last[:at] if items.any?
 
         candidates = []
-        candidates << tasks.last["updated_at"] if tasks.any?
-        candidates << comments.last["created_at"] if comments.any?
-        candidates << artifacts.last["created_at"] if artifacts.any?
+        candidates << tasks.last[:updated_at] if tasks.any?
+        candidates << comments.last[:created_at] if comments.any?
+        candidates << artifacts.last[:created_at] if artifacts.any?
 
         return nil if candidates.empty?
 
         candidates.map { |t| Time.iso8601(t) }.min.iso8601
-      rescue ArgumentError
+      rescue ArgumentError, TypeError
         nil
       end
     end
