@@ -19,7 +19,8 @@ class Boards::TaskCardTest < ActionView::TestCase
     assert_includes html, "title=\"Comments\""
     assert_includes html, "title=\"Artifacts\""
 
-    # Tooltip should use stable, timezone-aware formatting via helper.
+    # Tooltips should use stable, timezone-aware formatting via helper.
+    assert_includes html, "title=\"Created #{formatted_timestamp(task.created_at)}\""
     assert_includes html, "title=\"Updated #{formatted_timestamp(task.updated_at)}\""
   end
 
@@ -34,6 +35,7 @@ class Boards::TaskCardTest < ActionView::TestCase
     assert_not_includes html, "title=\"Comments\""
     assert_not_includes html, "title=\"Artifacts\""
 
+    assert_includes html, "title=\"Created #{formatted_timestamp(task.created_at)}\""
     assert_includes html, "title=\"Updated #{formatted_timestamp(task.updated_at)}\""
   end
 end
