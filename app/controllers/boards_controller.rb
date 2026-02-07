@@ -16,7 +16,8 @@ class BoardsController < ApplicationController
   def show
     @board_page = true
     session[:last_board_id] = @board.id
-    @tasks = @board.tasks.includes(:user)
+    # Preload associations used on Kanban cards to avoid N+1 queries
+    @tasks = @board.tasks.includes(:user, :comments, :artifacts)
 
     # Filter by tag if specified
     if params[:tag].present?
