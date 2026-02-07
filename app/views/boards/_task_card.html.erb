@@ -134,7 +134,7 @@
 
       <% if hidden_count > 0 %>
         <% hidden_tags = tags.drop(visible_tags.size) %>
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-surface text-content-secondary" title="<%= hidden_tags.join(', ') %>">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-surface text-content-secondary" title="Tags: <%= hidden_tags.join(', ') %>">
           +<%= hidden_count %>
         </span>
       <% end %>
