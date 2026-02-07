@@ -190,11 +190,24 @@ module Api
         params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
       end
 
+      # Ensure we always emit valid JSON even if user-provided strings contain
+      # control characters (e.g., from pasted terminal output).
+      def sanitize_json_string(value)
+        return nil if value.nil?
+
+        str = value.to_s
+        # Drop ASCII control chars (0x00-0x1F, 0x7F) which can break JSON parsers
+        # when present unescaped.
+        str = str.gsub(/[\u0000-\u001F\u007F]/, "")
+        # Ensure valid UTF-8
+        str.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+      end
+
       def task_json(task)
         {
           id: task.id,
-          name: task.name,
-          description: task.description,
+          name: sanitize_json_string(task.name),
+          description: sanitize_json_string(task.description),
           priority: task.priority,
           status: task.status,
           blocked: task.blocked,
