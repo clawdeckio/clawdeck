@@ -1,5 +1,5 @@
 class TaskArtifact < ApplicationRecord
-  belongs_to :task
+  belongs_to :task, counter_cache: :artifacts_count
   belongs_to :user, optional: true
   belongs_to :blob, class_name: "ActiveStorage::Blob", optional: true
 

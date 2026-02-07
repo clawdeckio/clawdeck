@@ -1,4 +1,16 @@
 module ApplicationHelper
+  # Ensure we never blow up on mixed encodings (common when data originates
+  # from request headers or external tools).
+  def safe_utf8(value)
+    return "" if value.nil?
+
+    str = value.to_s
+    str = str.dup.force_encoding("UTF-8") unless str.encoding.name == "UTF-8"
+    str.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+  rescue Encoding::UndefinedConversionError, Encoding::InvalidByteSequenceError
+    ""
+  end
+
   # Format timestamps for compact UI tooltips.
   # Keep it stable (no locale surprises) and include timezone.
   def formatted_timestamp(time)
