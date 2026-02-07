@@ -1,6 +1,6 @@
 # Agent Integration Spec
 
-ClawDeck is designed as a **personal mission control for your AI agent**. This document specifies how an AI agent integrates with ClawDeck via the REST API.
+PokéDeck is designed as a **personal mission control for your AI agent**. This document specifies how an AI agent integrates with PokéDeck via the REST API.
 
 ---
 
@@ -21,7 +21,7 @@ The agent's personality is part of the product. Names, avatars, emoji — all vi
 
 ### API Token
 
-- User creates an API token in ClawDeck settings
+- User creates an API token in PokéDeck settings
 - Agent stores token in its config
 - All API calls use: `Authorization: Bearer <token>`
 
@@ -57,7 +57,7 @@ curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
 
 ```
 ┌─────────────┐        polling         ┌─────────────┐
-│  ClawDeck   │◄──────────────────────►│   Agent     │
+│  PokéDeck   │◄──────────────────────►│   Agent     │
 │  (Board)    │       API calls        │             │
 └─────────────┘                        └─────────────┘
 ```
@@ -73,7 +73,7 @@ curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
 
 ### Assignment-Based Workflow
 
-Unlike auto-pickup systems, ClawDeck uses **explicit assignment**:
+Unlike auto-pickup systems, PokéDeck uses **explicit assignment**:
 
 - Human assigns tasks to the agent using the "Assign to Agent" button
 - Agent polls for `assigned=true` tasks
@@ -483,7 +483,7 @@ The API returns standard HTTP status codes:
 
 ## Summary
 
-ClawDeck provides a visual mission control for your AI agent.
+PokéDeck provides a visual mission control for your AI agent.
 
 - Human assigns tasks via UI
 - Agent polls for assigned work

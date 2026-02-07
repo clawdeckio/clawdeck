@@ -1,10 +1,10 @@
-# 🦞 ClawDeck
+# PokéDeck
 
 **Open source mission control for your AI agents.**
 
-ClawDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
+PokéDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
 
-> 🚧 **Early Development** — ClawDeck is under active development. Expect breaking changes.
+> 🚧 **Early Development** — PokéDeck is under active development. Expect breaking changes.
 
 ## Get Started
 
@@ -66,8 +66,8 @@ bundle _2.5.9_ install
 
 ### Setup
 ```bash
-git clone https://github.com/clawdeckio/clawdeck.git
-cd clawdeck
+git clone https://github.com/clawdeckio/pokedeck.git
+cd pokedeck
 bundle install
 bin/rails db:prepare
 bin/dev
@@ -77,7 +77,7 @@ Visit `http://localhost:3000`
 
 ### Authentication Setup
 
-ClawDeck supports two authentication methods:
+PokéDeck supports two authentication methods:
 
 1. **Email/Password** — Works out of the box
 2. **GitHub OAuth** — Optional, recommended for production
@@ -87,7 +87,7 @@ ClawDeck supports two authentication methods:
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click **New OAuth App**
 3. Fill in:
-   - **Application name:** ClawDeck
+   - **Application name:** PokéDeck
    - **Homepage URL:** Your domain
    - **Authorization callback URL:** `https://yourdomain.com/auth/github/callback`
 4. Add credentials to environment:
@@ -108,7 +108,7 @@ bin/rubocop
 
 ## API
 
-ClawDeck exposes a REST API for agent integrations. Get your API token from Settings.
+PokéDeck exposes a REST API for agent integrations. Get your API token from Settings.
 
 ### Authentication
 
@@ -271,7 +271,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 - 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/clawdeck)
+- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/pokedeck)
 
 ---
 
