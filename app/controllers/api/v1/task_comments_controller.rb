@@ -52,7 +52,13 @@ module Api
       end
 
       def comment_params
-        params.require(:comment).permit(:body)
+        # Primary payload shape: { comment: { body: "..." } }
+        # Back-compat: { task_comment: { body: "..." } } and { body: "..." }
+        raw = params[:comment] || params[:task_comment] || (params[:body].present? ? { body: params[:body] } : nil)
+        raise ActionController::ParameterMissing, :comment if raw.nil?
+
+        raw_params = raw.is_a?(ActionController::Parameters) ? raw : ActionController::Parameters.new(raw)
+        raw_params.permit(:body)
       end
 
       def apply_actor_info(comment)
