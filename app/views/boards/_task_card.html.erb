@@ -215,7 +215,12 @@
 
     <%# Agent Assignment Badge %>
     <% if task.assigned_to_agent? %>
-      <span class="text-xs" title="Assigned to <%= safe_utf8(task.user.agent_name.presence || 'Agent') %>"><%= safe_utf8(task.user.agent_emoji.presence || "🦞") %></span>
+      <% agent_name = safe_utf8(task.user.agent_name.presence || "Agent") %>
+      <% agent_emoji = safe_utf8(task.user.agent_emoji.presence || "🦞") %>
+      <span class="inline-flex items-center gap-1 text-xs text-content-muted/80" title="Assigned to <%= agent_name %>">
+        <span aria-hidden="true"><%= agent_emoji %></span>
+        <span class="max-w-28 truncate"><%= agent_name %></span>
+      </span>
     <% end %>
   </div>
   <% end %>

@@ -38,4 +38,16 @@ class Boards::TaskCardTest < ActionView::TestCase
     assert_includes html, "title=\"Created #{formatted_timestamp(task.created_at)}\""
     assert_includes html, "title=\"Updated #{formatted_timestamp(task.updated_at)}\""
   end
+
+  test "renders agent badge with name when assigned to agent" do
+    task = tasks(:one)
+    task.update!(assigned_to_agent: true)
+    task.user.update!(agent_name: "Blastoise", agent_emoji: "🛡️")
+
+    html = render(partial: "boards/task_card", locals: { task: task })
+
+    assert_includes html, "Assigned to Blastoise"
+    assert_includes html, "Blastoise"
+    assert_includes html, "🛡️"
+  end
 end
