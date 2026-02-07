@@ -22,11 +22,12 @@
 
 /* Insert marker (shows where the dragged card will be inserted) */
 .sortable-insert-before {
-  border-top: 2px solid rgba(59, 130, 246, 0.65); /* blue-500-ish */
+  /* Use inset box-shadow instead of borders to avoid shifting layout while dragging */
+  box-shadow: inset 0 2px 0 rgba(59, 130, 246, 0.65); /* blue-500-ish */
 }
 
 .sortable-insert-after {
-  border-bottom: 2px solid rgba(59, 130, 246, 0.65);
+  box-shadow: inset 0 -2px 0 rgba(59, 130, 246, 0.65);
 }
 
 /* Mobile-specific drag improvements */

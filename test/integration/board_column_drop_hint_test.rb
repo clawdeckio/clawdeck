@@ -13,5 +13,9 @@ class BoardColumnDropHintTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "Drop here"
     assert_includes @response.body, "data-sortable-ignore=\"true\""
     assert_includes @response.body, "drop-hint"
+
+    # Important: the hint should be hidden via our `.drop-hint { display: none; }` rule,
+    # not Tailwind's `hidden` utility (which may override custom CSS depending on build order).
+    refute_includes @response.body, "drop-hint hidden"
   end
 end

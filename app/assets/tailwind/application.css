@@ -112,7 +112,13 @@
   border-style: dashed;
 }
 
-/* Show a "Drop here" hint while dragging over a column */
+/* Drop hint: hidden by default; shown while dragging over a column.
+   (We don't rely on Tailwind's `hidden` utility since its generated utility CSS
+   can override custom rules depending on build order.) */
+.drop-hint {
+  display: none;
+}
+
 .column-drag-over .drop-hint {
   display: flex;
 }
