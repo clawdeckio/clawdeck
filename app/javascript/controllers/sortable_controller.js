@@ -21,7 +21,7 @@ export default class extends Controller {
       emptyInsertThreshold: 50,
       swapThreshold: 0.65,
       invertSwap: true,
-      filter: '[style*="display: none"]',
+      filter: '[style*="display: none"], [data-sortable-ignore="true"]',
       onStart: this.handleStart.bind(this),
       onEnd: this.handleEnd.bind(this),
       onMove: this.move.bind(this),

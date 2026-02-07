@@ -37,6 +37,12 @@
     <% tasks.each do |task| %>
       <%= render "boards/task_card", task: task %>
     <% end %>
+
+    <%# Drop hint: only becomes visible while a column is highlighted during drag %>
+    <li class="drop-hint hidden items-center justify-center text-xs text-content-muted/70 py-3 border border-dashed border-border rounded-md"
+        data-sortable-ignore="true">
+      Drop here
+    </li>
   </ul>
 
   <%# Inline Add Card Form (hidden by default) %>

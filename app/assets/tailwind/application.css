@@ -112,6 +112,11 @@
   border-style: dashed;
 }
 
+/* Show a "Drop here" hint while dragging over a column */
+.column-drag-over .drop-hint {
+  display: flex;
+}
+
 /* Sidebar layout */
 @layer components {
   /* Hide sidebar until JS determines state */
