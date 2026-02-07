@@ -107,7 +107,9 @@
     <%= render "application/delete_modal", url: board_task_path(task.board, task) %>
   <% end %>
 
-  <%= link_to board_task_path(task.board, task), data: { turbo_frame: "task_panel" }, class: "block p-3" do %>
+  <%= link_to board_task_path(task.board, task),
+        data: { turbo_frame: "task_panel" },
+        class: "block p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-accent/60" do %>
 
   <%# Task Name %>
   <div class="flex items-start gap-2">
