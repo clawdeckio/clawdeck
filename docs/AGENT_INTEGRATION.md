@@ -92,6 +92,53 @@ https://clawdeck.io/api/v1
 
 ---
 
+## Live Feed API
+
+The Live Feed endpoint provides a compact, time-ordered view of recent activity.
+
+```http
+GET /api/v1/live_feed
+```
+
+**Query Parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Items per collection (default 50, max 200). Also caps the unified `items` stream. |
+| `before` | Cursor for backward pagination (ISO8601). Returns records strictly earlier than this timestamp. |
+| `types` | Optional CSV filter of resource types to include: `task`, `comment`, `artifact` (e.g. `types=comment,artifact`). |
+
+**Response (shape):**
+
+```json
+{
+  "tasks": [ { "id": 1, "updated_at": "..." } ],
+  "comments": [ { "id": 2, "created_at": "..." } ],
+  "artifacts": [ { "id": 3, "created_at": "..." } ],
+  "items": [
+    {
+      "type": "comment",
+      "at": "2026-02-06T12:34:56Z",
+      "board_id": 1,
+      "task_id": 42,
+      "comment": { /* full comment object */ }
+    }
+  ],
+  "cursor": {
+    "next_before": "2026-02-06T12:00:00Z"
+  }
+}
+```
+
+**Pagination example:**
+
+```http
+GET /api/v1/live_feed?limit=50
+GET /api/v1/live_feed?limit=50&before=2026-02-06T12:00:00Z
+```
+
+---
+
 ## Boards API
 
 ### List All Boards

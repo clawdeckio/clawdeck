@@ -8,6 +8,9 @@ Rails.application.routes.draw do
 
       resources :activities, only: [ :index, :show ]
 
+      # Aggregated activity feed (tasks/comments/artifacts)
+      get :live_feed, to: "live_feed#index"
+
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
