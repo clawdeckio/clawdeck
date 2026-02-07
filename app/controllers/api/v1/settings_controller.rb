@@ -34,7 +34,7 @@ module Api
       def agent_status
         # Check if agent has ever been used (API token used)
         return "not_configured" unless current_user.api_tokens.exists?(["last_used_at IS NOT NULL"])
-        
+
         # Check if agent is currently working on a task
         working = current_user.tasks.where(status: :in_progress).where.not(agent_claimed_at: nil).exists?
         working ? "working" : "idle"
