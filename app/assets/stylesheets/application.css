@@ -20,6 +20,15 @@
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25), 0 4px 6px -4px rgba(0,0,0,0.25);
 }
 
+/* Insert marker (shows where the dragged card will be inserted) */
+.sortable-insert-before {
+  border-top: 2px solid rgba(59, 130, 246, 0.65); /* blue-500-ish */
+}
+
+.sortable-insert-after {
+  border-bottom: 2px solid rgba(59, 130, 246, 0.65);
+}
+
 /* Mobile-specific drag improvements */
 @media (max-width: 768px) {
   .sortable-ghost {
