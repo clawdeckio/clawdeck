@@ -1,4 +1,12 @@
 module ApplicationHelper
+  # Format timestamps for compact UI tooltips.
+  # Keep it stable (no locale surprises) and include timezone.
+  def formatted_timestamp(time)
+    return "" if time.blank?
+
+    time.in_time_zone.strftime("%Y-%m-%d %H:%M %Z")
+  end
+
   def activity_icon_bg(activity)
     case activity.action
     when "created"

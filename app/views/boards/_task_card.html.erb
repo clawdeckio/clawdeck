@@ -154,7 +154,7 @@
       </span>
     <% end %>
 
-    <span class="ml-auto text-content-muted/60" title="Updated <%= task.updated_at %>"><%= time_ago_in_words(task.updated_at) %> ago</span>
+    <span class="ml-auto text-content-muted/60" title="Updated <%= formatted_timestamp(task.updated_at) %>"><%= time_ago_in_words(task.updated_at) %> ago</span>
   </div>
 
   <%# Footer: Priority + Agent %>
