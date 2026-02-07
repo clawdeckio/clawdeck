@@ -51,11 +51,18 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 - PostgreSQL
 - Bundler
 
-**macOS (Homebrew Ruby) note:** if you install Ruby via `brew install ruby@3.3`, ensure your PATH includes the Homebrew Ruby bin so the expected Bundler version is available:
+**macOS (Homebrew Ruby) note:** macOS ships an older system Ruby (often 2.6.x) which cannot run the Bundler 2.5.x version pinned in `Gemfile.lock`. The simplest fix is to use Homebrew Ruby 3.3:
 
 ```bash
+brew install ruby@3.3
 export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
+
+# Use the Bundler version in Gemfile.lock (example):
+gem install bundler -v 2.5.9
+bundle _2.5.9_ install
 ```
+
+(If you already have rbenv/asdf, that works too — just ensure `ruby -v` is 3.3.x before running `bundle`.)
 
 ### Setup
 ```bash
