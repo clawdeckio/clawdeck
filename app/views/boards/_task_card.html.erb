@@ -1,6 +1,6 @@
 <% has_current_user = defined?(current_user) && current_user %>
 <li id="task_<%= task.id %>"
-    class="group bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
+    class="group bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover hover:shadow-sm <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
     <% if has_current_user %>
       data-controller="dropdown delete-confirm"
       data-action="contextmenu->dropdown#openAtCursor"
@@ -119,12 +119,23 @@
     <% end %>
   </div>
 
-  <%# Tags %>
+  <%# Tags (up to 2 + overflow) %>
   <% if task.tags.present? && task.tags.any? %>
+    <% tags = task.tags %>
+    <% visible_tags = tags.first(2) %>
+    <% hidden_count = tags.size - visible_tags.size %>
+
     <div class="flex flex-wrap gap-1 mt-2">
-      <% task.tags.each do |tag| %>
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-surface text-content-secondary">
+      <% visible_tags.each do |tag| %>
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-surface text-content-secondary" title="Tag: <%= tag %>">
           <%= tag %>
+        </span>
+      <% end %>
+
+      <% if hidden_count > 0 %>
+        <% hidden_tags = tags.drop(visible_tags.size) %>
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-surface text-content-secondary" title="<%= hidden_tags.join(', ') %>">
+          +<%= hidden_count %>
         </span>
       <% end %>
     </div>

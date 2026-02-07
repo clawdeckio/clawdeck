@@ -74,8 +74,20 @@ export default class extends Controller {
   }
 
   move(event) {
+    // Provide column hover feedback even when hovering over an empty column
+    // (Sortable's onChange doesn't always fire until an insertion actually happens).
+    const targetColumn = event.to?.closest?.("[data-status]")
+    if (targetColumn) {
+      // Remove highlight from all columns first
+      document.querySelectorAll(".column-drag-over").forEach(el => {
+        el.classList.remove("column-drag-over")
+      })
+      // Add highlight to current column
+      targetColumn.classList.add("column-drag-over")
+    }
+
     // Don't allow moving hidden (filtered) items
-    if (event.related?.style?.display === 'none') {
+    if (event.related?.style?.display === "none") {
       return false
     }
     return true

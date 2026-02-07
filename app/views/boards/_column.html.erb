@@ -29,7 +29,7 @@
 
   <%# Tasks List - no overflow, grows with content, min height for empty drop target %>
   <ul id="column-<%= status %>"
-      class="px-2 pb-2 space-y-2 min-h-[2rem]"
+      class="px-2 pb-2 space-y-2 min-h-[6rem] rounded-md border border-transparent transition-colors"
       data-controller="sortable"
       data-sortable-group-value="board"
       data-sortable-status-value="<%= status %>"

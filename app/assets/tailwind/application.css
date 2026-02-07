@@ -105,6 +105,13 @@
   border-color: var(--color-accent-muted);
 }
 
+/* Give empty columns a more obvious drop target when hovering during drag */
+.column-drag-over > ul {
+  background: rgba(255, 77, 77, 0.02);
+  border-color: var(--color-accent-muted);
+  border-style: dashed;
+}
+
 /* Sidebar layout */
 @layer components {
   /* Hide sidebar until JS determines state */
