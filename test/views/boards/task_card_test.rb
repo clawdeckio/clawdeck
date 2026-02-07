@@ -2,6 +2,7 @@ require "test_helper"
 
 class Boards::TaskCardTest < ActionView::TestCase
   include Rails.application.routes.url_helpers
+  include ApplicationHelper
 
   # Needed for URL helpers in view tests
   def default_url_options
@@ -17,6 +18,9 @@ class Boards::TaskCardTest < ActionView::TestCase
     assert_match(/\b1\b/, html) # comment/artifact counts from fixtures
     assert_includes html, "title=\"Comments\""
     assert_includes html, "title=\"Artifacts\""
+
+    # Tooltip should use stable, timezone-aware formatting via helper.
+    assert_includes html, "title=\"Updated #{formatted_timestamp(task.updated_at)}\""
   end
 
   test "omits comment/artifact counts when zero" do
@@ -29,5 +33,7 @@ class Boards::TaskCardTest < ActionView::TestCase
     assert_includes html, "##{task.id}"
     assert_not_includes html, "title=\"Comments\""
     assert_not_includes html, "title=\"Artifacts\""
+
+    assert_includes html, "title=\"Updated #{formatted_timestamp(task.updated_at)}\""
   end
 end
