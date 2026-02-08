@@ -7,6 +7,8 @@ Rails.application.routes.draw do
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
+        resources :comments, only: [ :create ], controller: "task_comments"
+
         collection do
           get :next
           get :pending_attention
