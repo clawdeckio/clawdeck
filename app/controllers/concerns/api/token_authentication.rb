@@ -11,7 +11,18 @@ module Api
 
     def authenticate_api_token
       token = extract_token_from_header
-      @current_user = ApiToken.authenticate(token)
+
+      # Primary auth: Bearer token (used by OpenClaw agents + API clients)
+      @current_user = ApiToken.authenticate(token) if token.present?
+
+      # Fallback: same-origin signed session cookie (used by the web UI)
+      if @current_user.nil?
+        session_id = cookies.signed[:session_id]
+        if session_id
+          session = Session.find_by(id: session_id)
+          @current_user = session&.user
+        end
+      end
 
       unless @current_user
         render json: { error: "Unauthorized" }, status: :unauthorized

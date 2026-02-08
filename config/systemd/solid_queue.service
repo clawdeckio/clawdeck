@@ -1,5 +1,5 @@
 [Unit]
-Description=Solid Queue Worker for ClawDeck
+Description=Solid Queue Worker for PokeDeck
 After=network.target postgresql.service puma.service
 Requires=postgresql.service
 

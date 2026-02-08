@@ -1,0 +1,17 @@
+one:
+  task: one
+  user: one
+  action: "created"
+  source: "api"
+  actor_type: "agent"
+  actor_name: "OpenClaw"
+  actor_emoji: ":lobster:"
+
+two:
+  task: two
+  user: two
+  action: "updated"
+  field_name: "priority"
+  old_value: "low"
+  new_value: "high"
+  source: "web"
