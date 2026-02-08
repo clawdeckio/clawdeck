@@ -33,6 +33,8 @@ Examples (non-exhaustive):
 - Filesystem paths (`/var/www/clawdeck`, `/var/log/clawdeck`)
 - Database names/users
 - Domains/URLs (until a domain migration is planned)
+- `clawdeck.io` remains the canonical public base URL until a coordinated `pokedeck` domain cutover
+- Self-hosters can override generated public links with `PUBLIC_BASE_URL`
 
 ## When to migrate identifiers
 

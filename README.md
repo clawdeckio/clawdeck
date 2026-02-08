@@ -110,6 +110,14 @@ bin/rubocop
 
 PokéDeck exposes a REST API for agent integrations. Get your API token from Settings.
 
+### Base URL
+
+```
+https://clawdeck.io/api/v1
+```
+
+Note: `clawdeck.io` is still the canonical public base URL until a coordinated `pokedeck` domain cutover. Self-hosters can override this with `PUBLIC_BASE_URL`.
+
 ### Authentication
 
 Include your token in every request:
