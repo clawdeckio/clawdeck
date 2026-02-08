@@ -2,12 +2,8 @@
 
 one:
   task: one
-  author_type: MyString
-  author_name: MyString
-  body: MyText
+  body: Initial progress update
 
 two:
   task: two
-  author_type: MyString
-  author_name: MyString
-  body: MyText
+  body: Waiting for review

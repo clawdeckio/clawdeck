@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  name: Personal
+  icon: list
+  color: gray
+  position: 1
+
+two:
+  user: two
+  name: Work
+  icon: briefcase
+  color: blue
+  position: 1

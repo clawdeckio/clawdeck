@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -131,6 +131,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["user_id"], name: "index_task_activities_on_user_id"
   end
 
+  create_table "task_comments", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id", "created_at"], name: "index_task_comments_on_task_id_and_created_at"
+    t.index ["task_id"], name: "index_task_comments_on_task_id"
+  end
+
   create_table "task_lists", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "position"
@@ -215,6 +224,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
   add_foreign_key "tags", "users"
   add_foreign_key "task_activities", "tasks"
   add_foreign_key "task_activities", "users"
+  add_foreign_key "task_comments", "tasks"
   add_foreign_key "task_lists", "projects"
   add_foreign_key "task_lists", "users"
   add_foreign_key "task_tags", "tags"
