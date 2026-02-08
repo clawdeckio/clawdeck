@@ -3,9 +3,15 @@ one:
   name: "Agent One"
   status: "idle"
   identifier: "agent-one"
+  metadata:
+    role: "planner"
+    source: "metadata"
 
 two:
   user: one
   name: "Agent Two"
   status: "working"
   identifier: "agent-two"
+  capabilities:
+    role: "executor"
+    source: "capabilities"
