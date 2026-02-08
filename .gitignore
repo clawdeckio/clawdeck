@@ -6,6 +6,8 @@
 
 # Ignore bundler config.
 /.bundle
+/vendor/bundle/
+/vendor/cache/
 
 # Ignore all environment files (except the example).
 /.env*
