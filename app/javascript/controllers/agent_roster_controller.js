@@ -189,6 +189,40 @@ export default class extends Controller {
     return this.agents.filter((agent) => this.inferredState(agent) === this.filter)
   }
 
+  statePriority(state) {
+    switch (state) {
+      case "working":
+        return 0
+      case "idle":
+        return 1
+      case "offline":
+        return 2
+      default:
+        return 3
+    }
+  }
+
+  sortedAgents(agents) {
+    return (agents || []).slice().sort((a, b) => {
+      const aState = this.inferredState(a)
+      const bState = this.inferredState(b)
+      const pri = this.statePriority(aState) - this.statePriority(bState)
+      if (pri !== 0) {
+        return pri
+      }
+
+      const aSeen = new Date(a.last_seen_at || a.lastSeenAt || 0).getTime()
+      const bSeen = new Date(b.last_seen_at || b.lastSeenAt || 0).getTime()
+      if (aSeen !== bSeen) {
+        return bSeen - aSeen
+      }
+
+      const aName = String(a.name || a.identifier || a.id || "")
+      const bName = String(b.name || b.identifier || b.id || "")
+      return aName.localeCompare(bName)
+    })
+  }
+
   statusDotClass(state) {
     switch (state) {
       case "working":
@@ -215,7 +249,7 @@ export default class extends Controller {
       return
     }
 
-    const rows = this.filteredAgents()
+    const rows = this.sortedAgents(this.filteredAgents())
     if (rows.length === 0) {
       this.bodyTarget.innerHTML = this.emptyHtml()
       return
@@ -240,9 +274,14 @@ export default class extends Controller {
 
         return `
           <div class="flex items-center justify-between gap-3 px-3 py-2">
-            <div class="min-w-0">
-              <div class="truncate text-sm font-medium text-content">${emoji} ${name}</div>
-              ${secondaryLine}
+            <div class="flex items-start gap-2 min-w-0">
+              <div class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-bg-elevated text-sm" aria-hidden="true">
+                ${emoji}
+              </div>
+              <div class="min-w-0">
+                <div class="truncate text-sm font-medium text-content">${name}</div>
+                ${secondaryLine}
+              </div>
             </div>
             <div class="flex items-center gap-2 text-xs text-content-muted">
               <span class="inline-block h-2 w-2 rounded-full ${this.statusDotClass(state)}"></span>
