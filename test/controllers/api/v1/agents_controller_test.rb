@@ -19,15 +19,28 @@ class Api::V1::AgentsControllerTest < ActionDispatch::IntegrationTest
 
     agents = response.parsed_body
     assert_kind_of Array, agents
+    assert agents.all? { |agent| agent.key?("role") }
   end
 
-  test "create creates agent" do
+  test "create with role sets metadata role and returns role" do
     assert_difference "Agent.count", 1 do
       post api_v1_agents_url,
-           params: { agent: { name: "BuildBot", status: "idle" } },
+           params: { agent: { name: "BuildBot", status: "idle", role: "planner" } },
            headers: @auth_header
     end
 
     assert_response :created
+
+    created_agent = Agent.find(response.parsed_body["id"])
+    assert_equal "planner", created_agent.metadata["role"]
+    assert_equal "planner", response.parsed_body["role"]
+  end
+
+  test "show returns role derived from capabilities when metadata role is absent" do
+    get api_v1_agent_url(agents(:two)), headers: @auth_header
+    assert_response :success
+
+    agent = response.parsed_body
+    assert_equal "executor", agent["role"]
   end
 end

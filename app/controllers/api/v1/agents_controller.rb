@@ -42,16 +42,26 @@ module Api
       end
 
       def agent_params
-        params.require(:agent).permit(
+        permitted = params.require(:agent).permit(
           :name,
           :emoji,
           :identifier,
           :status,
           :description,
           :last_seen_at,
+          :role,
           metadata: {},
           capabilities: {}
         )
+
+        return permitted unless permitted.key?(:role)
+
+        role = permitted.delete(:role)
+        metadata = (permitted[:metadata] || {}).to_h
+        metadata["role"] = role
+        permitted[:metadata] = metadata
+
+        permitted
       end
 
       def agent_json(agent)
@@ -63,11 +73,24 @@ module Api
           status: agent.status,
           description: agent.description,
           last_seen_at: agent.last_seen_at&.iso8601,
+          role: agent_role(agent),
           metadata: agent.metadata || {},
           capabilities: agent.capabilities || {},
           created_at: agent.created_at.iso8601,
           updated_at: agent.updated_at.iso8601
         }
+      end
+
+      def agent_role(agent)
+        metadata = agent.metadata.is_a?(Hash) ? agent.metadata : {}
+        return metadata["role"] if metadata.key?("role")
+        return metadata[:role] if metadata.key?(:role)
+
+        capabilities = agent.capabilities.is_a?(Hash) ? agent.capabilities : {}
+        return capabilities["role"] if capabilities.key?("role")
+        return capabilities[:role] if capabilities.key?(:role)
+
+        nil
       end
     end
   end
