@@ -261,6 +261,8 @@ DELETE /api/v1/tasks/:task_id/artifacts/:id
 
 ## Contributing
 
+See [`docs/BRANDING_IDENTIFIERS.md`](docs/BRANDING_IDENTIFIERS.md) for the branding-vs-identifiers policy.
+
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
