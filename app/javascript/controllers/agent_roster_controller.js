@@ -228,7 +228,13 @@ export default class extends Controller {
         const name = this.escape(agent.name || agent.email || agent.id || "Unnamed agent")
         const role = this.escape(agent.role || agent.metadata?.role || agent.capabilities?.role || "")
         const status = this.escape(agent.status || "")
-        const detail = [role, status].filter((value) => value.length > 0).join(" • ")
+        const roleBadge = role
+          ? `<span class="inline-flex items-center rounded-md bg-bg-elevated px-1.5 py-0.5 text-[10px] font-medium text-content-secondary">${role}</span>`
+          : ""
+        const statusText = status ? `<span class="truncate text-xs text-content-muted">${status}</span>` : ""
+        const secondaryLine = roleBadge || statusText
+          ? `<div class="mt-0.5 flex items-center gap-1.5">${roleBadge}${statusText}</div>`
+          : ""
         const lastSeen = agent.last_seen_at || agent.lastSeenAt
         const seenText = this.escape(this.timeAgo(lastSeen))
 
@@ -236,7 +242,7 @@ export default class extends Controller {
           <div class="flex items-center justify-between gap-3 px-3 py-2">
             <div class="min-w-0">
               <div class="truncate text-sm font-medium text-content">${emoji} ${name}</div>
-              ${detail ? `<div class="truncate text-xs text-content-muted">${detail}</div>` : ""}
+              ${secondaryLine}
             </div>
             <div class="flex items-center gap-2 text-xs text-content-muted">
               <span class="inline-block h-2 w-2 rounded-full ${this.statusDotClass(state)}"></span>

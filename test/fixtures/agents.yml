@@ -3,6 +3,8 @@ one:
   name: "Agent One"
   status: "idle"
   identifier: "agent-one"
+  metadata:
+    role: "Code Reviewer"
 
 two:
   user: one

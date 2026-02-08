@@ -19,6 +19,10 @@ class Api::V1::AgentsControllerTest < ActionDispatch::IntegrationTest
 
     agents = response.parsed_body
     assert_kind_of Array, agents
+
+    one_payload = agents.find { |agent| agent["identifier"] == @agent.identifier }
+    assert_not_nil one_payload
+    assert_equal "Code Reviewer", one_payload["role"]
   end
 
   test "index returns agents for signed-in web session" do
