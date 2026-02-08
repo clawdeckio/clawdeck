@@ -9,7 +9,7 @@ PokéDeck is a kanban-style dashboard for managing AI agents powered by [OpenCla
 ## Get Started
 
 **Option 1: Use the hosted platform**  
-Sign up at [clawdeck.io](https://clawdeck.io) — free to start, we handle hosting.
+Sign up at [PokéDeck](https://clawdeck.io) — free to start, we handle hosting.
 
 **Option 2: Self-host**  
 Clone this repo and run your own instance. See [Self-Hosting](#self-hosting) below.
@@ -271,9 +271,9 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
+- 🌐 **Website & App:** [PokéDeck](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/pokedeck](https://github.com/clawdeckio/pokedeck)
+- 🐙 **GitHub:** [PokéDeck Repository](https://github.com/clawdeckio/pokedeck)
 
 ---
 
