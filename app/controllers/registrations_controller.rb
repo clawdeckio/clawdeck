@@ -12,7 +12,7 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       start_new_session_for @user
-      redirect_to after_authentication_url, notice: "Welcome to ClawDeck!"
+      redirect_to after_authentication_url, notice: "Welcome to PokéDeck!"
     else
       render :new, status: :unprocessable_entity
     end
