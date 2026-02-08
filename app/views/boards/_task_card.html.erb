@@ -143,7 +143,7 @@
     </div>
   <% end %>
 
-  <%# Metadata row: id + counts + freshness %>
+  <%# Metadata row: id + counts + created_at %>
   <div class="mt-2 flex items-center gap-2 text-[11px] text-content-muted tabular-nums leading-none">
     <span class="text-content-muted/70">#<%= task.id %></span>
 
@@ -177,12 +177,10 @@
 
     <div class="ml-auto flex items-center gap-2 text-xs text-content-muted/60">
       <span title="Created <%= formatted_timestamp(task.created_at) %>"><%= time_ago_in_words(task.created_at) %> old</span>
-      <span class="text-content-muted/40">•</span>
-      <span title="Updated <%= formatted_timestamp(task.updated_at) %>"><%= time_ago_in_words(task.updated_at) %> ago</span>
     </div>
   </div>
 
-  <%# Footer: Priority + Agent %>
+  <%# Footer: Priority + Agent + updated_at %>
   <div class="flex items-center justify-between mt-2">
     <%# Priority Indicator %>
     <div class="flex items-center">
@@ -213,15 +211,24 @@
       <% end %>
     </div>
 
-    <%# Agent Assignment Badge %>
-    <% if task.assigned_to_agent? %>
-      <% agent_name = safe_utf8(task.user.agent_name.presence || "Agent") %>
-      <% agent_emoji = safe_utf8(task.user.agent_emoji.presence || "🦞") %>
-      <span class="inline-flex items-center gap-1 text-xs text-content-muted/80" title="Assigned to <%= agent_name %>">
-        <span aria-hidden="true"><%= agent_emoji %></span>
-        <span class="max-w-28 truncate"><%= agent_name %></span>
+    <% relative_updated_at = compact_relative_time(task.updated_at) %>
+    <div class="ml-auto flex min-w-0 items-center gap-2">
+      <%# Agent Assignment Badge %>
+      <% if task.assigned_to_agent? %>
+        <% agent_name = safe_utf8(task.user.agent_name.presence || "Agent") %>
+        <% agent_emoji = safe_utf8(task.user.agent_emoji.presence || "🦞") %>
+        <span class="inline-flex items-center gap-1 text-xs text-content-muted/80" title="Assigned to <%= agent_name %>">
+          <span aria-hidden="true"><%= agent_emoji %></span>
+          <span class="max-w-28 truncate"><%= agent_name %></span>
+        </span>
+      <% end %>
+
+      <span class="inline-flex h-4 w-[8ch] flex-shrink-0 items-center justify-end text-[11px] leading-none text-content-muted/70 tabular-nums"
+            title="Updated <%= formatted_timestamp(task.updated_at) %>"
+            aria-label="Updated <%= relative_updated_at %>">
+        <%= relative_updated_at %>
       </span>
-    <% end %>
+    </div>
   </div>
   <% end %>
 </li>

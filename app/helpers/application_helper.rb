@@ -19,6 +19,31 @@ module ApplicationHelper
     time.in_time_zone.strftime("%Y-%m-%d %H:%M %Z")
   end
 
+  # Compact relative timestamp for tight card/footer layouts.
+  # Examples: "2h ago", "3d ago"
+  def compact_relative_time(time, now: Time.current)
+    return "" if time.blank?
+
+    seconds = (now.to_i - time.to_i).abs
+    future = time > now
+
+    value, unit = case seconds
+    when 0...3600
+      [[seconds / 60, 1].max, "m"]
+    when 3600...86_400
+      [seconds / 3600, "h"]
+    when 86_400...2_592_000
+      [seconds / 86_400, "d"]
+    when 2_592_000...31_536_000
+      [seconds / 2_592_000, "mo"]
+    else
+      [seconds / 31_536_000, "y"]
+    end
+
+    label = "#{value}#{unit}"
+    future ? "in #{label}" : "#{label} ago"
+  end
+
   def activity_icon_bg(activity)
     case activity.action
     when "created"
