@@ -51,6 +51,12 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 - PostgreSQL
 - Bundler
 
+**macOS (Homebrew Ruby) note:** if you install Ruby via `brew install ruby@3.3`, ensure your PATH includes the Homebrew Ruby bin so the expected Bundler version is available:
+
+```bash
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
+```
+
 ### Setup
 ```bash
 git clone https://github.com/clawdeckio/clawdeck.git
@@ -159,6 +165,79 @@ PATCH /api/v1/tasks/:id/complete
 # Assign/unassign to agent
 PATCH /api/v1/tasks/:id/assign
 PATCH /api/v1/tasks/:id/unassign
+```
+
+### Agents
+
+```bash
+# List agents
+GET /api/v1/agents
+
+# Get agent
+GET /api/v1/agents/:id
+
+# Create agent
+POST /api/v1/agents
+{ "name": "BuildBot", "status": "idle" }
+
+# Update agent
+PATCH /api/v1/agents/:id
+
+# Delete agent
+DELETE /api/v1/agents/:id
+```
+
+### Task Comments
+
+```bash
+# List comments
+GET /api/v1/tasks/:task_id/comments
+
+# Get comment
+GET /api/v1/tasks/:task_id/comments/:id
+
+# Create comment
+POST /api/v1/tasks/:task_id/comments
+{ "body": "Working on this now." }
+
+# Update comment
+PATCH /api/v1/tasks/:task_id/comments/:id
+
+# Delete comment
+DELETE /api/v1/tasks/:task_id/comments/:id
+```
+
+### Activity Feed
+
+```bash
+# List all activities
+GET /api/v1/activities
+
+# List activities for a task
+GET /api/v1/tasks/:task_id/activities
+
+# Get activity
+GET /api/v1/activities/:id
+```
+
+### Task Artifacts
+
+```bash
+# List artifacts
+GET /api/v1/tasks/:task_id/artifacts
+
+# Get artifact
+GET /api/v1/tasks/:task_id/artifacts/:id
+
+# Create artifact (file path or blob_id)
+POST /api/v1/tasks/:task_id/artifacts
+{ "name": "Build Log", "artifact_type": "log", "file_path": "/tmp/build.log" }
+
+# Update artifact
+PATCH /api/v1/tasks/:task_id/artifacts/:id
+
+# Delete artifact
+DELETE /api/v1/tasks/:task_id/artifacts/:id
 ```
 
 ### Task Statuses

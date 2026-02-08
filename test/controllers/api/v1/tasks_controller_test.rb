@@ -160,7 +160,8 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "complete toggles completed task back to incomplete" do
-    @task.update!(completed: true, completed_at: Time.current)
+    # Complete is modeled as moving the task to the "done" column.
+    @task.update!(status: :done, completed_at: Time.current)
 
     patch complete_api_v1_task_url(@task), headers: @auth_header
     assert_response :success
