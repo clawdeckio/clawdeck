@@ -7,6 +7,8 @@ one:
   status: inbox
   priority: none
   completed: false
+  comments_count: 1
+  artifacts_count: 1
 
 two:
   name: Test Task Two
@@ -15,3 +17,5 @@ two:
   status: in_progress
   priority: high
   completed: false
+  comments_count: 1
+  artifacts_count: 1

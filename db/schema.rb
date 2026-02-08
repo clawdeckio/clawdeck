@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_05_000300) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_07_163000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -163,6 +163,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_000300) do
     t.index ["user_id"], name: "index_task_artifacts_on_user_id"
   end
 
+  create_table "task_comment_mentions", force: :cascade do |t|
+    t.bigint "agent_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "task_comment_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id"], name: "index_task_comment_mentions_on_agent_id"
+    t.index ["task_comment_id", "agent_id"], name: "index_task_comment_mentions_on_task_comment_id_and_agent_id", unique: true
+    t.index ["task_comment_id"], name: "index_task_comment_mentions_on_task_comment_id"
+  end
+
   create_table "task_comments", force: :cascade do |t|
     t.string "actor_emoji"
     t.string "actor_name"
@@ -202,10 +212,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_000300) do
 
   create_table "tasks", force: :cascade do |t|
     t.datetime "agent_claimed_at"
+    t.integer "artifacts_count", default: 0, null: false
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
     t.bigint "board_id", null: false
+    t.integer "comments_count", default: 0, null: false
     t.boolean "completed", default: false, null: false
     t.datetime "completed_at"
     t.integer "confidence", default: 0, null: false
@@ -266,6 +278,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_000300) do
   add_foreign_key "task_artifacts", "active_storage_blobs", column: "blob_id"
   add_foreign_key "task_artifacts", "tasks"
   add_foreign_key "task_artifacts", "users"
+  add_foreign_key "task_comment_mentions", "agents"
+  add_foreign_key "task_comment_mentions", "task_comments"
   add_foreign_key "task_comments", "tasks"
   add_foreign_key "task_comments", "users"
   add_foreign_key "task_lists", "projects"

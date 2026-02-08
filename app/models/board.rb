@@ -25,7 +25,7 @@ class Board < ApplicationRecord
 
     tasks = [
       {
-        name: "👋 Welcome to ClawDeck!",
+        name: "👋 Welcome to PokéDeck!",
         description: "Your mission control for AI agents. Drag tasks between columns, and your agent picks up what you assign. Think of it as a shared kanban with your AI coworker.",
         status: "inbox",
         position: 0

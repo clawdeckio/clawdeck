@@ -1,10 +1,10 @@
-# 🦞 ClawDeck
+# PokéDeck
 
 **Open source mission control for your AI agents.**
 
-ClawDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
+PokéDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
 
-> 🚧 **Early Development** — ClawDeck is under active development. Expect breaking changes.
+> 🚧 **Early Development** — PokéDeck is under active development. Expect breaking changes.
 
 ## Get Started
 
@@ -51,16 +51,23 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 - PostgreSQL
 - Bundler
 
-**macOS (Homebrew Ruby) note:** if you install Ruby via `brew install ruby@3.3`, ensure your PATH includes the Homebrew Ruby bin so the expected Bundler version is available:
+**macOS (Homebrew Ruby) note:** macOS ships an older system Ruby (often 2.6.x) which cannot run the Bundler 2.5.x version pinned in `Gemfile.lock`. The simplest fix is to use Homebrew Ruby 3.3:
 
 ```bash
+brew install ruby@3.3
 export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
+
+# Use the Bundler version in Gemfile.lock (example):
+gem install bundler -v 2.5.9
+bundle _2.5.9_ install
 ```
+
+(If you already have rbenv/asdf, that works too — just ensure `ruby -v` is 3.3.x before running `bundle`.)
 
 ### Setup
 ```bash
-git clone https://github.com/clawdeckio/clawdeck.git
-cd clawdeck
+git clone https://github.com/clawdeckio/pokedeck.git
+cd pokedeck
 bundle install
 bin/rails db:prepare
 bin/dev
@@ -70,7 +77,7 @@ Visit `http://localhost:3000`
 
 ### Authentication Setup
 
-ClawDeck supports two authentication methods:
+PokéDeck supports two authentication methods:
 
 1. **Email/Password** — Works out of the box
 2. **GitHub OAuth** — Optional, recommended for production
@@ -80,7 +87,7 @@ ClawDeck supports two authentication methods:
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click **New OAuth App**
 3. Fill in:
-   - **Application name:** ClawDeck
+   - **Application name:** PokéDeck
    - **Homepage URL:** Your domain
    - **Authorization callback URL:** `https://yourdomain.com/auth/github/callback`
 4. Add credentials to environment:
@@ -97,11 +104,17 @@ bin/rails test:system
 bin/rubocop
 ```
 
+macOS/OpenClaw/Codex sandbox note: use Homebrew Ruby and Bundler 2.5.9, force PostgreSQL over TCP (avoid `/tmp` socket permission issues), and disable parallel workers to avoid occasional `pg` segfaults during parallel schema setup.
+
+```bash
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:/opt/homebrew/bin:/Users/jasperdonnydongchen/.local/bin:/usr/bin:/bin:/usr/local/bin"; PGHOST=127.0.0.1 PARALLEL_WORKERS=1 bundle _2.5.9_ exec bin/rails test
+```
+
 ---
 
 ## API
 
-ClawDeck exposes a REST API for agent integrations. Get your API token from Settings.
+PokéDeck exposes a REST API for agent integrations. Get your API token from Settings.
 
 ### Authentication
 
@@ -254,6 +267,8 @@ DELETE /api/v1/tasks/:task_id/artifacts/:id
 
 ## Contributing
 
+See [`docs/BRANDING_IDENTIFIERS.md`](docs/BRANDING_IDENTIFIERS.md) for the branding-vs-identifiers policy.
+
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
@@ -264,7 +279,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 - 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/clawdeck)
+- 🐙 **GitHub:** [clawdeckio/pokedeck](https://github.com/clawdeckio/pokedeck)
 
 ---
 

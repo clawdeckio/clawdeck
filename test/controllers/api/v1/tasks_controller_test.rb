@@ -183,4 +183,28 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, task["updated_at"])
     assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, task["completed_at"])
   end
+
+  test "sanitizes control characters in name/description" do
+    @task.update!(name: "Hello\u0007World", description: "Line1\u001FLine2")
+
+    get api_v1_task_url(@task), headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal "HelloWorld", task["name"]
+    assert_equal "Line1Line2", task["description"]
+    assert_not_includes response.body, "\u0007"
+  end
+
+  test "task url uses PUBLIC_BASE_URL when set" do
+    ENV["PUBLIC_BASE_URL"] = "https://pokedeck.example"
+
+    get api_v1_task_url(@task), headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal "https://pokedeck.example/boards/#{@task.board_id}/tasks/#{@task.id}", task["url"]
+  ensure
+    ENV.delete("PUBLIC_BASE_URL")
+  end
 end
