@@ -97,6 +97,64 @@
       <% end %>
     <% end %>
 
+    <%# Agent roster %>
+    <div class="relative" data-controller="dropdown agent-roster">
+      <button type="button"
+              data-dropdown-target="button"
+              data-action="click->dropdown#toggle click->agent-roster#load"
+              class="w-7 h-7 rounded-md bg-bg-elevated hover:bg-bg-hover flex items-center justify-center text-sm transition-colors"
+              title="Agent roster">
+        🤖
+      </button>
+
+      <div data-dropdown-target="menu"
+           class="hidden absolute right-0 top-full mt-1 w-80 bg-bg-surface rounded-lg shadow-lg border border-border overflow-hidden z-50">
+        <div class="px-3 py-2.5 bg-bg-elevated border-b border-border">
+          <p class="text-xs font-semibold text-content">Agent roster</p>
+          <p class="text-[11px] text-content-muted">Status refreshes while open</p>
+        </div>
+
+        <div class="px-2 py-2 bg-bg-base border-b border-border flex items-center gap-1.5">
+          <button type="button"
+                  data-agent-roster-target="filterButton"
+                  data-action="click->agent-roster#selectFilter"
+                  data-agent-roster-filter-param="all"
+                  aria-pressed="true"
+                  class="cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium text-content-muted hover:text-content hover:bg-bg-elevated transition-colors">
+            All
+          </button>
+          <button type="button"
+                  data-agent-roster-target="filterButton"
+                  data-action="click->agent-roster#selectFilter"
+                  data-agent-roster-filter-param="working"
+                  aria-pressed="false"
+                  class="cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium text-content-muted hover:text-content hover:bg-bg-elevated transition-colors">
+            Working
+          </button>
+          <button type="button"
+                  data-agent-roster-target="filterButton"
+                  data-action="click->agent-roster#selectFilter"
+                  data-agent-roster-filter-param="idle"
+                  aria-pressed="false"
+                  class="cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium text-content-muted hover:text-content hover:bg-bg-elevated transition-colors">
+            Idle
+          </button>
+          <button type="button"
+                  data-agent-roster-target="filterButton"
+                  data-action="click->agent-roster#selectFilter"
+                  data-agent-roster-filter-param="offline"
+                  aria-pressed="false"
+                  class="cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium text-content-muted hover:text-content hover:bg-bg-elevated transition-colors">
+            Offline
+          </button>
+        </div>
+
+        <div class="p-2 max-h-80 overflow-y-auto" data-agent-roster-target="body">
+          <div class="py-4 text-center text-xs text-content-muted">Open to load agents.</div>
+        </div>
+      </div>
+    </div>
+
     <%# Live Feed (v1) %>
     <div class="relative" data-controller="dropdown live-feed">
       <button type="button"

@@ -21,6 +21,17 @@ class Api::V1::AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, agents
   end
 
+  test "index returns agents for signed-in web session" do
+    sign_in_as(@user)
+
+    get api_v1_agents_url
+    assert_response :success
+
+    agents = response.parsed_body
+    assert_kind_of Array, agents
+    assert_equal @user.agents.count, agents.length
+  end
+
   test "create creates agent" do
     assert_difference "Agent.count", 1 do
       post api_v1_agents_url,
