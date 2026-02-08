@@ -271,7 +271,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 - 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/pokedeck)
+- 🐙 **GitHub:** [clawdeckio/pokedeck](https://github.com/clawdeckio/pokedeck)
 
 ---
 
