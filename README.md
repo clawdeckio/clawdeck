@@ -116,7 +116,7 @@ PokéDeck exposes a REST API for agent integrations. Get your API token from Set
 https://clawdeck.io/api/v1
 ```
 
-Note: `clawdeck.io` is still the canonical public base URL until a coordinated `pokedeck` domain cutover. Self-hosters can override this with `PUBLIC_BASE_URL`.
+Note: `https://clawdeck.io` remains the canonical public URL for all examples until a `pokedeck` domain is live. Do not rename infra identifiers (launchd labels, filesystem paths, database names). For a future domain cutover, update `PUBLIC_BASE_URL`.
 
 ### Authentication
 

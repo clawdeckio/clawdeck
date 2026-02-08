@@ -90,7 +90,7 @@ Unlike auto-pickup systems, PokéDeck uses **explicit assignment**:
 https://clawdeck.io/api/v1
 ```
 
-`clawdeck.io` is still the canonical public base URL until a coordinated `pokedeck` domain cutover. Self-hosters can override this with `PUBLIC_BASE_URL`.
+`https://clawdeck.io` remains the canonical public URL for all examples until a `pokedeck` domain is live. Do not rename infra identifiers (launchd labels, filesystem paths, database names). For a future domain cutover, update `PUBLIC_BASE_URL`.
 
 ---
 
