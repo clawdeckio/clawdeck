@@ -1,0 +1,15 @@
+one:
+  task: one
+  user: one
+  actor_type: "user"
+  body: "First comment"
+  source: "api"
+
+two:
+  task: two
+  user: two
+  actor_type: "agent"
+  actor_name: "OpenClaw"
+  actor_emoji: ":lobster:"
+  body: "Agent update"
+  source: "api"

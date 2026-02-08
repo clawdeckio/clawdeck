@@ -1,0 +1,18 @@
+one:
+  user: one
+  name: "Agent One"
+  status: "idle"
+  identifier: "agent-one"
+  metadata:
+    role: "orchestrator"
+  capabilities:
+    can_plan: true
+
+two:
+  user: one
+  name: "Agent Two"
+  status: "working"
+  identifier: "agent-two"
+  metadata: {}
+  capabilities:
+    role: "executor"
