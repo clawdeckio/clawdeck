@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "clawdeck" %></title>
+    <title><%= content_for(:title) || "PokéDeck" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ClawDeck">
-    <meta name="application-name" content="ClawDeck">
+    <meta name="apple-mobile-web-app-title" content="PokéDeck">
+    <meta name="application-name" content="PokéDeck">
     <meta name="mobile-web-app-capable" content="yes">
     <%# Theme colors for Safari and other browsers %>
     <meta name="theme-color" content="#050810">
@@ -36,7 +36,7 @@
         <%# Logo on the left %>
         <div class="flex items-center flex-shrink-0">
           <%= link_to root_path, class: "flex items-center" do %>
-            <%= image_tag "clawdecklogo.svg", alt: "ClawDeck Logo", class: "h-6 w-auto" %>
+            <%= image_tag "clawdecklogo.svg", alt: "PokéDeck Logo", class: "h-6 w-auto" %>
           <% end %>
           <%# Loading spinner %>
           <div data-turbo-progress-target="spinner" class="opacity-0 p-2 transition-opacity pointer-events-none">

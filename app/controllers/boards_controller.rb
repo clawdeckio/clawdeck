@@ -16,6 +16,8 @@ class BoardsController < ApplicationController
   def show
     @board_page = true
     session[:last_board_id] = @board.id
+    # Preload associations used on Kanban cards to avoid N+1 queries.
+    # We use counter caches for comments/artifacts, so we only need :user here.
     @tasks = @board.tasks.includes(:user)
 
     # Filter by tag if specified

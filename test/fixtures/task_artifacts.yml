@@ -1,0 +1,13 @@
+one:
+  task: one
+  user: one
+  name: "Spec Document"
+  artifact_type: "file"
+  file_path: "/tmp/specs/spec.txt"
+
+two:
+  task: two
+  user: two
+  name: "Build Log"
+  artifact_type: "log"
+  file_path: "/tmp/logs/build.log"
