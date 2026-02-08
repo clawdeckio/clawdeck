@@ -7,8 +7,25 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-# Directories that contain user-facing strings.
-SCAN_DIRS=(app/views app/controllers app/helpers app/models config/locales public docs README.md)
+# Directories/files that may contain user-facing strings.
+SCAN_DIRS=(
+  app/views
+  app/controllers
+  app/helpers
+  app/models
+  app/mailers
+  app/javascript
+  app/assets
+  config/locales
+  public
+  docs
+  README.md
+)
+
+# Optional (ViewComponent-style) directory for user-facing copy.
+if [[ -d app/components ]]; then
+  SCAN_DIRS+=(app/components)
+fi
 
 # Exclusions for known non-user-facing identifiers.
 EXCLUDES=(
@@ -21,7 +38,8 @@ EXCLUDES=(
 )
 
 set +e
-matches=$(grep -RIn "ClawDeck" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
+# Ignore binary payloads (images/video/build outputs) to avoid accidental matches.
+matches=$(grep -RIn --binary-files=without-match "ClawDeck" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
 status=$?
 set -e
 
