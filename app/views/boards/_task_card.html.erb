@@ -117,7 +117,8 @@
       "done" => nil
     }[task.status] %>
 
-    <div class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+         data-sortable-ignore="true">
       <%# Assign / Unassign agent %>
       <% agent_connected = current_user.agent_last_active_at.present? %>
       <% if agent_connected %>
