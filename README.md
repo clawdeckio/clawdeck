@@ -49,9 +49,9 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ### Prerequisites
 - Ruby 3.3.1
 - PostgreSQL
-- Bundler
+- Bundler 2.5.9
 
-**macOS (Homebrew Ruby) note:** macOS ships an older system Ruby (often 2.6.x) which cannot run the Bundler 2.5.x version pinned in `Gemfile.lock`. The simplest fix is to use Homebrew Ruby 3.3:
+**macOS (arm64 / Apple Silicon) setup (Homebrew Ruby):** macOS ships an older system Ruby (often 2.6.x) which cannot run the Bundler 2.5.x version pinned in `Gemfile.lock`. Use Homebrew Ruby 3.3:
 
 ```bash
 brew install ruby@3.3
@@ -68,7 +68,7 @@ bundle _2.5.9_ install
 ```bash
 git clone https://github.com/clawdeckio/pokedeck.git
 cd pokedeck
-bundle install
+bundle _2.5.9_ install
 bin/rails db:prepare
 bin/dev
 ```
