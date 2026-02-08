@@ -16,6 +16,8 @@ EXCLUDES=(
   "--exclude-dir=tmp"
   "--exclude-dir=node_modules"
   "--exclude=*.log"
+  # Docs that explicitly discuss internal identifiers may mention "ClawDeck".
+  "--exclude=BRANDING_IDENTIFIERS.md"
 )
 
 set +e
