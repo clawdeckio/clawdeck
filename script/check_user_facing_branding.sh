@@ -20,8 +20,12 @@ EXCLUDES=(
   "--exclude=BRANDING_IDENTIFIERS.md"
 )
 
+# Intentionally case-sensitive: flag user-facing legacy branding ("ClawDeck"/"Claw Deck")
+# but allow lowercase internal identifiers (for example: clawdeck.io, asset filenames).
+BRANDING_REGEX='ClawDeck|Claw Deck'
+
 set +e
-matches=$(grep -RIn "ClawDeck" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
+matches=$(grep -RInE "$BRANDING_REGEX" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
 status=$?
 set -e
 
