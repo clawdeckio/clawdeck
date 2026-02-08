@@ -1,7 +1,7 @@
 class TaskArtifact < ApplicationRecord
   belongs_to :task, counter_cache: :artifacts_count
   belongs_to :user, optional: true
-  belongs_to :blob, class_name: "ActiveStorage::Blob", optional: true
+  belongs_to :blob, class_name: "ActiveStorage::Blob", optional: true if defined?(ActiveStorage::Blob)
 
   validates :name, presence: true
   validates :artifact_type, presence: true

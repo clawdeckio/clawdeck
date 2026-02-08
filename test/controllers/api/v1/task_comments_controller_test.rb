@@ -16,7 +16,7 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, comments
   end
 
-  test "create creates comment" do
+  test "create returns created json with bearer auth" do
     assert_difference "TaskComment.count", 1 do
       post api_v1_task_comments_url(task_id: @task.id),
            params: { comment: { body: "New comment" } },
@@ -24,6 +24,14 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :created
+    assert_equal "application/json", response.media_type
+
+    payload = response.parsed_body
+    assert_equal @task.id, payload["task_id"]
+    assert_equal @api_token.user_id, payload["user_id"]
+    assert_equal "api", payload["source"]
+    assert_equal "New comment", payload["body"]
+    assert payload["id"].present?
   end
 
   test "create accepts legacy task_comment payload" do
