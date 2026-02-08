@@ -1,6 +1,6 @@
 <% has_current_user = defined?(current_user) && current_user %>
 <li id="task_<%= task.id %>"
-    class="group bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover hover:shadow-sm <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
+    class="group relative bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover hover:shadow-sm <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
     <% if has_current_user %>
       data-controller="dropdown delete-confirm"
       data-action="contextmenu->dropdown#openAtCursor"
@@ -105,6 +105,63 @@
 
     <%# Delete Confirmation Modal - outside the dropdown so it's not hidden when dropdown closes %>
     <%= render "application/delete_modal", url: board_task_path(task.board, task) %>
+  <% end %>
+
+  <%# Quick Actions (hover) - avoids right-click-only affordance %>
+  <% if has_current_user %>
+    <% next_status = {
+      "inbox" => "up_next",
+      "up_next" => "in_progress",
+      "in_progress" => "in_review",
+      "in_review" => "done",
+      "done" => nil
+    }[task.status] %>
+
+    <div class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <%# Assign / Unassign agent %>
+      <% agent_connected = current_user.agent_last_active_at.present? %>
+      <% if agent_connected %>
+        <% if task.assigned_to_agent? %>
+          <%= button_to unassign_board_task_path(task.board, task),
+              method: :patch,
+              form: { data: { turbo_frame: "_top" } },
+              class: "inline-flex items-center justify-center w-7 h-7 rounded bg-bg-surface border border-border text-content-muted hover:text-content hover:bg-bg-hover",
+              title: "Unassign from agent" do %>
+            <span class="text-xs">−</span>
+          <% end %>
+        <% else %>
+          <%= button_to assign_board_task_path(task.board, task),
+              method: :patch,
+              form: { data: { turbo_frame: "_top" } },
+              class: "inline-flex items-center justify-center w-7 h-7 rounded bg-bg-surface border border-border text-content-muted hover:text-content hover:bg-bg-hover",
+              title: "Assign to agent" do %>
+            <span class="text-xs">+</span>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%# Block / Unblock %>
+      <%= button_to board_task_path(task.board, task),
+          method: :patch,
+          params: { task: { blocked: (!task.blocked?) } },
+          form: { data: { turbo_frame: "_top" } },
+          class: "inline-flex items-center justify-center w-7 h-7 rounded bg-bg-surface border border-border text-content-muted hover:text-content hover:bg-bg-hover",
+          title: (task.blocked? ? "Unblock" : "Block") do %>
+        <span class="text-xs"><%= task.blocked? ? "!" : "·" %></span>
+      <% end %>
+
+      <%# Move to next column %>
+      <% if next_status.present? %>
+        <%= button_to board_task_path(task.board, task),
+            method: :patch,
+            params: { task: { status: next_status } },
+            form: { data: { turbo_frame: "_top" } },
+            class: "inline-flex items-center justify-center w-7 h-7 rounded bg-bg-surface border border-border text-content-muted hover:text-content hover:bg-bg-hover",
+            title: "Move to next column" do %>
+          <span class="text-xs">→</span>
+        <% end %>
+      <% end %>
+    </div>
   <% end %>
 
   <%= link_to board_task_path(task.board, task),
@@ -223,11 +280,7 @@
         </span>
       <% end %>
 
-      <span class="inline-flex h-4 w-[8ch] flex-shrink-0 items-center justify-end text-[11px] leading-none text-content-muted/70 tabular-nums"
-            title="Updated <%= formatted_timestamp(task.updated_at) %>"
-            aria-label="Updated <%= relative_updated_at %>">
-        <%= relative_updated_at %>
-      </span>
+      <span class="inline-flex h-4 w-[8ch] flex-shrink-0 items-center justify-end text-[11px] leading-none text-content-muted/70 tabular-nums" title="Updated <%= formatted_timestamp(task.updated_at) %>" aria-label="Updated <%= relative_updated_at %>"><%= relative_updated_at %></span>
     </div>
   </div>
   <% end %>
