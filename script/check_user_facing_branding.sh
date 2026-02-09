@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fails if any user-facing "ClawDeck" branding appears in UI text.
+# Fails if stale user-facing branding or stale public domains appear.
 # We intentionally do NOT scan config/application.rb (Ruby module name) or logs.
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 # Directories that contain user-facing strings.
-SCAN_DIRS=(app/views app/controllers app/helpers app/models config/locales public docs README.md)
+SCAN_DIRS=(
+  app/views
+  app/controllers
+  app/helpers
+  app/models
+  config/locales
+  public
+  docs
+  README.md
+  CONTRIBUTING.md
+  QUICKSTART.md
+  DEPLOYMENT.md
+)
 
 # Exclusions for known non-user-facing identifiers.
 EXCLUDES=(
@@ -20,15 +32,40 @@ EXCLUDES=(
   "--exclude=BRANDING_IDENTIFIERS.md"
 )
 
-set +e
-matches=$(grep -RIn "ClawDeck" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
-status=$?
-set -e
+CHECKS=(
+  "ClawDeck|user-facing 'ClawDeck' strings"
+  "Claw Deck|user-facing 'Claw Deck' strings"
+  "PokeDeck|user-facing 'PokeDeck' strings (use PokéDeck)"
+  "clawdeck\\.so|stale clawdeck.so domain references"
+)
 
-if [[ $status -eq 0 ]]; then
-  echo "FAIL: Found user-facing 'ClawDeck' strings:"
-  echo "$matches"
+found=0
+
+for check in "${CHECKS[@]}"; do
+  pattern="${check%%|*}"
+  label="${check#*|}"
+
+  set +e
+  matches=$(grep -RInE "${pattern}" "${EXCLUDES[@]}" "${SCAN_DIRS[@]}" 2>/dev/null)
+  status=$?
+  set -e
+
+  if [[ $status -eq 0 ]]; then
+    if [[ $found -eq 0 ]]; then
+      echo "FAIL: Found stale user-facing branding/domain references:"
+    fi
+    echo
+    echo "- ${label}:"
+    echo "$matches"
+    found=1
+  elif [[ $status -gt 1 ]]; then
+    echo "ERROR: Failed to scan for pattern: ${pattern}"
+    exit $status
+  fi
+done
+
+if [[ $found -eq 1 ]]; then
   exit 1
 fi
 
-echo "OK: No user-facing 'ClawDeck' strings found in scanned paths."
+echo "OK: No stale user-facing branding/domain strings found in scanned paths."
