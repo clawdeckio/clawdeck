@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "==> Installing ClawDeck Services"
+echo "==> Installing PokéDeck Services"
 
 # Create log directory
 mkdir -p /var/log/clawdeck

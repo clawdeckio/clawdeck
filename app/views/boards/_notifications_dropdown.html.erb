@@ -1,0 +1,76 @@
+<% notifications = current_user.notifications.includes(:agent, :task, :task_comment).recent.limit(12) %>
+<% unread_count = current_user.notifications.unread.count %>
+
+<div class="relative" data-controller="dropdown">
+  <button type="button"
+          data-dropdown-target="button"
+          data-action="click->dropdown#toggle"
+          class="relative w-7 h-7 rounded-md bg-bg-elevated hover:bg-bg-hover flex items-center justify-center text-sm transition-colors"
+          title="Notifications">
+    🔔
+    <% if unread_count.positive? %>
+      <span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-[10px] leading-4 text-content text-center font-semibold">
+        <%= unread_count > 9 ? "9+" : unread_count %>
+      </span>
+    <% end %>
+  </button>
+
+  <div data-dropdown-target="menu"
+       class="hidden absolute right-0 top-full mt-1 w-96 bg-bg-surface rounded-lg shadow-lg border border-border overflow-hidden z-50">
+    <div class="px-3 py-2.5 bg-bg-elevated border-b border-border flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-content">Mentions</p>
+        <p class="text-[11px] text-content-muted">Agent mentions from task comments</p>
+      </div>
+      <% if unread_count.positive? %>
+        <%= button_to "Mark all read",
+            read_all_notifications_path,
+            method: :patch,
+            class: "cursor-pointer text-[11px] text-content-secondary hover:text-content transition-colors" %>
+      <% end %>
+    </div>
+
+    <% if notifications.any? %>
+      <div class="p-2 max-h-[26rem] overflow-y-auto space-y-1">
+        <% notifications.each do |notification| %>
+          <% task = notification.task %>
+          <% comment = notification.task_comment %>
+          <% next if task.blank? || comment.blank? %>
+
+          <div class="rounded-md border <%= notification.read? ? 'border-border bg-bg-base' : 'border-accent/50 bg-accent/5' %>">
+            <%= link_to board_task_path(task.board_id, task.id),
+                data: { turbo_frame: "task_panel", action: "click->dropdown#close" },
+                class: "block px-2.5 py-2" do %>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="text-xs text-content">
+                  <span class="font-semibold"><%= notification.agent.name %></span>
+                  mentioned on task #<%= task.id %>
+                </p>
+                <p class="text-[11px] text-content-muted whitespace-nowrap"><%= time_ago_in_words(notification.created_at) %> ago</p>
+              </div>
+              <p class="text-xs text-content-secondary leading-relaxed break-words"><%= raw comment.body_html %></p>
+            <% end %>
+
+            <div class="px-2.5 pb-2">
+              <% if notification.read? %>
+                <%= button_to "Mark unread",
+                    unread_notification_path(notification),
+                    method: :patch,
+                    class: "cursor-pointer text-[11px] text-content-muted hover:text-content transition-colors" %>
+              <% else %>
+                <%= button_to "Mark read",
+                    read_notification_path(notification),
+                    method: :patch,
+                    class: "cursor-pointer text-[11px] text-content-muted hover:text-content transition-colors" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="py-6 text-center text-xs text-content-muted">
+        No mentions yet.
+      </div>
+    <% end %>
+  </div>
+</div>

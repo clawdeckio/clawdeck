@@ -1,4 +1,4 @@
-# Quick Start: Deploy ClawDeck in 10 Minutes
+# Quick Start: Deploy PokéDeck in 10 Minutes
 
 ## What You'll Get
 
@@ -29,12 +29,12 @@ ssh root@YOUR_VPS_IP
 export DB_PASSWORD="choose_a_secure_password"
 
 # Run setup script
-curl -fsSL https://raw.githubusercontent.com/andresmax/clawdeck/main/script/setup_vps.sh | bash
+curl -fsSL https://raw.githubusercontent.com/andresmax/pokedeck/main/script/setup_vps.sh | bash
 
 # Clone repository
 cd /var/www
-git clone https://github.com/YOUR_GITHUB_USERNAME/clawdeck.git
-cd clawdeck
+git clone https://github.com/YOUR_GITHUB_USERNAME/pokedeck.git
+cd pokedeck
 
 # Create environment file
 cp .env.production.example .env.production

@@ -1,10 +1,10 @@
-# 🦞 ClawDeck
+# PokéDeck
 
 **Open source mission control for your AI agents.**
 
-ClawDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
+PokéDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
 
-> 🚧 **Early Development** — ClawDeck is under active development. Expect breaking changes.
+> 🚧 **Early Development** — PokéDeck is under active development. Expect breaking changes.
 
 ## Get Started
 
@@ -47,16 +47,17 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Self-Hosting
 
 ### Prerequisites
-- Ruby 3.3.1
+- Ruby 3.3.1+
 - PostgreSQL
-- Bundler
+- Bundler 2.5.9 (installed automatically by `bin/setup` if missing)
+
+See `DEV_SETUP.md` for Ruby manager install steps (`rbenv` or `mise`), migration, and test commands.
 
 ### Setup
 ```bash
-git clone https://github.com/clawdeckio/clawdeck.git
-cd clawdeck
-bundle install
-bin/rails db:prepare
+git clone https://github.com/clawdeckio/pokedeck.git
+cd pokedeck
+bin/setup --skip-server
 bin/dev
 ```
 
@@ -64,7 +65,7 @@ Visit `http://localhost:3000`
 
 ### Authentication Setup
 
-ClawDeck supports two authentication methods:
+PokéDeck supports two authentication methods:
 
 1. **Email/Password** — Works out of the box
 2. **GitHub OAuth** — Optional, recommended for production
@@ -74,7 +75,7 @@ ClawDeck supports two authentication methods:
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click **New OAuth App**
 3. Fill in:
-   - **Application name:** ClawDeck
+   - **Application name:** PokéDeck
    - **Homepage URL:** Your domain
    - **Authorization callback URL:** `https://yourdomain.com/auth/github/callback`
 4. Add credentials to environment:
@@ -95,7 +96,7 @@ bin/rubocop
 
 ## API
 
-ClawDeck exposes a REST API for agent integrations. Get your API token from Settings.
+PokéDeck exposes a REST API for agent integrations. Get your API token from Settings.
 
 ### Authentication
 
@@ -161,6 +162,79 @@ PATCH /api/v1/tasks/:id/assign
 PATCH /api/v1/tasks/:id/unassign
 ```
 
+### Agents
+
+```bash
+# List agents
+GET /api/v1/agents
+
+# Get agent
+GET /api/v1/agents/:id
+
+# Create agent
+POST /api/v1/agents
+{ "name": "BuildBot", "status": "idle" }
+
+# Update agent
+PATCH /api/v1/agents/:id
+
+# Delete agent
+DELETE /api/v1/agents/:id
+```
+
+### Task Comments
+
+```bash
+# List comments
+GET /api/v1/tasks/:task_id/comments
+
+# Get comment
+GET /api/v1/tasks/:task_id/comments/:id
+
+# Create comment
+POST /api/v1/tasks/:task_id/comments
+{ "body": "Working on this now." }
+
+# Update comment
+PATCH /api/v1/tasks/:task_id/comments/:id
+
+# Delete comment
+DELETE /api/v1/tasks/:task_id/comments/:id
+```
+
+### Activity Feed
+
+```bash
+# List all activities
+GET /api/v1/activities
+
+# List activities for a task
+GET /api/v1/tasks/:task_id/activities
+
+# Get activity
+GET /api/v1/activities/:id
+```
+
+### Task Artifacts
+
+```bash
+# List artifacts
+GET /api/v1/tasks/:task_id/artifacts
+
+# Get artifact
+GET /api/v1/tasks/:task_id/artifacts/:id
+
+# Create artifact (file path or blob_id)
+POST /api/v1/tasks/:task_id/artifacts
+{ "name": "Build Log", "artifact_type": "log", "file_path": "/tmp/build.log" }
+
+# Update artifact
+PATCH /api/v1/tasks/:task_id/artifacts/:id
+
+# Delete artifact
+DELETE /api/v1/tasks/:task_id/artifacts/:id
+```
+
 ### Task Statuses
 - `inbox` — New, not prioritized
 - `up_next` — Ready to be assigned
@@ -175,6 +249,8 @@ PATCH /api/v1/tasks/:id/unassign
 
 ## Contributing
 
+See [`docs/BRANDING_IDENTIFIERS.md`](docs/BRANDING_IDENTIFIERS.md) for the branding-vs-identifiers policy.
+
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
@@ -185,7 +261,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 - 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/clawdeck)
+- 🐙 **GitHub:** [clawdeckio/pokedeck](https://github.com/clawdeckio/pokedeck)
 
 ---
 

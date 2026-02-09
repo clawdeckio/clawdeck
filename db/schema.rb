@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_09_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "agents", force: :cascade do |t|
+    t.jsonb "capabilities", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "emoji"
+    t.string "identifier"
+    t.datetime "last_seen_at"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "name", null: false
+    t.string "status", default: "idle", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "identifier"], name: "index_agents_on_user_id_and_identifier", unique: true
+    t.index ["user_id"], name: "index_agents_on_user_id"
+  end
+
   create_table "api_tokens", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "last_used_at"
@@ -63,6 +79,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.bigint "user_id", null: false
     t.index ["user_id", "position"], name: "index_boards_on_user_id_and_position"
     t.index ["user_id"], name: "index_boards_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "agent_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", default: "mention", null: false
+    t.datetime "read_at"
+    t.bigint "task_comment_id", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["agent_id"], name: "index_notifications_on_agent_id"
+    t.index ["task_comment_id", "agent_id", "kind"], name: "index_notifications_on_comment_agent_kind", unique: true
+    t.index ["task_comment_id"], name: "index_notifications_on_task_comment_id"
+    t.index ["task_id"], name: "index_notifications_on_task_id"
+    t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -131,6 +164,47 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["user_id"], name: "index_task_activities_on_user_id"
   end
 
+  create_table "task_artifacts", force: :cascade do |t|
+    t.string "artifact_type", default: "file", null: false
+    t.bigint "blob_id"
+    t.datetime "created_at", null: false
+    t.string "file_path"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "name", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["blob_id"], name: "index_task_artifacts_on_blob_id"
+    t.index ["task_id", "created_at"], name: "index_task_artifacts_on_task_id_and_created_at"
+    t.index ["task_id"], name: "index_task_artifacts_on_task_id"
+    t.index ["user_id"], name: "index_task_artifacts_on_user_id"
+  end
+
+  create_table "task_comment_mentions", force: :cascade do |t|
+    t.bigint "agent_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "task_comment_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id"], name: "index_task_comment_mentions_on_agent_id"
+    t.index ["task_comment_id", "agent_id"], name: "index_task_comment_mentions_on_task_comment_id_and_agent_id", unique: true
+    t.index ["task_comment_id"], name: "index_task_comment_mentions_on_task_comment_id"
+  end
+
+  create_table "task_comments", force: :cascade do |t|
+    t.string "actor_emoji"
+    t.string "actor_name"
+    t.string "actor_type"
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.string "source", default: "web", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["task_id", "created_at"], name: "index_task_comments_on_task_id_and_created_at"
+    t.index ["task_id"], name: "index_task_comments_on_task_id"
+    t.index ["user_id"], name: "index_task_comments_on_user_id"
+  end
+
   create_table "task_lists", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "position"
@@ -155,10 +229,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
 
   create_table "tasks", force: :cascade do |t|
     t.datetime "agent_claimed_at"
+    t.integer "artifacts_count", default: 0, null: false
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
     t.bigint "board_id", null: false
+    t.integer "comments_count", default: 0, null: false
     t.boolean "completed", default: false, null: false
     t.datetime "completed_at"
     t.integer "confidence", default: 0, null: false
@@ -207,14 +283,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agents", "users"
   add_foreign_key "api_tokens", "users"
   add_foreign_key "boards", "users"
+  add_foreign_key "notifications", "agents"
+  add_foreign_key "notifications", "task_comments"
+  add_foreign_key "notifications", "tasks"
+  add_foreign_key "notifications", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tags", "projects"
   add_foreign_key "tags", "users"
   add_foreign_key "task_activities", "tasks"
   add_foreign_key "task_activities", "users"
+  add_foreign_key "task_artifacts", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "task_artifacts", "tasks"
+  add_foreign_key "task_artifacts", "users"
+  add_foreign_key "task_comment_mentions", "agents"
+  add_foreign_key "task_comment_mentions", "task_comments"
+  add_foreign_key "task_comments", "tasks"
+  add_foreign_key "task_comments", "users"
   add_foreign_key "task_lists", "projects"
   add_foreign_key "task_lists", "users"
   add_foreign_key "task_tags", "tags"
