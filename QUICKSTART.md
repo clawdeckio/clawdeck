@@ -16,8 +16,8 @@
    - Add your SSH key
 
 2. Point DNS to VPS IP:
-   - `clawdeck.so` → your VPS IP
-   - `www.clawdeck.so` → your VPS IP
+   - `clawdeck.io` → your VPS IP
+   - `www.clawdeck.io` → your VPS IP
 
 ## Step 2: Setup VPS (5 minutes)
 
@@ -29,12 +29,12 @@ ssh root@YOUR_VPS_IP
 export DB_PASSWORD="choose_a_secure_password"
 
 # Run setup script
-curl -fsSL https://raw.githubusercontent.com/andresmax/pokedeck/main/script/setup_vps.sh | bash
+curl -fsSL https://raw.githubusercontent.com/clawdeckio/clawdeck/main/script/setup_vps.sh | bash
 
 # Clone repository
 cd /var/www
-git clone https://github.com/YOUR_GITHUB_USERNAME/pokedeck.git
-cd pokedeck
+git clone https://github.com/YOUR_GITHUB_USERNAME/clawdeck.git clawdeck
+cd clawdeck
 
 # Create environment file
 cp .env.production.example .env.production
@@ -73,7 +73,7 @@ GitHub Actions will automatically deploy. Check progress in Actions tab.
 
 ## Verify Deployment
 
-Visit https://clawdeck.so
+Visit https://clawdeck.io
 
 Check services:
 ```bash

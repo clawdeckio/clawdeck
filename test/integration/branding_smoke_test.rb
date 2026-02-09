@@ -9,8 +9,7 @@ class BrandingSmokeTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "PokéDeck"
     assert_not_includes @response.body, "ClawDeck"
     assert_not_includes @response.body, "Claw Deck"
-    assert_includes @response.body, "github.com/clawdeckio/pokedeck"
-    assert_not_includes @response.body, "github.com/clawdeckio/clawdeck"
+    assert_includes @response.body, "github.com/clawdeckio/clawdeck"
 
     # PWA manifest (served as JSON via /manifest.json)
     get "/manifest.json"

@@ -5,7 +5,7 @@ Simple, fast deployment to DigitalOcean VPS. No Docker overhead.
 ## Prerequisites
 
 1. A fresh Ubuntu 24.04 VPS (512MB RAM minimum)
-2. Domain pointing to your VPS IP (clawdeck.so)
+2. Domain pointing to your VPS IP (clawdeck.io)
 3. SSH access to the VPS
 
 ## Initial Setup (One-time)
@@ -18,8 +18,8 @@ Create a new DigitalOcean droplet:
 - Add your SSH key during creation
 
 Update your domain DNS:
-- Point `clawdeck.so` to your VPS IP
-- Point `www.clawdeck.so` to your VPS IP
+- Point `clawdeck.io` to your VPS IP
+- Point `www.clawdeck.io` to your VPS IP
 
 ### 2. Run VPS Setup Script
 
@@ -33,7 +33,7 @@ ssh root@your-vps-ip
 export DB_PASSWORD="your_secure_password_here"
 
 # Download and run setup script
-curl -fsSL https://raw.githubusercontent.com/yourusername/pokedeck/main/script/setup_vps.sh | bash
+curl -fsSL https://raw.githubusercontent.com/yourusername/clawdeck/main/script/setup_vps.sh | bash
 ```
 
 This installs: Ruby, PostgreSQL, Nginx, and creates databases.
@@ -42,8 +42,8 @@ This installs: Ruby, PostgreSQL, Nginx, and creates databases.
 
 ```bash
 cd /var/www
-git clone https://github.com/yourusername/pokedeck.git
-cd pokedeck
+git clone https://github.com/yourusername/clawdeck.git clawdeck
+cd clawdeck
 ```
 
 ### 4. Create Production Environment File

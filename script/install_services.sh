@@ -30,7 +30,7 @@ nginx -t
 # Setup SSL with Let's Encrypt
 echo "==> Setting up SSL..."
 mkdir -p /var/www/certbot
-certbot --nginx -d clawdeck.so -d www.clawdeck.so --non-interactive --agree-tos --email ${CERTBOT_EMAIL:-admin@clawdeck.so}
+certbot --nginx -d clawdeck.io -d www.clawdeck.io --non-interactive --agree-tos --email ${CERTBOT_EMAIL:-admin@clawdeck.io}
 
 # Restart Nginx
 systemctl restart nginx
