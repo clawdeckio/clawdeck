@@ -15,10 +15,14 @@ Thank you for your interest in contributing to PokéDeck! 🦞
 ## Development Setup
 
 ```bash
+brew install ruby@3.3
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 bundle install
 bin/rails db:prepare
 bin/dev
 ```
+
+For the full setup flow (including version-manager options), see `DEV_SETUP.md`.
 
 ## Code Style
 

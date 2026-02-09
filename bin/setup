@@ -30,6 +30,7 @@ def ensure_supported_ruby!(required_version)
     Current Ruby: #{RUBY_VERSION} (#{RbConfig.ruby})
 
     Install a modern Ruby and try again:
+      homebrew: brew install ruby@3.3 && export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
       mise:  brew install mise && mise install ruby@#{required_version}
       rbenv: brew install rbenv ruby-build && rbenv install #{required_version}
   MSG

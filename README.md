@@ -51,7 +51,15 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 - PostgreSQL
 - Bundler 2.5.9 (installed automatically by `bin/setup` if missing)
 
-See `DEV_SETUP.md` for Ruby manager install steps (`rbenv` or `mise`), migration, and test commands.
+On macOS arm64, prefer Homebrew Ruby:
+
+```bash
+brew install ruby@3.3
+echo 'export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+See `DEV_SETUP.md` for full local setup (`ruby -v`, `bundle install`, migrations, tests).
 
 ### Setup
 ```bash
