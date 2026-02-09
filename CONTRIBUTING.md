@@ -1,6 +1,6 @@
-# Contributing to ClawDeck
+# Contributing to PokéDeck
 
-Thank you for your interest in contributing to ClawDeck! 🦞
+Thank you for your interest in contributing to PokéDeck! 🦞
 
 ## Getting Started
 
@@ -11,6 +11,13 @@ Thank you for your interest in contributing to ClawDeck! 🦞
 5. Run tests: `bin/ci`
 6. Commit with a clear message
 7. Push and open a Pull Request
+
+## Branding and Identifiers
+
+- Use **PokéDeck** for user-facing copy (UI text, docs prose, examples shown to users).
+- Keep infrastructure identifiers as `clawdeck*` for now (repo slug, filesystem paths, DB names, service labels).
+- Keep canonical external URL examples as `https://clawdeck.io` until an intentional domain cutover.
+- See [`docs/BRANDING_IDENTIFIERS.md`](docs/BRANDING_IDENTIFIERS.md) for full policy.
 
 ## Development Setup
 
@@ -46,4 +53,4 @@ Open a Discussion or join our Discord.
 
 ---
 
-Thank you for helping make ClawDeck better! 🦞
+Thank you for helping make PokéDeck better! 🦞

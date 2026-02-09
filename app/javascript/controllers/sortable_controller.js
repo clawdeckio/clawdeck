@@ -11,6 +11,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.lastInsertMarkerEl = null
+
     const options = {
       animation: 150,
       ghostClass: "sortable-ghost",
@@ -21,7 +23,7 @@ export default class extends Controller {
       emptyInsertThreshold: 50,
       swapThreshold: 0.65,
       invertSwap: true,
-      filter: '[style*="display: none"]',
+      filter: '[style*="display: none"], [data-sortable-ignore="true"]',
       onStart: this.handleStart.bind(this),
       onEnd: this.handleEnd.bind(this),
       onMove: this.move.bind(this),
@@ -57,6 +59,8 @@ export default class extends Controller {
     document.querySelectorAll('.column-drag-over').forEach(el => {
       el.classList.remove('column-drag-over')
     })
+
+    this.clearInsertMarker()
   }
 
   // Handle visual feedback during drag
@@ -74,11 +78,53 @@ export default class extends Controller {
   }
 
   move(event) {
+    // Provide column hover feedback even when hovering over an empty column
+    // (Sortable's onChange doesn't always fire until an insertion actually happens).
+    const targetColumn = event.to?.closest?.("[data-status]")
+    if (targetColumn) {
+      // Remove highlight from all columns first
+      document.querySelectorAll(".column-drag-over").forEach(el => {
+        el.classList.remove("column-drag-over")
+      })
+      // Add highlight to current column
+      targetColumn.classList.add("column-drag-over")
+    }
+
+    // Insert marker: show a subtle before/after line on the hovered card so the
+    // user can see exactly where the dragged card will land.
+    this.updateInsertMarker(event)
+
     // Don't allow moving hidden (filtered) items
-    if (event.related?.style?.display === 'none') {
+    if (event.related?.style?.display === "none") {
       return false
     }
     return true
+  }
+
+  updateInsertMarker(event) {
+    const related = event.related
+
+    // Nothing to mark (e.g. empty column) — clear any previous marker.
+    if (!related) {
+      this.clearInsertMarker()
+      return
+    }
+
+    // If we're still on the same element, just update before/after class.
+    if (this.lastInsertMarkerEl && this.lastInsertMarkerEl !== related) {
+      this.clearInsertMarker()
+    }
+
+    related.classList.remove("sortable-insert-before", "sortable-insert-after")
+    related.classList.add(event.willInsertAfter ? "sortable-insert-after" : "sortable-insert-before")
+    this.lastInsertMarkerEl = related
+  }
+
+  clearInsertMarker() {
+    if (!this.lastInsertMarkerEl) return
+
+    this.lastInsertMarkerEl.classList.remove("sortable-insert-before", "sortable-insert-after")
+    this.lastInsertMarkerEl = null
   }
 
   // Handle reordering within the same column

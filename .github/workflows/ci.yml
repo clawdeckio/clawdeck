@@ -65,6 +65,16 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  branding_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Ensure no stale user-facing branding remains
+        run: bash script/check_user_facing_branding.sh
+
   test:
     runs-on: ubuntu-latest
 
