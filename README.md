@@ -64,6 +64,18 @@ bundle _2.5.9_ install
 
 (If you already have rbenv/asdf, that works too — just ensure `ruby -v` is 3.3.x before running `bundle`.)
 
+Common local commands with the correct Ruby/Bundler:
+
+```bash
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:/opt/homebrew/bin:$PATH"
+
+# Database
+PGHOST=127.0.0.1 bundle _2.5.9_ exec bin/rails db:migrate
+
+# Test suite
+PGHOST=127.0.0.1 PARALLEL_WORKERS=1 bundle _2.5.9_ exec bin/rails test
+```
+
 ### Setup
 ```bash
 git clone https://github.com/clawdeckio/pokedeck.git

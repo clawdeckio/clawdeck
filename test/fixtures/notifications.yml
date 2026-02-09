@@ -1,0 +1,15 @@
+unread_mention:
+  user: one
+  agent: one
+  task: one
+  task_comment: one
+  kind: mention
+  read_at:
+
+read_mention:
+  user: one
+  agent: two
+  task: one
+  task_comment: one
+  kind: mention
+  read_at: <%= 1.day.ago %>

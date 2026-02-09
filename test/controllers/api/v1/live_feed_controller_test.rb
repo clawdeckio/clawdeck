@@ -112,4 +112,23 @@ class Api::V1::LiveFeedControllerTest < ActionDispatch::IntegrationTest
     get api_v1_live_feed_url(before: "not-a-time"), headers: @auth_header
     assert_response :success
   end
+
+  test "comment payload includes highlighted mention html" do
+    TaskComment.create!(
+      task: @task,
+      user: @user,
+      actor_type: "user",
+      source: "api",
+      body: "Ping @Machamp <script>alert(1)</script>"
+    )
+
+    get api_v1_live_feed_url(types: "comment"), headers: @auth_header
+    assert_response :success
+
+    html = response.parsed_body.fetch("comments").first.fetch("body_html")
+    assert_includes html, "@Machamp"
+    assert_includes html, "mention-token"
+    assert_includes html, "&lt;script&gt;"
+    assert_not_includes html, "<script>"
+  end
 end

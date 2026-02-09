@@ -1,11 +1,13 @@
 one:
   user: one
-  name: "Agent One"
+  name: "Machamp"
+  emoji: "💪"
   status: "idle"
-  identifier: "agent-one"
+  identifier: "machamp"
 
 two:
   user: one
-  name: "Agent Two"
+  name: "Blastoise"
+  emoji: "💧"
   status: "working"
-  identifier: "agent-two"
+  identifier: "blastoise"

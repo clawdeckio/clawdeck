@@ -11,6 +11,8 @@ Rails.application.routes.draw do
       # Aggregated activity feed (tasks/comments/artifacts)
       get :live_feed, to: "live_feed#index"
 
+      resources :notifications, only: [ :index, :update ]
+
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
@@ -45,6 +47,15 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :settings, only: [ :show, :update ], controller: "profiles" do
     post :regenerate_api_token
+  end
+  resources :notifications, only: [] do
+    member do
+      patch :read
+      patch :unread
+    end
+    collection do
+      patch :read_all
+    end
   end
 
   # Boards (multi-board kanban views)

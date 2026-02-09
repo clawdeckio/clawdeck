@@ -93,11 +93,13 @@ export default class extends Controller {
           const c = i.comment || {}
           const who = this.escape(c.actor_name || c.actor_type || "Someone")
           const emoji = (c.actor_emoji || "").toString().trim()
-          const body = this.truncate(this.escape((c.body || "").toString()), 160)
+          const body = c.body_html
+            ? c.body_html.toString()
+            : this.truncate(this.escape((c.body || "").toString()), 160)
           const taskHint = i.task_id ? ` #${this.escape(i.task_id)}` : ""
-          const text = `${emoji ? `${emoji} ` : ""}${who}: ${body}${taskHint}`
+          const text = `${emoji ? `${this.escape(emoji)} ` : ""}${who}: ${body}${taskHint}`
           const href = this.taskHref(c.board_id, c.task_id)
-          return this.rowHtml("💬", text, at, href)
+          return this.rowHtml("💬", text, at, href, { textClass: "text-xs text-content break-words" })
         }
 
         if (type === "artifact") {
@@ -136,13 +138,15 @@ export default class extends Controller {
     return "📎"
   }
 
-  rowHtml(icon, text, at, href) {
+  rowHtml(icon, text, at, href, options = {}) {
+    const textClass = options.textClass || "text-xs text-content truncate"
+
     const inner = `
       <div class="flex items-start justify-between gap-3 px-2 py-2 rounded-md hover:bg-bg-elevated">
         <div class="flex items-start gap-2 min-w-0">
           <div class="w-7 h-7 rounded-md bg-bg-elevated flex items-center justify-center text-base flex-shrink-0" aria-hidden="true">${icon}</div>
           <div class="min-w-0">
-            <div class="text-xs text-content truncate">${text}</div>
+            <div class="${textClass}">${text}</div>
             <div class="text-[11px] text-content-muted">${at ? `${at} ago` : ""}</div>
           </div>
         </div>
