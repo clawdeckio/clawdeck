@@ -19,7 +19,7 @@ class TaskCommentTest < ActiveSupport::TestCase
     assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
   end
 
-  test "updates mentions, avoids duplicate notifications, and resets to unread" do
+  test "updates mentions, adds missing notifications, avoids duplicates, and resets to unread" do
     comment = TaskComment.create!(
       task: tasks(:one),
       user: users(:one),
@@ -38,8 +38,31 @@ class TaskCommentTest < ActiveSupport::TestCase
     notification.reload
     assert_nil notification.read_at
 
-    comment.update!(body: "Switch to @Blastoise")
-    assert_equal [ agents(:two).id ], comment.task_comment_mentions.pluck(:agent_id)
+    assert_difference "Notification.count", 1 do
+      comment.update!(body: "Now @Machamp and @Blastoise")
+    end
+
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
+
+    assert_no_difference "Notification.count" do
+      comment.update!(body: "Again @Machamp and @Blastoise and @Machamp")
+    end
+
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
+  end
+
+  test "does not create self mention notification for agent actor but still notifies others" do
+    comment = TaskComment.create!(
+      task: tasks(:one),
+      actor_type: "agent",
+      actor_name: agents(:one).name,
+      actor_emoji: agents(:one).emoji,
+      source: "api",
+      body: "FYI @Machamp and @Blastoise"
+    )
+
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
     assert_equal [ agents(:two).id ], comment.notifications.mention.pluck(:agent_id)
   end
 
