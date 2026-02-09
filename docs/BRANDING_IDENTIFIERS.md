@@ -4,6 +4,11 @@ This codebase is **branded** as **PokéDeck** (user-facing strings, page titles,
 
 However, there are still many internal identifiers that intentionally remain `clawdeck` / `ClawDeck` for now.
 
+## Quick Rule
+
+If it is visible to end users, use **PokéDeck**.
+If it is an infrastructure identifier (module names, service labels, filesystem paths, DB names, domains), keep existing `clawdeck` values unless a dedicated migration is planned.
+
 ## Why keep `clawdeck` identifiers?
 
 Renaming infra identifiers can be a breaking migration (domains, paths, service labels, database names, secrets,

@@ -66,8 +66,8 @@ bundle _2.5.9_ install
 
 ### Setup
 ```bash
-git clone https://github.com/clawdeckio/clawdeck.git
-cd clawdeck
+git clone https://github.com/clawdeckio/pokedeck.git
+cd pokedeck
 bundle install
 bin/rails db:prepare
 bin/dev
@@ -281,7 +281,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 - 🌐 **Website & App:** [clawdeck.io](https://clawdeck.io)
 - 💬 **Discord:** [Join the community](https://discord.gg/pqffNjdY)
-- 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/clawdeck)
+- 🐙 **GitHub:** [clawdeckio/pokedeck](https://github.com/clawdeckio/pokedeck)
 
 ---
 

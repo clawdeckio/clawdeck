@@ -33,7 +33,7 @@ ssh root@your-vps-ip
 export DB_PASSWORD="your_secure_password_here"
 
 # Download and run setup script
-curl -fsSL https://raw.githubusercontent.com/yourusername/clawdeck/main/script/setup_vps.sh | bash
+curl -fsSL https://raw.githubusercontent.com/yourusername/pokedeck/main/script/setup_vps.sh | bash
 ```
 
 This installs: Ruby, PostgreSQL, Nginx, and creates databases.
