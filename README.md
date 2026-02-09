@@ -47,41 +47,17 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Self-Hosting
 
 ### Prerequisites
-- Ruby 3.3.1
+- Ruby 3.3.1+
 - PostgreSQL
-- Bundler
+- Bundler 2.5.9 (installed automatically by `bin/setup` if missing)
 
-**macOS (Homebrew Ruby) note:** macOS ships an older system Ruby (often 2.6.x) which cannot run the Bundler 2.5.x version pinned in `Gemfile.lock`. The simplest fix is to use Homebrew Ruby 3.3:
-
-```bash
-brew install ruby@3.3
-export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
-
-# Use the Bundler version in Gemfile.lock (example):
-gem install bundler -v 2.5.9
-bundle _2.5.9_ install
-```
-
-(If you already have rbenv/asdf, that works too — just ensure `ruby -v` is 3.3.x before running `bundle`.)
-
-Common local commands with the correct Ruby/Bundler:
-
-```bash
-export PATH="/opt/homebrew/opt/ruby@3.3/bin:/opt/homebrew/bin:$PATH"
-
-# Database
-PGHOST=127.0.0.1 bundle _2.5.9_ exec bin/rails db:migrate
-
-# Test suite
-PGHOST=127.0.0.1 PARALLEL_WORKERS=1 bundle _2.5.9_ exec bin/rails test
-```
+See `DEV_SETUP.md` for Ruby manager install steps (`rbenv` or `mise`), migration, and test commands.
 
 ### Setup
 ```bash
 git clone https://github.com/clawdeckio/pokedeck.git
 cd pokedeck
-bundle install
-bin/rails db:prepare
+bin/setup --skip-server
 bin/dev
 ```
 
@@ -114,12 +90,6 @@ GITHUB_CLIENT_SECRET=your_client_secret
 bin/rails test
 bin/rails test:system
 bin/rubocop
-```
-
-macOS/OpenClaw/Codex sandbox note: use Homebrew Ruby and Bundler 2.5.9, force PostgreSQL over TCP (avoid `/tmp` socket permission issues), and disable parallel workers to avoid occasional `pg` segfaults during parallel schema setup.
-
-```bash
-export PATH="/opt/homebrew/opt/ruby@3.3/bin:/opt/homebrew/bin:/Users/jasperdonnydongchen/.local/bin:/usr/bin:/bin:/usr/local/bin"; PGHOST=127.0.0.1 PARALLEL_WORKERS=1 bundle _2.5.9_ exec bin/rails test
 ```
 
 ---
