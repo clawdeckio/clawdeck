@@ -10,8 +10,12 @@
 # they reach JSON serialization.
 
 module JsonEncodingGuard
-  def generate(obj, *args)
-    super(scrub_ascii_8bit(obj), *args)
+  GUARDED_ENTRYPOINTS = %i[generate fast_generate pretty_generate dump].freeze
+
+  GUARDED_ENTRYPOINTS.each do |entrypoint|
+    define_method(entrypoint) do |obj, *args|
+      super(scrub_ascii_8bit(obj), *args)
+    end
   end
 
   private
@@ -37,5 +41,5 @@ module JsonEncodingGuard
   end
 end
 
-# Patch JSON.generate globally (used by ActiveSupport::JSON under the hood in many places).
+# Patch JSON generation entrypoints globally so ASCII-8BIT string payloads are normalized.
 JSON.singleton_class.prepend(JsonEncodingGuard)
