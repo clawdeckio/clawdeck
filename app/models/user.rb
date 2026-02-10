@@ -5,6 +5,10 @@ class User < ApplicationRecord
   has_many :boards, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :api_tokens, dependent: :destroy
+  has_many :agents, dependent: :destroy
+  has_many :notifications, through: :agents
+  has_many :task_comments, dependent: :nullify
+  has_many :task_artifacts, dependent: :nullify
   has_one_attached :avatar
 
   # Primary API token for agent integration

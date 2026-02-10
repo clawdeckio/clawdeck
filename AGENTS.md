@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClawDeck is a Rails 8.1 todo application with passwordless email authentication (6-digit verification codes via Resend). It's deployed to DigitalOcean VPS with automatic CI/CD via GitHub Actions.
+PokéDeck is a Rails 8.1 todo application with passwordless email authentication (6-digit verification codes via Resend). It's deployed to DigitalOcean VPS with automatic CI/CD via GitHub Actions.
 
 ## Development Commands
 
@@ -83,7 +83,7 @@ tail -f /var/log/clawdeck/solid_queue.log  # View job logs
 ### Application Structure
 The application follows standard Rails 8 conventions with these key components:
 
-- **Module Name**: `ClawDeck` (config/application.rb:9)
+- **Module Name**: `PokéDeck` (config/application.rb:9)
 - **Solid Stack**: Uses solid_cache, solid_queue, and solid_cable instead of Redis
 - **Hotwire-first**: Built for Turbo Drive navigation with minimal JavaScript
 - **Asset Pipeline**: Propshaft for static assets, importmap-rails for JavaScript modules

@@ -1,0 +1,13 @@
+one:
+  user: one
+  name: "Machamp"
+  emoji: "💪"
+  status: "idle"
+  identifier: "machamp"
+
+two:
+  user: one
+  name: "Blastoise"
+  emoji: "💧"
+  status: "working"
+  identifier: "blastoise"

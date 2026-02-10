@@ -1,5 +1,5 @@
 [Unit]
-Description=Puma HTTP Server for ClawDeck
+Description=Puma HTTP Server for PokeDeck
 After=network.target postgresql.service
 Requires=postgresql.service
 
