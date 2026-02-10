@@ -4,7 +4,7 @@ module Api
       before_action :set_agent
 
       def index
-        query = @agent.notifications.includes(:task, :task_comment).where(user: current_user)
+        query = @agent.notifications.unread.includes(:task, :task_comment, :actor_agent, :recipient_agent)
 
         if params[:before].present?
           before_time = parse_before_cursor(params[:before])
@@ -17,9 +17,7 @@ module Api
         limit = 50 if limit <= 0
         limit = [ limit, 200 ].min
 
-        items = query
-          .order(Arel.sql("read_at IS NOT NULL"), created_at: :desc)
-          .limit(limit)
+        items = query.order(created_at: :desc).limit(limit)
 
         render json: {
           items: items.map { |notification| notification_json(notification) },
@@ -30,7 +28,7 @@ module Api
       end
 
       def update
-        notification = @agent.notifications.where(user: current_user).find(params[:id])
+        notification = @agent.notifications.find(params[:id])
         read = params.require(:notification).fetch(:read)
 
         if ActiveModel::Type::Boolean.new.cast(read)
@@ -69,6 +67,16 @@ module Api
         {
           id: notification.id,
           kind: notification.kind,
+          recipient_agent: {
+            id: notification.recipient_agent.id,
+            name: notification.recipient_agent.name,
+            emoji: notification.recipient_agent.emoji
+          },
+          actor_agent: notification.actor_agent && {
+            id: notification.actor_agent.id,
+            name: notification.actor_agent.name,
+            emoji: notification.actor_agent.emoji
+          },
           read_at: notification.read_at&.iso8601,
           created_at: notification.created_at.iso8601,
           task: {

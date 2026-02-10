@@ -1,14 +1,14 @@
 unread_mention:
-  user: one
-  agent: one
+  recipient_agent: one
+  actor_agent: two
   task: one
   task_comment: one
   kind: mention
   read_at:
 
 read_mention:
-  user: one
-  agent: two
+  recipient_agent: two
+  actor_agent: one
   task: one
   task_comment: one
   kind: mention

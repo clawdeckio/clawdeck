@@ -12,13 +12,13 @@ class NotificationsController < ApplicationController
   end
 
   def read_all
-    current_user.notifications.unread.update_all(read_at: Time.current)
+    Notification.for_user(current_user).unread.update_all(read_at: Time.current)
     redirect_back fallback_location: boards_path
   end
 
   private
 
   def set_notification
-    @notification = current_user.notifications.find(params[:id])
+    @notification = Notification.for_user(current_user).find(params[:id])
   end
 end

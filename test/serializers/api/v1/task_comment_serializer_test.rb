@@ -34,6 +34,6 @@ class Api::V1::TaskCommentSerializerTest < ActiveSupport::TestCase
 
     payload = Api::V1::TaskCommentSerializer.new(comment.reload).as_json
 
-    assert_includes payload[:body_html], %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+    assert_includes payload[:body_html], %(<span class="mention">@Machamp</span>)
   end
 end

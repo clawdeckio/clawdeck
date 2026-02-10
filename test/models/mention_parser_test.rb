@@ -16,7 +16,7 @@ class MentionParserTest < ActiveSupport::TestCase
   test "highlights supported mentions and escapes unsafe html" do
     html = MentionParser.highlight_mentions("Hi @Machamp <script>alert(1)</script>")
 
-    assert_includes html, %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+    assert_includes html, %(<span class="mention">@Machamp</span>)
     assert_includes html, "&lt;script&gt;alert(1)&lt;/script&gt;"
     assert_not_includes html, "<script>"
   end

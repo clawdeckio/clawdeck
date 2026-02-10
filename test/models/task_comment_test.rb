@@ -16,10 +16,10 @@ class TaskCommentTest < ActiveSupport::TestCase
     )
 
     assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
-    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:recipient_agent_id).sort
   end
 
-  test "updates mentions, adds missing notifications, avoids duplicates, and resets to unread" do
+  test "updates mentions, adds missing notifications, and avoids duplicates" do
     comment = TaskComment.create!(
       task: tasks(:one),
       user: users(:one),
@@ -28,7 +28,7 @@ class TaskCommentTest < ActiveSupport::TestCase
       body: "Initial @Machamp"
     )
 
-    notification = comment.notifications.mention.find_by!(agent_id: agents(:one).id)
+    notification = comment.notifications.mention.find_by!(recipient_agent_id: agents(:one).id)
     notification.update!(read_at: Time.current)
 
     assert_no_difference "Notification.count" do
@@ -36,20 +36,20 @@ class TaskCommentTest < ActiveSupport::TestCase
     end
 
     notification.reload
-    assert_nil notification.read_at
+    assert notification.read?
 
     assert_difference "Notification.count", 1 do
       comment.update!(body: "Now @Machamp and @Blastoise")
     end
 
     assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
-    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:recipient_agent_id).sort
 
     assert_no_difference "Notification.count" do
       comment.update!(body: "Again @Machamp and @Blastoise and @Machamp")
     end
 
-    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:agent_id).sort
+    assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.notifications.mention.pluck(:recipient_agent_id).sort
   end
 
   test "does not create self mention notification for agent actor but still notifies others" do
@@ -63,12 +63,14 @@ class TaskCommentTest < ActiveSupport::TestCase
     )
 
     assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
-    assert_equal [ agents(:two).id ], comment.notifications.mention.pluck(:agent_id)
+    notification = comment.notifications.mention.find_by!(recipient_agent_id: agents(:two).id)
+    assert_equal [ agents(:two).id ], comment.notifications.mention.pluck(:recipient_agent_id)
+    assert_equal agents(:one).id, notification.actor_agent_id
   end
 
   test "body_html highlights mentions in comment output" do
     comment = TaskComment.new(body: "Hello @Machamp")
 
-    assert_includes comment.body_html, %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+    assert_includes comment.body_html, %(<span class="mention">@Machamp</span>)
   end
 end

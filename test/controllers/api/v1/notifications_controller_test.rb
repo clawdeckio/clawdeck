@@ -8,15 +8,15 @@ class Api::V1::NotificationsControllerTest < ActionDispatch::IntegrationTest
     @task = tasks(:one)
   end
 
-  test "index returns items array with unread notifications first" do
+  test "index returns unread items only for current agent" do
     read_comment = TaskComment.create!(
       task: @task,
       user: @user,
       body: "Read notification comment"
     )
     read_notification = Notification.create!(
-      user: @user,
-      agent: @agent,
+      recipient_agent: @agent,
+      actor_agent: agents(:two),
       task: @task,
       task_comment: read_comment,
       kind: :mention,
@@ -33,10 +33,8 @@ class Api::V1::NotificationsControllerTest < ActionDispatch::IntegrationTest
 
     ids = body["items"].map { |item| item["id"] }
     assert_includes ids, notifications(:unread_mention).id
-    assert_includes ids, read_notification.id
-
-    read_flags = body["items"].map { |item| item["read_at"].present? ? 1 : 0 }
-    assert_equal read_flags.sort, read_flags
+    assert_not_includes ids, read_notification.id
+    assert body["items"].all? { |item| item["read_at"].nil? }
   end
 
   test "index returns bad request when X-Agent-Name is missing" do
@@ -62,6 +60,7 @@ class Api::V1::NotificationsControllerTest < ActionDispatch::IntegrationTest
           headers: auth_headers
     assert_response :success
     assert notification.reload.read_at.present?
+    assert_equal notification.recipient_agent.id, response.parsed_body.dig("recipient_agent", "id")
 
     patch api_v1_notification_url(notification),
           params: { notification: { read: false } },

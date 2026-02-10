@@ -33,7 +33,7 @@ class MentionParser
 
       escaped.gsub(MENTION_PATTERN) do |match|
         name = canonical_name(match.delete_prefix("@")) || match.delete_prefix("@")
-        %(<span class="mention-token text-accent font-semibold">@#{ERB::Util.html_escape(name)}</span>)
+        %(<span class="mention">@#{ERB::Util.html_escape(name)}</span>)
       end
     end
 

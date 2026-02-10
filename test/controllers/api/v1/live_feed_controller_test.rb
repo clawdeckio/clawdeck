@@ -127,7 +127,7 @@ class Api::V1::LiveFeedControllerTest < ActionDispatch::IntegrationTest
 
     html = response.parsed_body.fetch("comments").first.fetch("body_html")
     assert_includes html, "@Machamp"
-    assert_includes html, "mention-token"
+    assert_includes html, "class=\"mention\""
     assert_includes html, "&lt;script&gt;"
     assert_not_includes html, "<script>"
   end

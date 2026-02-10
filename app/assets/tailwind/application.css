@@ -123,6 +123,14 @@
   display: flex;
 }
 
+.mention {
+  background-color: var(--color-accent-muted);
+  border-radius: 0.25rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  padding: 0 0.2em;
+}
+
 /* Sidebar layout */
 @layer components {
   /* Hide sidebar until JS determines state */

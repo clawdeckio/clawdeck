@@ -39,7 +39,7 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
 
     payload = response.parsed_body
     assert_mentions(payload, [ agents(:one) ])
-    assert_includes payload["body_html"], %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+    assert_includes payload["body_html"], %(<span class="mention">@Machamp</span>)
   end
 
   test "create accepts legacy task_comment payload" do
@@ -71,7 +71,7 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
 
     payload = response.parsed_body
     assert_mentions(payload, [ agents(:one) ])
-    assert_includes payload["body_html"], %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+    assert_includes payload["body_html"], %(<span class="mention">@Machamp</span>)
   end
 
   test "update includes mention metadata and highlighted body_html" do
@@ -83,7 +83,7 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
 
     payload = response.parsed_body
     assert_mentions(payload, [ agents(:two) ])
-    assert_includes payload["body_html"], %(<span class="mention-token text-accent font-semibold">@Blastoise</span>)
+    assert_includes payload["body_html"], %(<span class="mention">@Blastoise</span>)
   end
 
   private

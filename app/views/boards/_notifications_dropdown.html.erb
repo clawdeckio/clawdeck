@@ -1,5 +1,6 @@
-<% notifications = current_user.notifications.includes(:agent, :task, :task_comment).recent.limit(12) %>
-<% unread_count = current_user.notifications.unread.count %>
+<% notifications_scope = Notification.for_user(current_user) %>
+<% notifications = notifications_scope.includes(:recipient_agent, :task, :task_comment).recent.limit(12) %>
+<% unread_count = notifications_scope.unread.count %>
 
 <div class="relative" data-controller="dropdown">
   <button type="button"
@@ -43,7 +44,7 @@
                 class: "block px-2.5 py-2" do %>
               <div class="flex items-center justify-between gap-2 mb-1">
                 <p class="text-xs text-content">
-                  <span class="font-semibold"><%= notification.agent.name %></span>
+                  <span class="font-semibold"><%= notification.recipient_agent.name %></span>
                   mentioned on task #<%= task.id %>
                 </p>
                 <p class="text-[11px] text-content-muted whitespace-nowrap"><%= time_ago_in_words(notification.created_at) %> ago</p>
