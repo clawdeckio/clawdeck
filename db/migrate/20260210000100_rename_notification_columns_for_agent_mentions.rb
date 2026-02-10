@@ -7,8 +7,8 @@ class RenameNotificationColumnsForAgentMentions < ActiveRecord::Migration[8.1]
       rename_column :notifications, :agent_id, :recipient_agent_id
     end
 
-    if index_name_exists?(:notifications, "index_notifications_on_agent_id") &&
-       !index_name_exists?(:notifications, "index_notifications_on_recipient_agent_id")
+    if index_exists?(:notifications, :agent_id, name: "index_notifications_on_agent_id") &&
+       !index_exists?(:notifications, :recipient_agent_id, name: "index_notifications_on_recipient_agent_id")
       rename_index :notifications, "index_notifications_on_agent_id", "index_notifications_on_recipient_agent_id"
     end
 
@@ -22,9 +22,11 @@ class RenameNotificationColumnsForAgentMentions < ActiveRecord::Migration[8.1]
 
     add_index :notifications, [ :task_comment_id, :recipient_agent_id, :kind ],
               unique: true,
-              name: "index_notifications_on_comment_recipient_kind"
+              name: "index_notifications_on_comment_recipient_kind",
+              if_not_exists: true
     add_index :notifications, [ :recipient_agent_id, :read_at, :created_at ],
-              name: "index_notifications_on_recipient_and_read_and_created"
+              name: "index_notifications_on_recipient_and_read_and_created",
+              if_not_exists: true
   end
 
   def down
@@ -53,15 +55,17 @@ class RenameNotificationColumnsForAgentMentions < ActiveRecord::Migration[8.1]
       rename_column :notifications, :recipient_agent_id, :agent_id
     end
 
-    if index_name_exists?(:notifications, "index_notifications_on_recipient_agent_id") &&
-       !index_name_exists?(:notifications, "index_notifications_on_agent_id")
+    if index_exists?(:notifications, :recipient_agent_id, name: "index_notifications_on_recipient_agent_id") &&
+       !index_exists?(:notifications, :agent_id, name: "index_notifications_on_agent_id")
       rename_index :notifications, "index_notifications_on_recipient_agent_id", "index_notifications_on_agent_id"
     end
 
     add_index :notifications, [ :task_comment_id, :agent_id, :kind ],
               unique: true,
-              name: "index_notifications_on_comment_agent_kind"
+              name: "index_notifications_on_comment_agent_kind",
+              if_not_exists: true
     add_index :notifications, [ :user_id, :read_at, :created_at ],
-              name: "index_notifications_on_user_id_and_read_at_and_created_at"
+              name: "index_notifications_on_user_id_and_read_at_and_created_at",
+              if_not_exists: true
   end
 end

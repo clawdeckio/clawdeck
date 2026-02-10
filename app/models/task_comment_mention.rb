@@ -10,7 +10,7 @@ class TaskCommentMention < ApplicationRecord
   private
 
   def create_mention_notification
-    Notifications::MentionNotifier.call(task_comment_mention: self)
+    ::Notifications::MentionNotifier.call(task_comment_mention: self)
   end
 
   def remove_mention_notification
