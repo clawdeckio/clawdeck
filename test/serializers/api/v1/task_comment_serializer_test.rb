@@ -1,6 +1,12 @@
 require "test_helper"
 
 class Api::V1::TaskCommentSerializerTest < ActiveSupport::TestCase
+  test "loads serializer from app/models autoload path" do
+    source_path = Api::V1::TaskCommentSerializer.instance_method(:as_json).source_location.first
+
+    assert_match %r{/app/models/api/v1/task_comment_serializer\.rb\z}, source_path
+  end
+
   test "serializes mentions and mentions_count" do
     comment = TaskComment.create!(
       task: tasks(:one),
