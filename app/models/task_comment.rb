@@ -15,7 +15,7 @@ class TaskComment < ApplicationRecord
   end
 
   def body_html
-    MentionParser.highlight_mentions(body)
+    MentionParser.highlight_mentions(body, agents_scope: task.user.agents)
   end
 
   def actor_agent

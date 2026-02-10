@@ -12,7 +12,7 @@ class TaskCommentTest < ActiveSupport::TestCase
       user: users(:one),
       actor_type: "user",
       source: "api",
-      body: "Heads up @Machamp and @Blastoise"
+      body: "Heads up @machamp, and @Blastoise."
     )
 
     assert_equal [ agents(:one).id, agents(:two).id ].sort, comment.task_comment_mentions.pluck(:agent_id).sort
@@ -69,8 +69,8 @@ class TaskCommentTest < ActiveSupport::TestCase
   end
 
   test "body_html highlights mentions in comment output" do
-    comment = TaskComment.new(body: "Hello @Machamp")
+    comment = TaskComment.new(task: tasks(:one), body: "Hello @machamp,")
 
-    assert_includes comment.body_html, %(<span class="mention">@Machamp</span>)
+    assert_includes comment.body_html, %(<span class="mention">@machamp</span>,)
   end
 end
