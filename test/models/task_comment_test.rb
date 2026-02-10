@@ -56,7 +56,7 @@ class TaskCommentTest < ActiveSupport::TestCase
     comment = TaskComment.create!(
       task: tasks(:one),
       actor_type: "agent",
-      actor_name: agents(:one).name,
+      actor_name: agents(:one).name.downcase,
       actor_emoji: agents(:one).emoji,
       source: "api",
       body: "FYI @Machamp and @Blastoise"

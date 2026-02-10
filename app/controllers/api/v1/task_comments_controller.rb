@@ -84,6 +84,7 @@ module Api
           actor_emoji: comment.actor_emoji,
           source: comment.source,
           body: comment.body,
+          body_html: comment.body_html,
           created_at: comment.created_at.iso8601,
           updated_at: comment.updated_at.iso8601
         }

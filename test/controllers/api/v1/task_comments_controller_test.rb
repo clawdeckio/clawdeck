@@ -40,4 +40,20 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
     get api_v1_task_comment_url(task_id: @task.id, id: @comment.id), headers: @auth_header
     assert_response :success
   end
+
+  test "show includes highlighted body_html" do
+    comment = TaskComment.create!(
+      task: @task,
+      user: users(:one),
+      actor_type: "user",
+      source: "api",
+      body: "Ping @Machamp"
+    )
+
+    get api_v1_task_comment_url(task_id: @task.id, id: comment.id), headers: @auth_header
+    assert_response :success
+
+    payload = response.parsed_body
+    assert_includes payload["body_html"], %(<span class="mention-token text-accent font-semibold">@Machamp</span>)
+  end
 end

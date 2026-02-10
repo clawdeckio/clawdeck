@@ -53,6 +53,6 @@ class TaskComment < ApplicationRecord
     return unless actor_type == "agent"
     return if actor_name.blank?
 
-    task.user.agents.find_by(name: actor_name)&.id
+    task.user.agents.where("LOWER(name) = ?", actor_name.downcase).pick(:id)
   end
 end
