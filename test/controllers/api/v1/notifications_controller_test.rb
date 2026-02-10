@@ -35,6 +35,11 @@ class Api::V1::NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_includes ids, notifications(:unread_mention).id
     assert_not_includes ids, read_notification.id
     assert body["items"].all? { |item| item["read_at"].nil? }
+
+    item = body["items"].find { |notification_item| notification_item["id"] == notifications(:unread_mention).id }
+    assert_not_nil item["at"]
+    assert_equal notifications(:unread_mention).task_id, item["task_id"]
+    assert_equal notifications(:unread_mention).task_comment_id, item["comment_id"]
   end
 
   test "index returns bad request when X-Agent-Name is missing" do
@@ -61,6 +66,9 @@ class Api::V1::NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert notification.reload.read_at.present?
     assert_equal notification.recipient_agent.id, response.parsed_body.dig("recipient_agent", "id")
+    assert_not_nil response.parsed_body["at"]
+    assert_equal notification.task_id, response.parsed_body["task_id"]
+    assert_equal notification.task_comment_id, response.parsed_body["comment_id"]
 
     patch api_v1_notification_url(notification),
           params: { notification: { read: false } },
