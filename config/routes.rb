@@ -4,6 +4,15 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :settings, only: [ :show, :update ]
 
+      resources :agents, only: [ :index, :show, :create, :update, :destroy ]
+
+      resources :activities, only: [ :index, :show ]
+
+      # Aggregated activity feed (tasks/comments/artifacts)
+      get :live_feed, to: "live_feed#index"
+
+      resources :notifications, only: [ :index, :update ]
+
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
@@ -18,6 +27,10 @@ Rails.application.routes.draw do
           patch :assign
           patch :unassign
         end
+
+        resources :comments, controller: "task_comments", only: [ :index, :show, :create, :update, :destroy ]
+        resources :artifacts, controller: "task_artifacts", only: [ :index, :show, :create, :update, :destroy ]
+        resources :activities, only: [ :index ], controller: "activities"
       end
     end
   end
@@ -34,6 +47,15 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :settings, only: [ :show, :update ], controller: "profiles" do
     post :regenerate_api_token
+  end
+  resources :notifications, only: [] do
+    member do
+      patch :read
+      patch :unread
+    end
+    collection do
+      patch :read_all
+    end
   end
 
   # Boards (multi-board kanban views)
@@ -53,6 +75,7 @@ Rails.application.routes.draw do
     "/boards"
   }
   get "pages/home"
+  get "health", to: "health#show"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

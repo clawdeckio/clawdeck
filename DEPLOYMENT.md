@@ -1,4 +1,4 @@
-# ClawDeck Deployment Guide
+# PokéDeck Deployment Guide
 
 Simple, fast deployment to DigitalOcean VPS. No Docker overhead.
 
@@ -42,8 +42,8 @@ This installs: Ruby, PostgreSQL, Nginx, and creates databases.
 
 ```bash
 cd /var/www
-git clone https://github.com/yourusername/clawdeck.git
-cd clawdeck
+git clone https://github.com/yourusername/pokedeck.git
+cd pokedeck
 ```
 
 ### 4. Create Production Environment File

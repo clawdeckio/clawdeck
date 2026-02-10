@@ -1,7 +1,7 @@
 <%
   column_labels = {
     "inbox" => "Inbox",
-    "up_next" => "Up Next",
+    "up_next" => "Assigned",
     "in_progress" => "In Progress",
     "in_review" => "In Review",
     "done" => "Done"
@@ -29,7 +29,7 @@
 
   <%# Tasks List - no overflow, grows with content, min height for empty drop target %>
   <ul id="column-<%= status %>"
-      class="px-2 pb-2 space-y-2 min-h-[2rem]"
+      class="px-2 pb-2 space-y-2 min-h-[6rem] rounded-md border border-transparent transition-colors"
       data-controller="sortable"
       data-sortable-group-value="board"
       data-sortable-status-value="<%= status %>"
@@ -37,6 +37,12 @@
     <% tasks.each do |task| %>
       <%= render "boards/task_card", task: task %>
     <% end %>
+
+    <%# Drop hint: only becomes visible while a column is highlighted during drag %>
+    <li class="drop-hint items-center justify-center text-xs text-content-muted/70 py-3 border border-dashed border-border rounded-md"
+        data-sortable-ignore="true">
+      Drop here
+    </li>
   </ul>
 
   <%# Inline Add Card Form (hidden by default) %>

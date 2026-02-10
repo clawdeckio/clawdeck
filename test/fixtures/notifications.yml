@@ -1,0 +1,15 @@
+unread_mention:
+  recipient_agent: one
+  actor_agent: two
+  task: one
+  task_comment: one
+  kind: mention
+  read_at:
+
+read_mention:
+  recipient_agent: two
+  actor_agent: one
+  task: one
+  task_comment: one
+  kind: mention
+  read_at: <%= 1.day.ago %>
