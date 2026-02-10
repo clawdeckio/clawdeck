@@ -1,0 +1,13 @@
+one:
+  name: Personal
+  icon: "📋"
+  color: gray
+  position: 0
+  user: one
+
+two:
+  name: Personal
+  icon: "📋"
+  color: gray
+  position: 0
+  user: two
