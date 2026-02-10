@@ -5,12 +5,12 @@ module Api
       before_action :set_comment, only: [ :show, :update, :destroy ]
 
       def index
-        comments = @task.comments.recent
-        render json: comments.map { |comment| comment_json(comment) }
+        comments = @task.comments.recent.includes(task_comment_mentions: :agent)
+        render json: comments.map { |comment| serialize_comment(comment) }
       end
 
       def show
-        render json: comment_json(@comment)
+        render json: serialize_comment(@comment)
       end
 
       def create
@@ -20,7 +20,7 @@ module Api
         comment.source = "api"
 
         if comment.save
-          render json: comment_json(comment), status: :created
+          render json: serialize_comment(comment), status: :created
         else
           render json: { error: comment.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end
@@ -30,7 +30,7 @@ module Api
         apply_actor_info(@comment)
 
         if @comment.update(comment_params)
-          render json: comment_json(@comment)
+          render json: serialize_comment(@comment)
         else
           render json: { error: @comment.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end
@@ -74,20 +74,8 @@ module Api
         end
       end
 
-      def comment_json(comment)
-        {
-          id: comment.id,
-          task_id: comment.task_id,
-          user_id: comment.user_id,
-          actor_type: comment.actor_type,
-          actor_name: comment.actor_name,
-          actor_emoji: comment.actor_emoji,
-          source: comment.source,
-          body: comment.body,
-          body_html: comment.body_html,
-          created_at: comment.created_at.iso8601,
-          updated_at: comment.updated_at.iso8601
-        }
+      def serialize_comment(comment)
+        Api::V1::TaskCommentSerializer.new(comment).as_json
       end
     end
   end
