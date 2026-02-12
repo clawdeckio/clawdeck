@@ -26,7 +26,8 @@ Rails.application.routes.draw do
           patch :unassign
         end
 
-        resources :comments, controller: "task_comments", only: [ :index, :show, :create, :update, :destroy ]
+        post "comments", to: "task_comments#create"
+        resources :comments, controller: "task_comments", only: [ :index, :show, :update, :destroy ]
         resources :artifacts, controller: "task_artifacts", only: [ :index, :show, :create, :update, :destroy ]
         resources :activities, only: [ :index ], controller: "activities"
       end

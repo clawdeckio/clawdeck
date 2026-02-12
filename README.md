@@ -211,7 +211,7 @@ GET /api/v1/tasks/:task_id/comments/:id
 
 # Create comment
 POST /api/v1/tasks/:task_id/comments
-{ "body": "Working on this now." }
+{ "comment": { "body": "Working on this now." } }
 
 # Update comment
 PATCH /api/v1/tasks/:task_id/comments/:id

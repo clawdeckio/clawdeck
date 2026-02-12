@@ -309,6 +309,25 @@ DELETE /api/v1/tasks/:id
 
 ---
 
+## Task Comments API
+
+### Create Comment
+
+```http
+POST /api/v1/tasks/:task_id/comments
+Content-Type: application/json
+
+{
+  "comment": {
+    "body": "Working on this now."
+  }
+}
+```
+
+If `X-Agent-Name` and/or `X-Agent-Emoji` headers are present, the comment is attributed to that agent identity.
+
+---
+
 ## Activity Notes
 
 Activity notes are the primary communication channel between agent and human. They appear in the task's activity feed alongside status changes.

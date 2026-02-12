@@ -17,23 +17,37 @@ class Api::V1::TaskCommentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create creates comment" do
+    headers = @auth_header.merge(
+      "X-Agent-Name" => "Maxie",
+      "X-Agent-Emoji" => ":fox:"
+    )
+
     assert_difference "TaskComment.count", 1 do
       post api_v1_task_comments_url(task_id: @task.id),
            params: { comment: { body: "New comment" } },
-           headers: @auth_header
+           headers: headers,
+           as: :json
     end
 
     assert_response :created
+    comment = response.parsed_body
+
+    assert_equal "New comment", comment["body"]
+    assert_equal "api", comment["source"]
+    assert_equal "agent", comment["actor_type"]
+    assert_equal "Maxie", comment["actor_name"]
+    assert_equal ":fox:", comment["actor_emoji"]
   end
 
-  test "create accepts legacy task_comment payload" do
-    assert_difference "TaskComment.count", 1 do
+  test "create returns unauthorized without token" do
+    assert_no_difference "TaskComment.count" do
       post api_v1_task_comments_url(task_id: @task.id),
-           params: { task_comment: { body: "Legacy comment" } },
-           headers: @auth_header
+           params: { comment: { body: "Unauthorized comment" } },
+           as: :json
     end
 
-    assert_response :created
+    assert_response :unauthorized
+    assert_equal "Unauthorized", response.parsed_body["error"]
   end
 
   test "show returns comment" do
