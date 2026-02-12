@@ -1,0 +1,13 @@
+one:
+  name: Personal
+  icon: P
+  color: gray
+  user: one
+  position: 1
+
+two:
+  name: Work
+  icon: W
+  color: blue
+  user: two
+  position: 1

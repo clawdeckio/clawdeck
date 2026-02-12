@@ -125,6 +125,25 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "medium", task["priority"]
   end
 
+  test "update accepts activity_note without task payload" do
+    original_attributes = @task.attributes.except("updated_at")
+    previous_updated_at = @task.updated_at
+
+    begin
+      patch api_v1_task_url(@task),
+            params: { activity_note: "Checked by agent" },
+            headers: @auth_header
+    rescue => error
+      flunk("Expected no exception, got #{error.class}: #{error.message}")
+    end
+
+    assert_response :success
+
+    @task.reload
+    assert_equal original_attributes, @task.attributes.except("updated_at")
+    assert_operator @task.updated_at, :>, previous_updated_at
+  end
+
   test "update returns errors for invalid update" do
     patch api_v1_task_url(@task),
           params: { task: { name: "" } },

@@ -260,6 +260,27 @@ The `activity_note` parameter is optional but recommended. It creates an activit
 DELETE /api/v1/tasks/:id
 ```
 
+### List Task Comments
+
+```http
+GET /api/v1/tasks/:task_id/comments
+```
+
+Returns comments for the task in chronological order (oldest first, newest last).
+
+### Create Task Comment
+
+```http
+POST /api/v1/tasks/:task_id/comments
+Content-Type: application/json
+
+{
+  "comment": {
+    "body": "Investigating this now. I found where the issue starts."
+  }
+}
+```
+
 ---
 
 ## Activity Notes

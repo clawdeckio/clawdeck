@@ -4,7 +4,7 @@ class TaskActivity < ApplicationRecord
 
   validates :action, presence: true
 
-  ACTIONS = %w[created updated moved].freeze
+  ACTIONS = %w[created updated moved commented].freeze
   TRACKED_FIELDS = %w[name priority due_date].freeze
 
   scope :recent, -> { order(created_at: :desc) }
@@ -67,6 +67,8 @@ class TaskActivity < ApplicationRecord
       describe_move
     when "updated"
       describe_update
+    when "commented"
+      "Added a comment"
     else
       action.humanize
     end
