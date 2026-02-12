@@ -3,13 +3,19 @@
 one:
   name: Test Task One
   user: one
+  board: one
   status: inbox
   priority: none
   completed: false
+  comments_count: 1
+  artifacts_count: 1
 
 two:
   name: Test Task Two
   user: two
+  board: two
   status: in_progress
   priority: high
   completed: false
+  comments_count: 1
+  artifacts_count: 1

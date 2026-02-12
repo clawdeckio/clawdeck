@@ -163,7 +163,12 @@ module Api
       # Toggles task between done and inbox status
       def complete
         set_task_activity_info(@task)
-        new_status = @task.status == "done" ? "inbox" : "done"
+
+        # Toggle completion based on either column status or completed flag.
+        # (Some callers may set `completed=true` without moving the task to the "done" column.)
+        should_uncomplete = (@task.status == "done") || @task.completed
+        new_status = should_uncomplete ? "inbox" : "done"
+
         @task.update!(status: new_status)
         render json: task_json(@task)
       end
@@ -182,17 +187,41 @@ module Api
       end
 
       def task_params
-        params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
+        params.require(:task).permit(
+          :name,
+          :description,
+          :priority,
+          :due_date,
+          :status,
+          :blocked,
+          :blocked_reason,
+          :board_id,
+          tags: []
+        )
+      end
+
+      # Ensure we always emit valid JSON even if user-provided strings contain
+      # control characters (e.g., from pasted terminal output).
+      def sanitize_json_string(value)
+        return nil if value.nil?
+
+        str = value.to_s
+        # Drop ASCII control chars (0x00-0x1F, 0x7F) which can break JSON parsers
+        # when present unescaped.
+        str = str.gsub(/[\u0000-\u001F\u007F]/, "")
+        # Ensure valid UTF-8
+        str.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
       end
 
       def task_json(task)
         {
           id: task.id,
-          name: task.name,
-          description: task.description,
+          name: sanitize_json_string(task.name),
+          description: sanitize_json_string(task.description),
           priority: task.priority,
           status: task.status,
           blocked: task.blocked,
+          blocked_reason: sanitize_json_string(task.blocked_reason),
           tags: task.tags || [],
           completed: task.completed,
           completed_at: task.completed_at&.iso8601,
@@ -202,7 +231,9 @@ module Api
           assigned_at: task.assigned_at&.iso8601,
           agent_claimed_at: task.agent_claimed_at&.iso8601,
           board_id: task.board_id,
-          url: "https://clawdeck.io/boards/#{task.board_id}/tasks/#{task.id}",
+          # Keep default host on clawdeck.io until a coordinated domain migration.
+          # Allow overrides (e.g., staging, future pokedeck host) via env.
+          url: "#{ENV.fetch("PUBLIC_BASE_URL", "https://clawdeck.io")}/boards/#{task.board_id}/tasks/#{task.id}",
           created_at: task.created_at.iso8601,
           updated_at: task.updated_at.iso8601
         }

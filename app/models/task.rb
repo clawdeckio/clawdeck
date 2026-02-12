@@ -2,6 +2,8 @@ class Task < ApplicationRecord
   belongs_to :user
   belongs_to :board
   has_many :activities, class_name: "TaskActivity", dependent: :destroy
+  has_many :comments, class_name: "TaskComment", dependent: :destroy
+  has_many :artifacts, class_name: "TaskArtifact", dependent: :destroy
 
   enum :priority, { none: 0, low: 1, medium: 2, high: 3 }, default: :none, prefix: true
   enum :status, { inbox: 0, up_next: 1, in_progress: 2, in_review: 3, done: 4 }, default: :inbox
@@ -26,6 +28,7 @@ class Task < ApplicationRecord
 
   # Position management - acts_as_list functionality without the gem
   before_create :set_position
+  before_validation :clear_blocked_reason_unless_blocked
   before_save :sync_completed_with_status
   before_update :track_completion_time, if: :will_save_change_to_status?
 
@@ -65,6 +68,10 @@ class Task < ApplicationRecord
 
   def sync_completed_with_status
     self.completed = (status == "done")
+  end
+
+  def clear_blocked_reason_unless_blocked
+    self.blocked_reason = nil unless blocked?
   end
 
   def track_completion_time

@@ -63,6 +63,7 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert task.key?("priority")
     assert task.key?("completed")
     assert task.key?("status")
+    assert task.key?("blocked_reason")
     assert task["created_at"].present?
     assert task["updated_at"].present?
   end
@@ -94,12 +95,15 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
 
   # Show tests
   test "show returns task" do
+    @task.update!(blocked: true, blocked_reason: "Waiting on stakeholder input")
+
     get api_v1_task_url(@task), headers: @auth_header
     assert_response :success
 
     task = response.parsed_body
     assert_equal @task.id, task["id"]
     assert_equal @task.name, task["name"]
+    assert_equal "Waiting on stakeholder input", task["blocked_reason"]
   end
 
   test "show returns not found for non-existent task" do
@@ -132,6 +136,44 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "update sets blocked and blocked_reason" do
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: true, blocked_reason: "Waiting on API credentials" } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal true, task["blocked"]
+    assert_equal "Waiting on API credentials", task["blocked_reason"]
+    assert_equal "Waiting on API credentials", @task.reload.blocked_reason
+  end
+
+  test "update clears blocked_reason when blocked is set false" do
+    @task.update!(blocked: true, blocked_reason: "Waiting on design sign-off")
+
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: false } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal false, task["blocked"]
+    assert_nil task["blocked_reason"]
+    assert_nil @task.reload.blocked_reason
+  end
+
+  test "update clears blocked_reason when blocked_reason is sent with blocked false" do
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: false, blocked_reason: "Should not persist" } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal false, task["blocked"]
+    assert_nil task["blocked_reason"]
+    assert_nil @task.reload.blocked_reason
+  end
+
   # Destroy tests
   test "destroy deletes task" do
     assert_difference "Task.count", -1 do
@@ -160,7 +202,8 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "complete toggles completed task back to incomplete" do
-    @task.update!(completed: true, completed_at: Time.current)
+    # Complete is modeled as moving the task to the "done" column.
+    @task.update!(status: :done, completed_at: Time.current)
 
     patch complete_api_v1_task_url(@task), headers: @auth_header
     assert_response :success
@@ -181,5 +224,29 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, task["created_at"])
     assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, task["updated_at"])
     assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, task["completed_at"])
+  end
+
+  test "sanitizes control characters in name/description" do
+    @task.update!(name: "Hello\u0007World", description: "Line1\u001FLine2")
+
+    get api_v1_task_url(@task), headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal "HelloWorld", task["name"]
+    assert_equal "Line1Line2", task["description"]
+    assert_not_includes response.body, "\u0007"
+  end
+
+  test "task url uses PUBLIC_BASE_URL when set" do
+    ENV["PUBLIC_BASE_URL"] = "https://pokedeck.example"
+
+    get api_v1_task_url(@task), headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal "https://pokedeck.example/boards/#{@task.board_id}/tasks/#{@task.id}", task["url"]
+  ensure
+    ENV.delete("PUBLIC_BASE_URL")
   end
 end
