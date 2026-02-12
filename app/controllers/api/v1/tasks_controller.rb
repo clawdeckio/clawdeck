@@ -146,7 +146,12 @@ module Api
       # PATCH /api/v1/tasks/:id
       def update
         set_task_activity_info(@task)
-        if @task.update(task_params)
+        permitted_task_params = task_params(required: false)
+
+        if permitted_task_params.empty?
+          @task.touch
+          render json: task_json(@task)
+        elsif @task.update(permitted_task_params)
           render json: task_json(@task)
         else
           render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -181,8 +186,14 @@ module Api
         task.activity_note = params[:activity_note] || params.dig(:task, :activity_note)
       end
 
-      def task_params
-        params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
+      def task_params(required: true)
+        task_attributes = if required
+          params.require(:task)
+        else
+          params.fetch(:task, ActionController::Parameters.new)
+        end
+
+        task_attributes.permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
       end
 
       def task_json(task)
