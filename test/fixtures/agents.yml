@@ -1,0 +1,11 @@
+one:
+  user: one
+  name: "Agent One"
+  status: "idle"
+  identifier: "agent-one"
+
+two:
+  user: one
+  name: "Agent Two"
+  status: "working"
+  identifier: "agent-two"

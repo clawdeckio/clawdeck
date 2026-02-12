@@ -1,10 +1,10 @@
 # Dark Theme Update Prompt
 
-*Prompt for Claude Code to update ClawDeck colors to match maxie.bot style*
+*Prompt for Claude Code to update PokéDeck colors to match maxie.bot style*
 
 ---
 
-## Task: Update ClawDeck color scheme to match maxie.bot style
+## Task: Update PokéDeck color scheme to match maxie.bot style
 
 ### Goal:
 Change the app's color palette to a dark theme with warm accents. NO layout changes — colors and styling only.

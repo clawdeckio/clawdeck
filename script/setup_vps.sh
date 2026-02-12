@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "==> ClawDeck VPS Setup Script"
+echo "==> PokéDeck VPS Setup Script"
 echo "==> This will install: Ruby, PostgreSQL, Nginx, and configure the server"
 
 # Update system

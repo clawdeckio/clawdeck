@@ -41,6 +41,9 @@
 # Ignore key files for decrypting credentials and more.
 /config/credentials/*.key
 
+# Bundler vendored gems (local dev)
+/vendor/bundle/
+
 # Ignore Kamal secrets
 /.kamal/secrets
 

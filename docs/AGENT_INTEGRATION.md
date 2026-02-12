@@ -1,6 +1,6 @@
 # Agent Integration Spec
 
-ClawDeck is designed as a **personal mission control for your AI agent**. This document specifies how an AI agent integrates with ClawDeck via the REST API.
+PokéDeck is designed as a **personal mission control for your AI agent**. This document specifies how an AI agent integrates with PokéDeck via the REST API.
 
 ---
 
@@ -21,7 +21,7 @@ The agent's personality is part of the product. Names, avatars, emoji — all vi
 
 ### API Token
 
-- User creates an API token in ClawDeck settings
+- User creates an API token in PokéDeck settings
 - Agent stores token in its config
 - All API calls use: `Authorization: Bearer <token>`
 
@@ -57,7 +57,7 @@ curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
 
 ```
 ┌─────────────┐        polling         ┌─────────────┐
-│  ClawDeck   │◄──────────────────────►│   Agent     │
+│  PokéDeck   │◄──────────────────────►│   Agent     │
 │  (Board)    │       API calls        │             │
 └─────────────┘                        └─────────────┘
 ```
@@ -73,7 +73,7 @@ curl -H "Authorization: Bearer cd_xxxxxxxxxxxx" \
 
 ### Assignment-Based Workflow
 
-Unlike auto-pickup systems, ClawDeck uses **explicit assignment**:
+Unlike auto-pickup systems, PokéDeck uses **explicit assignment**:
 
 - Human assigns tasks to the agent using the "Assign to Agent" button
 - Agent polls for `assigned=true` tasks
@@ -88,6 +88,53 @@ Unlike auto-pickup systems, ClawDeck uses **explicit assignment**:
 
 ```
 https://clawdeck.io/api/v1
+```
+
+---
+
+## Live Feed API
+
+The Live Feed endpoint provides a compact, time-ordered view of recent activity.
+
+```http
+GET /api/v1/live_feed
+```
+
+**Query Parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Items per collection (default 50, max 200). Also caps the unified `items` stream. |
+| `before` | Cursor for backward pagination (ISO8601). Returns records strictly earlier than this timestamp. |
+| `types` | Optional CSV filter of resource types to include: `task`, `comment`, `artifact` (e.g. `types=comment,artifact`). |
+
+**Response (shape):**
+
+```json
+{
+  "tasks": [ { "id": 1, "updated_at": "..." } ],
+  "comments": [ { "id": 2, "created_at": "..." } ],
+  "artifacts": [ { "id": 3, "created_at": "..." } ],
+  "items": [
+    {
+      "type": "comment",
+      "at": "2026-02-06T12:34:56Z",
+      "board_id": 1,
+      "task_id": 42,
+      "comment": { /* full comment object */ }
+    }
+  ],
+  "cursor": {
+    "next_before": "2026-02-06T12:00:00Z"
+  }
+}
+```
+
+**Pagination example:**
+
+```http
+GET /api/v1/live_feed?limit=50
+GET /api/v1/live_feed?limit=50&before=2026-02-06T12:00:00Z
 ```
 
 ---
@@ -259,6 +306,25 @@ The `activity_note` parameter is optional but recommended. It creates an activit
 ```http
 DELETE /api/v1/tasks/:id
 ```
+
+---
+
+## Task Comments API
+
+### Create Comment
+
+```http
+POST /api/v1/tasks/:task_id/comments
+Content-Type: application/json
+
+{
+  "comment": {
+    "body": "Working on this now."
+  }
+}
+```
+
+If `X-Agent-Name` and/or `X-Agent-Emoji` headers are present, the comment is attributed to that agent identity.
 
 ---
 
@@ -436,7 +502,7 @@ The API returns standard HTTP status codes:
 
 ## Summary
 
-ClawDeck provides a visual mission control for your AI agent.
+PokéDeck provides a visual mission control for your AI agent.
 
 - Human assigns tasks via UI
 - Agent polls for assigned work

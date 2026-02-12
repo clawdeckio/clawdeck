@@ -105,6 +105,24 @@
   border-color: var(--color-accent-muted);
 }
 
+/* Give empty columns a more obvious drop target when hovering during drag */
+.column-drag-over > ul {
+  background: rgba(255, 77, 77, 0.02);
+  border-color: var(--color-accent-muted);
+  border-style: dashed;
+}
+
+/* Drop hint: hidden by default; shown while dragging over a column.
+   (We don't rely on Tailwind's `hidden` utility since its generated utility CSS
+   can override custom rules depending on build order.) */
+.drop-hint {
+  display: none;
+}
+
+.column-drag-over .drop-hint {
+  display: flex;
+}
+
 /* Sidebar layout */
 @layer components {
   /* Hide sidebar until JS determines state */
