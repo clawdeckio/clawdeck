@@ -143,6 +143,13 @@ Body: `{ "status": "in_progress" }` or `{ "blocked": true }`
 `POST /tasks`
 Body: `{ "name": "Task title", "status": "inbox" }`
 
+**List task comments (most recent last):**
+`GET /tasks/:task_id/comments`
+
+**Create task comment:**
+`POST /tasks/:task_id/comments`
+Body: `{ "comment": { "body": "Working on this now." } }`
+
 ## Statuses
 - `inbox` — New, not prioritized
 - `up_next` — Prioritized, waiting to be assigned

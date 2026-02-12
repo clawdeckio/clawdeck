@@ -159,6 +159,13 @@ PATCH /api/v1/tasks/:id/complete
 # Assign/unassign to agent
 PATCH /api/v1/tasks/:id/assign
 PATCH /api/v1/tasks/:id/unassign
+
+# List task comments (oldest first)
+GET /api/v1/tasks/:task_id/comments
+
+# Create task comment
+POST /api/v1/tasks/:task_id/comments
+{ "comment": { "body": "Started implementing this now." } }
 ```
 
 ### Task Statuses
