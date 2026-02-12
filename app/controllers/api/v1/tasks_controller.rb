@@ -187,7 +187,17 @@ module Api
       end
 
       def task_params
-        params.require(:task).permit(:name, :description, :priority, :due_date, :status, :blocked, :board_id, tags: [])
+        params.require(:task).permit(
+          :name,
+          :description,
+          :priority,
+          :due_date,
+          :status,
+          :blocked,
+          :blocked_reason,
+          :board_id,
+          tags: []
+        )
       end
 
       # Ensure we always emit valid JSON even if user-provided strings contain
@@ -211,6 +221,7 @@ module Api
           priority: task.priority,
           status: task.status,
           blocked: task.blocked,
+          blocked_reason: sanitize_json_string(task.blocked_reason),
           tags: task.tags || [],
           completed: task.completed,
           completed_at: task.completed_at&.iso8601,

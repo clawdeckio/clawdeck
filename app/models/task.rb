@@ -28,6 +28,7 @@ class Task < ApplicationRecord
 
   # Position management - acts_as_list functionality without the gem
   before_create :set_position
+  before_validation :clear_blocked_reason_unless_blocked
   before_save :sync_completed_with_status
   before_update :track_completion_time, if: :will_save_change_to_status?
 
@@ -67,6 +68,10 @@ class Task < ApplicationRecord
 
   def sync_completed_with_status
     self.completed = (status == "done")
+  end
+
+  def clear_blocked_reason_unless_blocked
+    self.blocked_reason = nil unless blocked?
   end
 
   def track_completion_time

@@ -63,6 +63,7 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
     assert task.key?("priority")
     assert task.key?("completed")
     assert task.key?("status")
+    assert task.key?("blocked_reason")
     assert task["created_at"].present?
     assert task["updated_at"].present?
   end
@@ -94,12 +95,15 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
 
   # Show tests
   test "show returns task" do
+    @task.update!(blocked: true, blocked_reason: "Waiting on stakeholder input")
+
     get api_v1_task_url(@task), headers: @auth_header
     assert_response :success
 
     task = response.parsed_body
     assert_equal @task.id, task["id"]
     assert_equal @task.name, task["name"]
+    assert_equal "Waiting on stakeholder input", task["blocked_reason"]
   end
 
   test "show returns not found for non-existent task" do
@@ -130,6 +134,44 @@ class Api::V1::TasksControllerTest < ActionDispatch::IntegrationTest
           params: { task: { name: "" } },
           headers: @auth_header
     assert_response :unprocessable_entity
+  end
+
+  test "update sets blocked and blocked_reason" do
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: true, blocked_reason: "Waiting on API credentials" } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal true, task["blocked"]
+    assert_equal "Waiting on API credentials", task["blocked_reason"]
+    assert_equal "Waiting on API credentials", @task.reload.blocked_reason
+  end
+
+  test "update clears blocked_reason when blocked is set false" do
+    @task.update!(blocked: true, blocked_reason: "Waiting on design sign-off")
+
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: false } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal false, task["blocked"]
+    assert_nil task["blocked_reason"]
+    assert_nil @task.reload.blocked_reason
+  end
+
+  test "update clears blocked_reason when blocked_reason is sent with blocked false" do
+    patch api_v1_task_url(@task),
+          params: { task: { blocked: false, blocked_reason: "Should not persist" } },
+          headers: @auth_header
+    assert_response :success
+
+    task = response.parsed_body
+    assert_equal false, task["blocked"]
+    assert_nil task["blocked_reason"]
+    assert_nil @task.reload.blocked_reason
   end
 
   # Destroy tests

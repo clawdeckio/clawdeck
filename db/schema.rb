@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_07_163000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_12_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -216,6 +216,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_163000) do
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
+    t.text "blocked_reason"
     t.bigint "board_id", null: false
     t.integer "comments_count", default: 0, null: false
     t.boolean "completed", default: false, null: false
