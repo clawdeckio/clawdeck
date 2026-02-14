@@ -1,261 +1,24 @@
-<%# Board Header %>
-<header class="relative flex-shrink-0 flex items-center justify-between px-6 py-3 bg-bg-base border-b border-border">
-  <%# Left section: Board switcher dropdown %>
-  <div class="flex items-center gap-4">
-    <%# Board switcher dropdown %>
-    <div class="relative" data-controller="dropdown">
-      <button type="button"
-              data-dropdown-target="button"
-              data-action="click->dropdown#toggle"
-              class="flex items-center gap-2 cursor-pointer hover:bg-bg-surface px-2 py-1 -ml-2 rounded-lg transition-colors">
-        <span class="text-sm"><%= @board.icon %></span>
-        <span class="text-sm font-semibold text-content font-display"><%= @board.name %></span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-content-muted">
-          <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-        </svg>
-      </button>
-
-      <%# Board switcher dropdown menu %>
-      <div data-dropdown-target="menu"
-           class="hidden absolute left-0 top-full mt-1 w-56 bg-bg-surface rounded-lg shadow-lg border border-border overflow-hidden z-50">
-        <%# Board list %>
-        <div class="py-1 max-h-[70vh] overflow-y-auto">
-          <% @boards.each do |board| %>
-            <%= link_to board_path(board),
-                class: "flex items-center gap-3 px-3 py-2 text-sm hover:bg-bg-elevated transition-colors #{board.id == @board.id ? 'bg-bg-elevated' : ''}",
-                data: { turbo_frame: "_top" } do %>
-              <span class="text-sm"><%= board.icon %></span>
-              <span class="text-content truncate flex-1"><%= board.name %></span>
-              <% if board.id == @board.id %>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-accent">
-                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                </svg>
-              <% end %>
-            <% end %>
-          <% end %>
-        </div>
-
-        <%# Divider %>
-        <div class="border-t border-border"></div>
-
-        <%# New Board button %>
-        <div class="py-1">
-          <button type="button"
-                  onclick="document.getElementById('new-board-modal').classList.remove('hidden')"
-                  class="w-full flex items-center gap-3 px-3 py-2 text-sm text-content-secondary hover:bg-bg-elevated hover:text-content transition-colors cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-              <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-            </svg>
-            <span>New Board</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <%# Center section: Task counts (absolutely centered in viewport) %>
-  <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex items-center gap-2 text-xs text-content-muted">
-    <span><span id="header-inbox-count"><%= @columns[:inbox]&.count || 0 %></span> inbox</span>
-    <span class="text-content-muted/50">|</span>
-    <span><span id="header-in_progress-count"><%= @columns[:in_progress]&.count || 0 %></span> in progress</span>
-  </div>
-
-  <%# Right section: Controls and user dropdown %>
-  <div class="flex items-center gap-2">
-    <%# Flash messages (compact) %>
-    <% if notice.present? %>
-      <div data-controller="flash" class="py-1 px-2.5 bg-status-success/20 text-status-success text-xs font-medium rounded-md">
-        <%= notice %>
-      </div>
-    <% end %>
-    <% if alert.present? %>
-      <div data-controller="flash" class="py-1 px-2.5 bg-status-error/20 text-status-error text-xs font-medium rounded-md">
-        <%= alert %>
-      </div>
-    <% end %>
-
-    <%# Board Settings Button %>
-    <button type="button"
-            onclick="document.getElementById('board-settings-modal').classList.remove('hidden')"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-content-secondary bg-bg-elevated hover:bg-bg-hover transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-      </svg>
-      <span class="hidden sm:inline">Board settings</span>
-    </button>
-
-    <%# Agent indicator (links to settings) %>
-    <% agent_connected = current_user.agent_last_active_at.present? %>
-    <%= link_to settings_path,
-        class: "relative w-7 h-7 rounded-md bg-bg-elevated hover:bg-bg-hover flex items-center justify-center text-sm transition-colors",
-        title: agent_connected ? "#{current_user.agent_name || 'Agent'} • Last active: #{time_ago_in_words(current_user.agent_last_active_at)} ago" : "Configure agent" do %>
-      <%= agent_connected ? (current_user.agent_emoji || "🦞") : "🦞" %>
-      <% if agent_connected && current_user.agent_last_active_at > 5.minutes.ago %>
-        <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-bg-base"></span>
-      <% end %>
-    <% end %>
-
-    <%# User avatar dropdown %>
-    <div class="relative" data-controller="dropdown">
-      <button
-        type="button"
-        data-dropdown-target="button"
-        data-action="click->dropdown#toggle"
-        class="flex items-center cursor-pointer"
-        aria-expanded="false"
-        aria-haspopup="true">
-        <div class="w-7 h-7 rounded-md overflow-hidden bg-bg-surface flex items-center justify-center">
-          <% if current_user.has_avatar? %>
-            <%= image_tag current_user.avatar_source, class: "w-full h-full object-cover", alt: "Your avatar" %>
-          <% else %>
-            <svg class="w-4 h-4 text-content-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          <% end %>
-        </div>
-      </button>
-
-      <%# Dropdown menu %>
-      <div
-        data-dropdown-target="menu"
-        class="hidden absolute right-0 top-full mt-1 w-48 bg-bg-surface rounded-lg shadow-lg border border-border overflow-hidden z-50">
-        <%# User info %>
-        <div class="px-3 py-2.5 bg-bg-elevated border-b border-border">
-          <p class="text-xs font-medium text-content truncate">
-            <%= current_user.email_address.split('@').first %>
-          </p>
-          <p class="text-xs text-content-muted truncate">
-            <%= current_user.email_address %>
-          </p>
-        </div>
-        <%# Menu items %>
-        <div class="py-1">
-          <%= link_to settings_path,
-              class: "flex items-center gap-2 px-3 py-2 text-xs text-content-secondary hover:bg-bg-elevated transition-colors" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Settings
-          <% end %>
-          <%= link_to "https://github.com/clawdeckio/clawdeck",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              class: "flex items-center gap-2 px-3 py-2 text-xs text-content-secondary hover:bg-bg-elevated transition-colors" do %>
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-            </svg>
-            GitHub
-          <% end %>
-          <%= link_to "https://discord.gg/pqffNjdY",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              class: "flex items-center gap-2 px-3 py-2 text-xs text-content-secondary hover:bg-bg-elevated transition-colors" do %>
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-            </svg>
-            Discord
-          <% end %>
-          <div class="border-t border-border my-1"></div>
-          <%= link_to session_path,
-              method: :delete,
-              data: { turbo_method: :delete },
-              class: "flex items-center gap-2 px-3 py-2 text-xs text-accent hover:bg-bg-elevated transition-colors" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Sign out
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<%# New Board Modal %>
-<div id="new-board-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="absolute inset-0 bg-black/60" onclick="document.getElementById('new-board-modal').classList.add('hidden')"></div>
-  <div class="relative bg-bg-surface border border-border rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
-    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-      <span class="text-sm font-semibold text-content font-display">New Board</span>
-      <button type="button"
-              onclick="document.getElementById('new-board-modal').classList.add('hidden')"
-              class="p-2 rounded-lg text-content-muted hover:text-content hover:bg-bg-elevated transition-colors cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <%= form_with model: Board.new, url: boards_path, class: "p-5 space-y-4" do |form| %>
-      <div>
-        <label class="block text-sm font-medium text-content-secondary mb-2">Board Name</label>
-        <%= form.text_field :name,
-            required: true,
-            placeholder: "e.g., Work, Personal, Side Project",
-            class: "w-full px-3 py-2 text-sm bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-content placeholder-content-muted" %>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-content-secondary mb-2">Icon</label>
-        <div class="flex flex-wrap gap-2" id="icon-group">
-          <% available_icons = Board::DEFAULT_ICONS.dup %>
-          <% if current_user.agent_last_active_at.present? && current_user.agent_emoji.present? && !available_icons.include?(current_user.agent_emoji) %>
-            <% available_icons << current_user.agent_emoji %>
-          <% end %>
-          <% available_icons.each do |icon| %>
-            <button type="button"
-                    onclick="selectBoardIcon(this, '<%= icon %>')"
-                    data-icon="<%= icon %>"
-                    class="w-10 h-10 flex items-center justify-center rounded-lg bg-bg-elevated hover:bg-bg-hover transition-colors text-xl cursor-pointer <%= icon == '📋' ? 'ring-2 ring-accent' : '' %>">
-              <%= icon %>
-            </button>
-          <% end %>
-        </div>
-        <%= form.hidden_field :icon, value: "📋", id: "board-icon-field" %>
-      </div>
-
-      <div class="flex items-center justify-end gap-3 pt-2">
-        <button type="button"
-                onclick="document.getElementById('new-board-modal').classList.add('hidden')"
-                class="px-4 py-2 text-sm rounded-md bg-bg-elevated hover:bg-bg-hover text-content-secondary transition-colors cursor-pointer">
-          Cancel
-        </button>
-        <%= form.submit "Create Board", class: "px-4 py-2 text-sm rounded-md bg-accent text-content hover:bg-accent-hover transition-colors cursor-pointer" %>
-      </div>
-    <% end %>
-  </div>
-</div>
+<%# Board-specific modals — Board Settings only (New Board modal is in shared/navbar) %>
 
 <script>
-  function selectBoardIcon(btn, icon) {
-    document.getElementById('board-icon-field').value = icon;
-    document.querySelectorAll('#icon-group button').forEach(b => {
-      b.classList.remove('ring-2', 'ring-accent');
-    });
-    btn.classList.add('ring-2', 'ring-accent');
-  }
-
   function selectEditBoardIcon(btn, icon) {
     document.getElementById('edit-board-icon-field').value = icon;
     document.querySelectorAll('#edit-icon-group button').forEach(b => {
-      b.classList.remove('ring-2', 'ring-accent');
+      b.classList.remove('ring-2', 'ring-project-amber');
     });
-    btn.classList.add('ring-2', 'ring-accent');
+    btn.classList.add('ring-2', 'ring-project-amber');
   }
 </script>
 
 <%# Board Settings Modal %>
 <div id="board-settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
   <div class="absolute inset-0 bg-black/60" onclick="document.getElementById('board-settings-modal').classList.add('hidden')"></div>
-  <div class="relative bg-bg-surface border border-border rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
-    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-      <span class="text-sm font-semibold text-content font-display">Board Settings</span>
+  <div class="relative bg-bg-surface border border-white/[0.08] rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden" style="box-shadow: 0 12px 40px rgba(0,0,0,0.5);">
+    <div class="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+      <span class="text-sm font-bold text-content">Board Settings</span>
       <button type="button"
               onclick="document.getElementById('board-settings-modal').classList.add('hidden')"
-              class="p-2 rounded-lg text-content-muted hover:text-content hover:bg-bg-elevated transition-colors cursor-pointer">
+              class="p-2 rounded-lg text-content-muted hover:text-content hover:bg-white/[0.04] transition-colors cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
@@ -268,7 +31,7 @@
         <%= form.text_field :name,
             required: true,
             placeholder: "e.g., Work, Personal, Side Project",
-            class: "w-full px-3 py-2 text-sm bg-bg-elevated border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-content placeholder-content-muted" %>
+            class: "w-full px-3 py-2 text-sm bg-bg-card border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-project-amber text-content placeholder-content-muted" %>
       </div>
 
       <div>
@@ -278,7 +41,6 @@
           <% if current_user.agent_last_active_at.present? && current_user.agent_emoji.present? && !edit_icons.include?(current_user.agent_emoji) %>
             <% edit_icons << current_user.agent_emoji %>
           <% end %>
-          <%# Also include the current board's icon if it's custom %>
           <% if @board.icon.present? && !edit_icons.include?(@board.icon) %>
             <% edit_icons << @board.icon %>
           <% end %>
@@ -286,7 +48,7 @@
             <button type="button"
                     onclick="selectEditBoardIcon(this, '<%= icon %>')"
                     data-icon="<%= icon %>"
-                    class="w-10 h-10 flex items-center justify-center rounded-lg bg-bg-elevated hover:bg-bg-hover transition-colors text-xl cursor-pointer <%= icon == @board.icon ? 'ring-2 ring-accent' : '' %>">
+                    class="w-10 h-10 flex items-center justify-center rounded-lg bg-bg-card hover:bg-white/[0.08] transition-colors text-xl cursor-pointer <%= icon == @board.icon ? 'ring-2 ring-project-amber' : '' %>">
               <%= icon %>
             </button>
           <% end %>
@@ -309,10 +71,10 @@
         <div class="flex items-center gap-3">
           <button type="button"
                   onclick="document.getElementById('board-settings-modal').classList.add('hidden')"
-                  class="px-4 py-2 text-sm rounded-md bg-bg-elevated hover:bg-bg-hover text-content-secondary transition-colors cursor-pointer">
+                  class="px-4 py-2 text-sm rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-content-secondary transition-colors cursor-pointer">
             Cancel
           </button>
-          <%= form.submit "Save Changes", class: "px-4 py-2 text-sm rounded-md bg-accent text-content hover:bg-accent-hover transition-colors cursor-pointer" %>
+          <%= form.submit "Save Changes", class: "px-4 py-2 text-sm rounded-lg bg-project-amber text-[#161619] font-semibold hover:brightness-110 transition-all cursor-pointer" %>
         </div>
       </div>
     <% end %>

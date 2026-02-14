@@ -2,134 +2,124 @@
 
 @theme {
   /* ========================================
-     SEMANTIC COLOR PALETTE
-     Change colors here to update everywhere
+     DESIGN SYSTEM v2 — Neutral Dark Palette
      ======================================== */
 
-  /* Backgrounds */
-  --color-bg-base: #0e1220;
-  --color-bg-surface: #141827;
-  --color-bg-elevated: #1c2233;
-  --color-bg-hover: #232b3d;
+  /* Backgrounds (3-layer depth system) */
+  --color-bg-base: #161619;
+  --color-bg-surface: #161619;
+  --color-bg-elevated: #1a1a1e;
+  --color-bg-card: #1e1e22;
+  --color-bg-dropdown: #222226;
 
-  /* Accent (primary action color) */
-  --color-accent: #ff4d4d;
-  --color-accent-hover: #e63946;
-  --color-accent-dark: #991b1b;
-  --color-accent-muted: rgba(255, 77, 77, 0.3);
-
-  /* Text/Content */
-  --color-content: #ffffff;
-  --color-content-secondary: #a0aec0;
-  --color-content-muted: #64748b;
-  --color-content-inverse: #050810;
+  /* Text */
+  --color-content: #f0f0f0;
+  --color-content-secondary: #bbb;
+  --color-content-muted: #888;
+  --color-content-dim: #555;
+  --color-content-ghost: #444;
+  --color-content-dimmed: #333;
 
   /* Borders */
-  --color-border: rgba(136, 146, 176, 0.15);
-  --color-border-accent: rgba(255, 77, 77, 0.3);
+  --color-border: rgba(255, 255, 255, 0.05);
+  --color-border-card: rgba(255, 255, 255, 0.04);
+  --color-border-hover: rgba(255, 255, 255, 0.08);
+  --color-border-active: rgba(255, 255, 255, 0.12);
 
-  /* Status colors */
-  --color-status-success: #22c55e;
-  --color-status-warning: #f59e0b;
+  /* Project colors */
+  --color-project-red: #ef4444;
+  --color-project-green: #34d399;
+  --color-project-amber: #fbbf24;
+  --color-project-blue: #60a5fa;
+  --color-project-purple: #a78bfa;
+
+  /* Functional / Status */
+  --color-status-success: #34d399;
+  --color-status-warning: #fbbf24;
   --color-status-error: #ef4444;
-  --color-status-info: #3b82f6;
+  --color-status-info: #60a5fa;
+  --color-agent: #fbbf24;
 
-  /* Fonts */
-  --font-display: "Clash Display", system-ui, sans-serif;
-  --font-body: "Satoshi", system-ui, sans-serif;
+  /* Legacy compat — referenced in views not yet migrated */
+  --color-bg-hover: #222226;
+  --color-accent: #ef4444;
+  --color-accent-hover: #dc2626;
+  --color-accent-muted: rgba(239, 68, 68, 0.3);
+  --color-content-inverse: #0c0c0f;
+  --color-border-accent: rgba(239, 68, 68, 0.3);
+
+  /* Font */
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-up: fadeUp 0.3s ease both;
+  --animate-slide-in: slideIn 0.2s ease both;
+  --animate-drop-in: dropIn 0.12s ease both;
+  --animate-cmd-in: cmdIn 0.2s ease both;
+  --animate-pulse-dot: pulse 2s ease-in-out infinite;
 }
 
 @layer base {
   :root {
-    --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     color-scheme: dark;
   }
 
-  html,
-  body {
+  html, body {
     font-family: var(--font-body);
     margin: 0;
     padding: 0;
     background-color: var(--color-bg-base);
   }
+
+  /* Selection styling */
+  ::selection {
+    background: #fbbf24;
+    color: #161619;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
 }
 
-/* ========================================
-   STARRY BACKGROUND (Homepage)
-   ======================================== */
-.stars {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image:
-    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.8), transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.5), transparent),
-    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.6), transparent),
-    radial-gradient(2px 2px at 130px 80px, rgba(255, 255, 255, 0.4), transparent),
-    radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(2px 2px at 200px 60px, rgba(0, 229, 204, 0.6), transparent),
-    radial-gradient(1px 1px at 250px 150px, rgba(255, 255, 255, 0.5), transparent),
-    radial-gradient(2px 2px at 300px 40px, rgba(255, 77, 77, 0.4), transparent);
-  background-size: 350px 200px;
-  animation: twinkle 8s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 0;
+/* Keyframes */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cmdIn {
+  from { opacity: 0; transform: translateX(-50%) scale(0.96); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
 }
 
-@keyframes twinkle {
-  0% { opacity: 0.4; }
-  100% { opacity: 0.7; }
-}
-
-.nebula {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255, 77, 77, 0.12), transparent 50%),
-    radial-gradient(ellipse 60% 60% at 80% 30%, rgba(0, 229, 204, 0.08), transparent 50%),
-    radial-gradient(ellipse 90% 70% at 50% 90%, rgba(255, 77, 77, 0.06), transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ========================================
-   COLUMN DRAG HIGHLIGHT
-   ======================================== */
+/* Column drag highlight */
 .column-drag-over {
-  background: rgba(255, 77, 77, 0.03);
-  border-color: var(--color-accent-muted);
-}
-
-/* Sidebar layout */
-@layer components {
-  /* Hide sidebar until JS determines state */
-  [data-sidebar-target="sidebar"] {
-    visibility: hidden;
-    transform: translateX(calc(-100% - 0.5rem));
-  }
-
-  /* Show sidebar once state is determined */
-  html.sidebar-ready [data-sidebar-target="sidebar"] {
-    visibility: visible;
-  }
-
-  /* Content has no margin by default */
-  [data-sidebar-target="content"] {
-    margin-left: 0;
-  }
-
-  /* When sidebar is open (class on html element) */
-  html.sidebar-open [data-sidebar-target="sidebar"] {
-    transform: translateX(0);
-  }
-
-  /* 48px sidebar + 8px gap = 56px */
-  html.sidebar-open [data-sidebar-target="content"] {
-    margin-left: 56px;
-  }
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
 }

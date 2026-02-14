@@ -8,12 +8,11 @@
     <meta name="apple-mobile-web-app-title" content="ClawDeck">
     <meta name="application-name" content="ClawDeck">
     <meta name="mobile-web-app-capable" content="yes">
-    <%# Theme colors for Safari and other browsers %>
-    <meta name="theme-color" content="#050810">
+    <meta name="theme-color" content="#161619">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%# Fonts - Clash Display + Satoshi %>
-    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <%# Font — Plus Jakarta Sans %>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <%= yield :head %>
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
@@ -28,20 +27,20 @@
     <%= javascript_importmap_tags %>
     <%= render "application/plausible_analytics" %>
   </head>
-  <body class="h-screen overflow-hidden bg-bg-base font-body" data-controller="turbo-progress">
+  <body class="h-screen overflow-hidden bg-[#161619] text-[#bbb] font-sans" data-controller="turbo-progress">
     <% if @board_page %>
       <%# Board page - full screen, no wrapper %>
       <div class="h-screen flex flex-col bg-bg-base">
-        <main class="h-full text-content-secondary font-normal text-sm">
+        <main class="h-full text-content-secondary font-medium text-sm">
           <%= yield %>
         </main>
       </div>
     <% else %>
       <%# Other pages - centered content with navbar %>
       <div class="h-screen flex flex-col bg-bg-base">
-        <%= render "application/navbar" %>
+        <%= render "shared/navbar" %>
         <div class="flex-1 overflow-y-auto px-4 pb-8 overscroll-contain [-webkit-overflow-scrolling:touch]">
-          <main class="container max-w-lg mx-auto text-content-secondary font-normal text-sm">
+          <main class="max-w-[680px] mx-auto text-content-secondary font-medium text-sm">
             <%= yield %>
           </main>
         </div>

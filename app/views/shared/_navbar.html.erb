@@ -1,0 +1,216 @@
+<%# Unified navbar — 52px, used on both board and non-board pages %>
+<%# Determine which board to show in switcher %>
+<% navbar_boards = authenticated? ? (defined?(@boards) && @boards ? @boards : current_user.boards) : [] %>
+<% navbar_current_board = @board || navbar_boards.first %>
+
+<header class="relative flex-shrink-0 flex items-center justify-between h-[52px] px-6 bg-transparent border-b border-white/5" style="position: sticky; top: 0; z-index: 100; background: #161619;">
+  <%# Left section: Board switcher + nav tabs %>
+  <div class="flex items-center gap-5">
+    <% if authenticated? && navbar_current_board %>
+      <%# Board switcher dropdown %>
+      <div class="relative" data-controller="dropdown">
+        <button type="button"
+                data-dropdown-target="button"
+                data-action="click->dropdown#toggle"
+                class="flex items-center gap-2 cursor-pointer hover:bg-white/[0.04] px-2 py-1 -ml-2 rounded-lg transition-colors">
+          <% if @board %>
+            <span class="text-lg"><%= navbar_current_board.icon %></span>
+            <span class="text-sm font-extrabold text-[#e0e0e0] tracking-[-0.02em]"><%= navbar_current_board.name %></span>
+          <% else %>
+            <span class="text-sm">🏠</span>
+            <span class="text-sm font-extrabold text-[#e0e0e0] tracking-[-0.02em]">Home</span>
+          <% end %>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="opacity-30 ml-0.5 transition-transform" data-dropdown-target="chevron">
+            <path d="M4 6L8 10L12 6" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <%# Board switcher dropdown menu %>
+        <div data-dropdown-target="menu"
+             class="hidden absolute left-0 top-full mt-1.5 w-60 p-1.5 rounded-xl border border-white/[0.08] z-50 animate-drop-in <%= @board ? 'bg-bg-card' : 'bg-bg-surface' %>"
+             style="box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+          <%# Home link %>
+          <%= link_to home_path,
+              class: "flex items-center gap-2.5 w-full px-2.5 py-[9px] rounded-lg transition-colors #{!@board ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]'}",
+              data: { turbo_frame: "_top" } do %>
+            <span class="text-sm w-6 text-center">🏠</span>
+            <span class="text-[13px] font-semibold flex-1 truncate <%= !@board ? 'text-[#e0e0e0]' : 'text-[#777]' %>">Home</span>
+            <% unless @board %>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8.5L6.5 12L13 4" stroke="#f0f0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            <% end %>
+          <% end %>
+          <%# Divider %>
+          <div class="h-px bg-white/[0.06] my-1"></div>
+          <%# "Switch board" label %>
+          <div class="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#444]">
+            Switch board
+          </div>
+          <%# Board list %>
+          <div class="max-h-[60vh] overflow-y-auto">
+            <% navbar_boards.each do |board| %>
+              <% board_color = board_hex_color(board) %>
+              <% is_active = @board && @board.id == board.id %>
+              <%= link_to board_path(board),
+                  class: "flex items-center gap-2.5 w-full px-2.5 py-[9px] rounded-lg transition-colors #{is_active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]'}",
+                  data: { turbo_frame: "_top" } do %>
+                <span class="text-sm w-6 text-center"><%= board.icon %></span>
+                <span class="text-[13px] font-semibold flex-1 truncate <%= is_active ? 'text-[#e0e0e0]' : 'text-[#777]' %>"><%= board.name %></span>
+                <% if is_active %>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8.5L6.5 12L13 4" stroke="<%= board_color %>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+          <%# Divider %>
+          <div class="h-px bg-white/[0.06] my-1"></div>
+          <%# Create new board %>
+          <button type="button"
+                  onclick="document.getElementById('new-board-modal').classList.remove('hidden')"
+                  class="flex items-center gap-2.5 w-full px-2.5 py-[9px] rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="ml-1">
+              <path d="M8 3V13M3 8H13" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="text-[13px] font-semibold text-[#555]">Create new board</span>
+          </button>
+        </div>
+      </div>
+
+    <% elsif authenticated? %>
+      <%# Fallback: link to boards if no boards exist yet %>
+      <%= link_to boards_path, class: "flex items-center gap-2 text-sm text-content-secondary hover:text-content transition-colors" do %>
+        <span class="text-sm font-extrabold text-[#e0e0e0]">ClawDeck</span>
+      <% end %>
+    <% else %>
+      <%= link_to root_path, class: "flex items-center" do %>
+        <%= image_tag "clawdecklogo.svg", alt: "ClawDeck Logo", class: "h-6 w-auto" %>
+      <% end %>
+    <% end %>
+  </div>
+
+
+  <%# Right section: Flash messages + actions + user dropdown %>
+  <div class="flex items-center gap-2.5">
+    <%# Flash messages %>
+    <% if notice.present? %>
+      <div data-controller="flash" class="py-1 px-2.5 bg-status-success/20 text-status-success text-xs font-medium rounded-lg">
+        <%= notice %>
+      </div>
+    <% end %>
+    <% if alert.present? %>
+      <div data-controller="flash" class="py-1 px-2.5 bg-status-error/20 text-status-error text-xs font-medium rounded-lg">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <% if authenticated? %>
+      <%# Board settings button (board pages only) %>
+      <% if @board %>
+        <button type="button"
+                onclick="document.getElementById('board-settings-modal').classList.remove('hidden')"
+                class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-[#888] font-semibold bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          <span class="hidden sm:inline">Settings</span>
+        </button>
+      <% end %>
+
+      <%# Agent indicator %>
+      <% if current_user.agent_last_active_at.present? %>
+        <div class="relative cursor-default" title="<%= current_user.agent_name || 'Agent' %> &middot; Last active: <%= time_ago_in_words(current_user.agent_last_active_at) %> ago">
+          <span class="text-lg"><%= current_user.agent_emoji || "🦞" %></span>
+          <% if current_user.agent_last_active_at > 5.minutes.ago %>
+            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-status-success rounded-full border border-bg-base"></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# User avatar dropdown %>
+      <div class="relative" data-controller="dropdown">
+        <button type="button"
+                data-dropdown-target="button"
+                data-action="click->dropdown#toggle"
+                class="flex items-center cursor-pointer"
+                aria-expanded="false"
+                aria-haspopup="true">
+          <div class="w-[30px] h-[30px] rounded-lg overflow-hidden bg-white/[0.06] border border-transparent hover:bg-white/10 flex items-center justify-center transition-all">
+            <% if current_user.has_avatar? %>
+              <%= image_tag current_user.avatar_source, class: "w-full h-full object-cover", alt: "Your avatar" %>
+            <% else %>
+              <span class="text-[13px] font-bold text-[#e0e0e0]"><%= current_user.email_address.first.upcase %></span>
+            <% end %>
+          </div>
+        </button>
+
+        <%# User dropdown menu %>
+        <div data-dropdown-target="menu"
+             class="hidden absolute right-0 top-full mt-1.5 w-[220px] p-1.5 rounded-xl border border-white/[0.08] z-50 animate-drop-in <%= @board ? 'bg-bg-card' : 'bg-bg-surface' %>"
+             style="box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+          <%# User info header %>
+          <div class="px-2.5 py-2.5 border-b border-white/[0.06] mb-1">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-sm font-bold text-[#e0e0e0]">
+                <%= current_user.email_address.first.upcase %>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[13px] font-bold text-[#e0e0e0] truncate"><%= current_user.email_address.split('@').first %></div>
+                <div class="text-[11px] font-medium text-[#555] truncate"><%= current_user.email_address %></div>
+              </div>
+            </div>
+          </div>
+
+          <%# Menu items %>
+          <%= link_to settings_path,
+              class: "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-[#999] hover:bg-white/[0.04] transition-colors" do %>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" class="opacity-35">
+              <circle cx="8" cy="8" r="2.5" stroke="#888" stroke-width="1.5"/>
+              <path d="M8 1V3M8 13V15M1 8H3M13 8H15M3.05 3.05L4.46 4.46M11.54 11.54L12.95 12.95M12.95 3.05L11.54 4.46M4.46 11.54L3.05 12.95" stroke="#888" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Settings
+          <% end %>
+          <%= link_to "https://github.com/clawdeckio/clawdeck",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              class: "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-[#999] hover:bg-white/[0.04] transition-colors" do %>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" class="opacity-35">
+              <path fill-rule="evenodd" d="M8 1C4.133 1 1 4.13 1 8.003c0 3.094 2.006 5.722 4.787 6.65.35.064.478-.152.478-.338 0-.166-.006-.607-.01-1.192-1.947.424-2.358-.94-2.358-.94-.318-.81-.777-1.026-.777-1.026-.635-.434.048-.425.048-.425.702.049 1.072.722 1.072.722.625 1.07 1.639.762 2.038.582.064-.453.245-.762.446-.937-1.554-.177-3.189-.779-3.189-3.466 0-.766.273-1.39.72-1.881-.071-.177-.313-.89.069-1.855 0 0 .588-.19 1.925.719A6.7 6.7 0 018 4.79c.595.003 1.194.08 1.753.236 1.336-.907 1.923-.719 1.923-.719.382.965.14 1.678.07 1.855.448.49.72 1.115.72 1.88 0 2.693-1.638 3.286-3.197 3.46.252.217.476.644.476 1.299 0 .937-.009 1.694-.009 1.923 0 .188.127.408.483.338A7.003 7.003 0 0015 8.003C15 4.13 11.867 1 8 1z" clip-rule="evenodd"/>
+            </svg>
+            GitHub
+          <% end %>
+          <%= link_to "https://discord.gg/pqffNjdY",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              class: "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-[#999] hover:bg-white/[0.04] transition-colors" do %>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" class="opacity-35">
+              <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.046.046 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019 9.5 9.5 0 0 0 .818-1.329.049.049 0 0 0-.027-.068 8.735 8.735 0 0 1-1.248-.595.05.05 0 0 1-.005-.085c.084-.063.168-.128.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.049.049 0 0 1 .053.007c.08.066.164.132.248.195a.05.05 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.027.07c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.036c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.02z"/>
+            </svg>
+            Discord
+          <% end %>
+
+          <%# Divider + Log out %>
+          <div class="h-px bg-white/[0.06] my-1"></div>
+          <%= link_to session_path,
+              data: { turbo_method: :delete },
+              class: "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-[#ef4444] hover:bg-[rgba(239,68,68,0.06)] transition-colors" do %>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" class="opacity-40">
+              <path d="M6 2H4C2.9 2 2 2.9 2 4V12C2 13.1 2.9 14 4 14H6M11 11L14 8L11 5M6 8H14" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Log out
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <%= link_to "Sign in", new_session_path, class: "px-3 py-1.5 text-xs font-medium text-content-secondary hover:text-content transition-colors" %>
+    <% end %>
+  </div>
+</header>
+
+<%# New Board modal — available on all pages %>
+<% if authenticated? %>
+  <%= render "shared/new_board_modal" %>
+<% end %>

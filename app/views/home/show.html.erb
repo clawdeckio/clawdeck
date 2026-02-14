@@ -1,0 +1,282 @@
+<% content_for :title, "Home Dashboard - clawdeck" %>
+
+<div class="max-w-[540px] mx-auto px-5 pb-12">
+
+  <%# ─── Greeting + Progress ─── %>
+  <div class="flex items-end justify-between pt-9 animate-fade-up">
+    <div>
+      <div class="text-[11px] font-semibold text-[#444] tracking-[0.06em] uppercase mb-2">
+        <%= Date.today.strftime("%A, %B %-d") %>
+      </div>
+      <h1 class="text-[28px] font-extrabold text-[#f0f0f0] tracking-[-0.03em] leading-[1.15]">
+        <%= time_greeting %>, <%= current_user.email_address.split('@').first.capitalize %>
+      </h1>
+    </div>
+    <div class="flex items-center gap-3.5">
+      <div class="text-right">
+        <div class="text-[22px] font-extrabold text-[#f0f0f0] tracking-[-0.02em]">
+          <%= @completed_today_count %>/<%= @all_today_tasks.size %>
+        </div>
+        <div class="text-[11px] font-medium text-[#444]">done today</div>
+      </div>
+      <% progress = @all_today_tasks.size > 0 ? (@completed_today_count.to_f / @all_today_tasks.size) : 0 %>
+      <div class="relative w-11 h-11">
+        <svg width="44" height="44" viewBox="0 0 44 44" style="transform: rotate(-90deg)">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4" />
+          <circle cx="22" cy="22" r="18" fill="none" stroke="#ef4444" stroke-width="4"
+            stroke-dasharray="<%= (progress * 113).round(1) %> 113" stroke-linecap="round"
+            style="transition: stroke-dasharray 0.6s ease" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <%# ─── Agent Status Bar ─── %>
+  <% if @agent_tasks_count > 0 %>
+    <div class="flex items-center gap-1.5 pt-4 pb-6 animate-fade-up" style="animation-delay: 0.04s">
+      <div class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] animate-pulse-dot"></div>
+      <span class="text-[11px] font-semibold text-[#fbbf24]">
+        Agent working on <%= pluralize(@agent_tasks_count, "task") %>
+      </span>
+    </div>
+  <% else %>
+    <div class="pt-4 pb-6"></div>
+  <% end %>
+
+  <%# ─── Today's Tasks ─── %>
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-2.5 animate-fade-up" style="animation-delay: 0.06s">
+      <h2 class="text-sm font-bold text-[#999]">Today</h2>
+      <% first_board = @boards.first %>
+      <% if first_board %>
+        <%= link_to board_path(first_board), class: "text-[11px] font-semibold text-[#444] hover:text-[#666] transition-colors" do %>
+          View board &rarr;
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex flex-col gap-[5px]">
+      <% if @all_today_tasks.empty? %>
+        <div class="px-4 py-8 rounded-xl text-center animate-fade-up" style="animation-delay: 0.08s; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.04);">
+          <div class="text-[13px] font-medium text-[#555]">No tasks for today</div>
+          <div class="text-[11px] text-[#333] mt-1">Tasks in "Up Next" and "In Progress" will appear here</div>
+        </div>
+      <% else %>
+        <% @all_today_tasks.each_with_index do |task, i| %>
+          <% color = board_hex_color(task.board) %>
+          <% is_done = task.completed? %>
+          <div class="flex gap-3.5 items-start relative overflow-hidden animate-fade-up"
+               style="padding: 14px 16px; border-radius: 12px;
+                      background: <%= is_done ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)' %>;
+                      border: 1px solid <%= is_done ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)' %>;
+                      opacity: <%= is_done ? '0.35' : '1' %>;
+                      transition: all 0.25s ease;
+                      animation-delay: <%= (0.08 + i * 0.04).round(2) %>s;"
+               data-controller="home-checkbox"
+               data-home-checkbox-task-id-value="<%= task.id %>"
+               data-home-checkbox-board-id-value="<%= task.board_id %>"
+               data-home-checkbox-completed-value="<%= is_done %>"
+               data-home-checkbox-color-value="<%= color %>">
+
+            <%# Checkbox %>
+            <button type="button"
+                    data-action="click->home-checkbox#toggle"
+                    data-home-checkbox-target="checkbox"
+                    class="flex items-center justify-center cursor-pointer transition-all duration-150"
+                    style="width: 20px; height: 20px; min-width: 20px; border-radius: 6px; margin-top: 1px;
+                           <%= is_done ?
+                             "background: #{color}; border: none;" :
+                             "background: transparent; border: 2px solid #{hex_to_rgba(color, 0.25)};" %>">
+              <% if is_done %>
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8.5L6.5 12L13 4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              <% end %>
+            </button>
+
+            <%# Task content %>
+            <div class="flex-1 min-w-0">
+              <div class="text-[13.5px] font-semibold leading-[1.35] mb-[5px]"
+                   data-home-checkbox-target="title"
+                   style="color: <%= is_done ? '#444' : '#ddd' %>; text-decoration: <%= is_done ? 'line-through' : 'none' %>;">
+                <%= task.name %>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <%# Board/project pill %>
+                <span style="font-size: 10px; font-weight: 600; color: <%= color %>;
+                             background: <%= hex_to_rgba(color, 0.07) %>;
+                             padding: 1px 7px; border-radius: 5px;
+                             border: 1px solid <%= hex_to_rgba(color, 0.09) %>;">
+                  <%= task.board.icon %> <%= task.board.name %>
+                </span>
+                <%# Due date label %>
+                <% if task.due_date.present? %>
+                  <span style="font-size: 10px; font-weight: 500; color: #555;
+                               background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px;">
+                    <%= task.due_date == Date.today ? "Today" : task.due_date.strftime("%-m/%-d") %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Agent status indicator %>
+            <% if task.assigned_to_agent? %>
+              <div class="flex items-center gap-1 self-start"
+                   style="padding: 3px 8px; border-radius: 7px;
+                          background: <%= is_done ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)' %>;
+                          border: 1px solid <%= is_done ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.12)' %>;">
+                <span style="font-size: 10px;">🤖</span>
+                <span style="font-size: 10px; font-weight: 600; color: <%= is_done ? '#34d399' : '#fbbf24' %>;">
+                  <%= is_done ? "Review" : "Working" %>
+                </span>
+                <% unless is_done %>
+                  <div style="width: 4px; height: 4px; border-radius: 50%; background: #fbbf24; animation: pulse 1.5s ease infinite;"></div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# ─── Agent Activity ─── %>
+  <div class="mb-8">
+    <div class="flex items-center gap-[7px] mb-2.5 animate-fade-up" style="animation-delay: 0.28s">
+      <span class="text-[13px]">🤖</span>
+      <h2 class="text-sm font-bold text-[#999]">Agent Activity</h2>
+    </div>
+    <div class="flex flex-col gap-[5px]">
+      <% if @agent_updates.empty? %>
+        <div class="animate-fade-up"
+             style="padding: 11px 13px; border-radius: 10px;
+                    background: rgba(251,191,36,0.03); border: 1px solid rgba(251,191,36,0.07);
+                    animation-delay: 0.32s;">
+          <div class="text-xs font-medium leading-[1.45]" style="color: #555;">No recent agent activity</div>
+          <div class="text-[10px] font-medium mt-1" style="color: #333;">Assign tasks to your agent to see updates here</div>
+        </div>
+      <% else %>
+        <% @agent_updates.each_with_index do |activity, i| %>
+          <div class="animate-fade-up"
+               style="padding: 11px 13px; border-radius: 10px;
+                      background: rgba(251,191,36,0.03); border: 1px solid rgba(251,191,36,0.07);
+                      animation-delay: <%= (0.32 + i * 0.04).round(2) %>s;">
+            <div class="text-xs font-medium leading-[1.45]" style="color: #999;">
+              <%= activity.task.name %> &mdash; <%= activity.description %>
+            </div>
+            <div class="text-[10px] font-medium mt-1" style="color: #333;">
+              <%= time_ago_in_words(activity.created_at) %> ago
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# ─── This Week — Activity Chart ─── %>
+  <% max_val = [@week_stats.map { |d| d[:you] + d[:agent] }.max || 1, 1].max %>
+  <% today_idx = (Date.today.cwday - 1) % 7 %>
+  <% total_you = @week_stats.sum { |d| d[:you] } %>
+  <% total_agent = @week_stats.sum { |d| d[:agent] } %>
+
+  <div class="mb-8 animate-fade-up"
+       style="padding: 18px 20px; border-radius: 14px;
+              background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05);
+              animation-delay: 0.48s;">
+    <%# Chart header %>
+    <div class="flex items-center justify-between mb-5">
+      <div style="font-size: 11px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 0.06em;">This week</div>
+      <div class="flex gap-3.5">
+        <div class="flex items-center gap-[5px]">
+          <div style="width: 8px; height: 8px; border-radius: 2px; background: #ef4444;"></div>
+          <span style="font-size: 10px; font-weight: 500; color: #555;">You (<%= total_you %>)</span>
+        </div>
+        <div class="flex items-center gap-[5px]">
+          <div style="width: 8px; height: 8px; border-radius: 2px; background: #fbbf24;"></div>
+          <span style="font-size: 10px; font-weight: 500; color: #555;">Agent (<%= total_agent %>)</span>
+        </div>
+      </div>
+    </div>
+
+    <%# Stacked bar chart %>
+    <div class="flex items-end gap-1.5" style="height: 90px; margin-bottom: 8px;">
+      <% @week_stats.each_with_index do |d, i| %>
+        <% total = d[:you] + d[:agent] %>
+        <% you_h = max_val > 0 ? (d[:you].to_f / max_val * 72).round(1) : 0 %>
+        <% agent_h = max_val > 0 ? (d[:agent].to_f / max_val * 72).round(1) : 0 %>
+        <% is_today = i == today_idx %>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;">
+          <% if total > 0 %>
+            <div style="font-size: 9px; font-weight: 700; color: <%= is_today ? '#ddd' : '#333' %>; margin-bottom: 4px;"><%= total %></div>
+          <% end %>
+          <div style="display: flex; flex-direction: column; gap: 1px; width: 100%; max-width: 42px;">
+            <% if agent_h > 0 %>
+              <div style="height: <%= agent_h %>px; border-radius: <%= you_h > 0 ? '5px 5px 0 0' : '5px' %>; background: <%= is_today ? '#fbbf24' : 'rgba(251,191,36,0.2)' %>;"></div>
+            <% end %>
+            <% if you_h > 0 %>
+              <div style="height: <%= you_h %>px; border-radius: <%= agent_h > 0 ? '0 0 5px 5px' : '5px' %>; background: <%= is_today ? '#ef4444' : 'rgba(239,68,68,0.2)' %>;"></div>
+            <% end %>
+            <% if total == 0 %>
+              <div style="height: 3px; border-radius: 4px; background: rgba(255,255,255,0.04); width: 100%;"></div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Day labels %>
+    <div class="flex gap-1.5">
+      <% @week_stats.each_with_index do |d, i| %>
+        <div style="flex: 1; text-align: center; font-size: 10px;
+                    font-weight: <%= i == today_idx ? '700' : '500' %>;
+                    color: <%= i == today_idx ? '#e0e0e0' : '#333' %>;">
+          <%= d[:day] %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Summary row %>
+    <div style="display: flex; justify-content: space-around; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.04);">
+      <div style="text-align: center;">
+        <div style="font-size: 20px; font-weight: 800; color: #ddd; letter-spacing: -0.02em;"><%= @completed_count %></div>
+        <div style="font-size: 10px; font-weight: 500; color: #444; margin-top: 2px;">completed</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; font-weight: 800; color: #fbbf24; letter-spacing: -0.02em;"><%= @in_progress_count %></div>
+        <div style="font-size: 10px; font-weight: 500; color: #444; margin-top: 2px;">in progress</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; font-weight: 800; color: #555; letter-spacing: -0.02em;"><%= @upcoming_count %></div>
+        <div style="font-size: 10px; font-weight: 500; color: #444; margin-top: 2px;">upcoming</div>
+      </div>
+    </div>
+  </div>
+
+  <%# ─── Boards (Projects) ─── %>
+  <div class="mb-12">
+    <h2 class="text-sm font-bold animate-fade-up" style="color: #999; margin-bottom: 10px; animation-delay: 0.52s;">Boards</h2>
+    <div class="grid grid-cols-2 gap-1.5">
+      <% @boards.each_with_index do |board, i| %>
+        <% task_count = board.tasks.where(completed: false).count %>
+        <%= link_to board_path(board),
+            class: "flex items-center gap-3 animate-fade-up",
+            style: "padding: 14px 16px; border-radius: 12px;
+                    background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);
+                    transition: all 0.15s; animation-delay: #{(0.56 + i * 0.04).round(2)}s;",
+            onmouseenter: "this.style.background='rgba(255,255,255,0.055)'; this.style.borderColor='rgba(255,255,255,0.1)'",
+            onmouseleave: "this.style.background='rgba(255,255,255,0.035)'; this.style.borderColor='rgba(255,255,255,0.06)'" do %>
+          <span class="text-xl"><%= board.icon %></span>
+          <div class="flex-1 min-w-0">
+            <div style="font-size: 13px; font-weight: 600; color: #ccc;" class="truncate"><%= board.name %></div>
+            <div style="font-size: 11px; font-weight: 500; color: #444; margin-top: 1px;"><%= pluralize(task_count, "task") %></div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="opacity: 0.2;">
+            <path d="M6 4L10 8L6 12" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+</div>

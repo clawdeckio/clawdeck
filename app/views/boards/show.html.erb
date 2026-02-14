@@ -5,7 +5,10 @@
 <%= turbo_stream_from "board_#{@board.id}" %>
 
 <div class="h-full flex flex-col" data-controller="board">
-  <%# Board Header %>
+  <%# Unified Navbar %>
+  <%= render "shared/navbar" %>
+
+  <%# Board modals (new board, settings) %>
   <%= render "boards/header" %>
 
   <%# Tag filter indicator %>
@@ -14,7 +17,7 @@
       <span class="text-xs text-content-muted">Filtered by:</span>
       <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-bg-elevated text-content">
         <%= @current_tag %>
-        <%= link_to board_path(@board), class: "ml-1 hover:text-accent" do %>
+        <%= link_to board_path(@board), class: "ml-1 hover:text-status-error" do %>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
             <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
           </svg>

@@ -1,4 +1,35 @@
 module ApplicationHelper
+  BOARD_COLOR_HEX = {
+    "gray" => "#888888", "red" => "#ef4444", "orange" => "#f97316", "amber" => "#fbbf24",
+    "yellow" => "#eab308", "lime" => "#84cc16", "green" => "#34d399", "emerald" => "#10b981",
+    "teal" => "#14b8a6", "cyan" => "#06b6d4", "sky" => "#0ea5e9", "blue" => "#60a5fa",
+    "indigo" => "#6366f1", "violet" => "#8b5cf6", "purple" => "#a78bfa", "fuchsia" => "#d946ef",
+    "pink" => "#ec4899", "rose" => "#f43f5e"
+  }.freeze
+
+  def board_hex_color(board)
+    BOARD_COLOR_HEX[board.color] || "#888888"
+  end
+
+  # Convert hex color to rgba string
+  def hex_to_rgba(hex, alpha)
+    hex = hex.gsub("#", "")
+    r = hex[0..1].to_i(16)
+    g = hex[2..3].to_i(16)
+    b = hex[4..5].to_i(16)
+    "rgba(#{r},#{g},#{b},#{alpha})"
+  end
+
+  def time_greeting
+    hour = Time.current.hour
+    if hour < 12
+      "Good morning"
+    elsif hour < 17
+      "Good afternoon"
+    else
+      "Good evening"
+    end
+  end
   def activity_icon_bg(activity)
     case activity.action
     when "created"
