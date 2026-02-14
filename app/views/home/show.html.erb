@@ -47,12 +47,6 @@
   <div class="mb-8">
     <div class="flex items-center justify-between mb-2.5 animate-fade-up" style="animation-delay: 0.06s">
       <h2 class="text-sm font-bold text-[#999]">Today</h2>
-      <% first_board = @boards.first %>
-      <% if first_board %>
-        <%= link_to board_path(first_board), class: "text-[11px] font-semibold text-[#444] hover:text-[#666] transition-colors" do %>
-          View board &rarr;
-        <% end %>
-      <% end %>
     </div>
 
     <div class="flex flex-col gap-[5px]">
@@ -65,39 +59,20 @@
         <% @all_today_tasks.each_with_index do |task, i| %>
           <% color = board_hex_color(task.board) %>
           <% is_done = task.completed? %>
-          <div class="flex gap-3.5 items-start relative overflow-hidden animate-fade-up"
-               style="padding: 14px 16px; border-radius: 12px;
-                      background: <%= is_done ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)' %>;
-                      border: 1px solid <%= is_done ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)' %>;
-                      opacity: <%= is_done ? '0.35' : '1' %>;
-                      transition: all 0.25s ease;
-                      animation-delay: <%= (0.08 + i * 0.04).round(2) %>s;"
-               data-controller="home-checkbox"
-               data-home-checkbox-task-id-value="<%= task.id %>"
-               data-home-checkbox-board-id-value="<%= task.board_id %>"
-               data-home-checkbox-completed-value="<%= is_done %>"
-               data-home-checkbox-color-value="<%= color %>">
-
-            <%# Checkbox %>
-            <button type="button"
-                    data-action="click->home-checkbox#toggle"
-                    data-home-checkbox-target="checkbox"
-                    class="flex items-center justify-center cursor-pointer transition-all duration-150"
-                    style="width: 20px; height: 20px; min-width: 20px; border-radius: 6px; margin-top: 1px;
-                           <%= is_done ?
-                             "background: #{color}; border: none;" :
-                             "background: transparent; border: 2px solid #{hex_to_rgba(color, 0.25)};" %>">
-              <% if is_done %>
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8.5L6.5 12L13 4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              <% end %>
-            </button>
+          <a href="<%= board_path(task.board) %>"
+             class="flex items-start relative overflow-hidden animate-fade-up cursor-pointer"
+             style="padding: 14px 16px; border-radius: 12px;
+                    background: <%= is_done ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)' %>;
+                    border: 1px solid <%= is_done ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)' %>;
+                    opacity: <%= is_done ? '0.35' : '1' %>;
+                    transition: all 0.15s ease;
+                    animation-delay: <%= (0.08 + i * 0.04).round(2) %>s;"
+             onmouseenter="this.style.background='<%= is_done ? 'rgba(255,255,255,0.025)' : 'rgba(255,255,255,0.055)' %>'; this.style.borderColor='rgba(255,255,255,0.1)'"
+             onmouseleave="this.style.background='<%= is_done ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.035)' %>'; this.style.borderColor='<%= is_done ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)' %>'">
 
             <%# Task content %>
             <div class="flex-1 min-w-0">
               <div class="text-[13.5px] font-semibold leading-[1.35] mb-[5px]"
-                   data-home-checkbox-target="title"
                    style="color: <%= is_done ? '#444' : '#ddd' %>; text-decoration: <%= is_done ? 'line-through' : 'none' %>;">
                 <%= task.name %>
               </div>
@@ -134,7 +109,7 @@
                 <% end %>
               </div>
             <% end %>
-          </div>
+          </a>
         <% end %>
       <% end %>
     </div>

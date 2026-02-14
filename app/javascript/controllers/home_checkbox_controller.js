@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { taskId: Number, boardId: Number, completed: Boolean, color: String }
+  static values = { taskId: Number, boardId: Number, completed: Boolean, color: String, url: String }
   static targets = ["checkbox", "title"]
 
-  toggle() {
+  toggle(event) {
+    event.stopPropagation()
     const newCompleted = !this.completedValue
     this.completedValue = newCompleted
 
@@ -31,6 +32,14 @@ export default class extends Controller {
       this.completedValue = !newCompleted
       this.updateUI(!newCompleted)
     })
+  }
+
+  navigate(event) {
+    // Don't navigate if clicking the checkbox
+    if (event.target.closest("[data-home-checkbox-target='checkbox']")) return
+    if (this.urlValue) {
+      window.location.href = this.urlValue
+    }
   }
 
   updateUI(completed) {
