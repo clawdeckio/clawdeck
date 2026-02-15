@@ -46,5 +46,8 @@
         </div>
       </div>
     <% end %>
+    <% if current_user %>
+      <%= render "shared/command_bar" %>
+    <% end %>
   </body>
 </html>

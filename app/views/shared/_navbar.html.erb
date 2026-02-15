@@ -107,6 +107,13 @@
     <% end %>
 
     <% if authenticated? %>
+      <%# Command bar trigger %>
+      <button type="button"
+              onclick="document.dispatchEvent(new CustomEvent('command-bar:toggle'))"
+              class="cursor-pointer inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#888] bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-colors">
+        <span class="text-[11px] opacity-50">⌘</span>K
+      </button>
+
       <%# Board settings button (board pages only) %>
       <% if @board %>
         <button type="button"

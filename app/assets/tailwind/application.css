@@ -118,8 +118,22 @@
   50% { opacity: 0.25; }
 }
 
+/* Agent typing dots */
+@keyframes dotBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+.cmd-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fbbf24;
+  animation: dotBounce 1s ease infinite;
+}
+
 /* Column drag highlight */
 .column-drag-over {
   background: rgba(255, 255, 255, 0.02);
   border-color: rgba(255, 255, 255, 0.08);
+  border-style: dashed;
 }

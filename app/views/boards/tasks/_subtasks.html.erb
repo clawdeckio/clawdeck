@@ -1,0 +1,44 @@
+<div id="task_<%= task.id %>_subtasks">
+  <% subtasks = task.subtasks %>
+  <% if subtasks.any? %>
+    <% done_count = subtasks.count(&:done?) %>
+    <% total_count = subtasks.size %>
+    <% progress = total_count > 0 ? (done_count.to_f / total_count * 100).round : 0 %>
+    <% board_color = board.color || "red" %>
+
+    <div class="space-y-3">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-bold text-content-ghost uppercase tracking-[0.06em]">Subtasks</span>
+        <span class="text-[10px] text-content-muted"><%= done_count %>/<%= total_count %></span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="h-[3px] rounded-sm bg-white/5 overflow-hidden">
+        <div class="h-full rounded-sm transition-all duration-300"
+             style="width: <%= progress %>%; background-color: color-mix(in srgb, var(--color-project-<%= board_color %>, #ef4444) 80%, transparent);"></div>
+      </div>
+
+      <!-- Subtask list -->
+      <div class="space-y-1">
+        <% subtasks.each do |subtask| %>
+          <%= button_to board_task_subtask_path(board, task, subtask),
+              method: :patch,
+              params: { subtask: { done: !subtask.done? } },
+              class: "w-full flex items-center gap-2.5 px-1 py-1.5 rounded-md hover:bg-white/[0.03] transition-colors cursor-pointer group/subtask" do %>
+            <% if subtask.done? %>
+              <span class="flex-shrink-0 w-4 h-4 rounded flex items-center justify-center bg-<%= board_color %>-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="white" class="w-2.5 h-2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </span>
+            <% else %>
+              <span class="flex-shrink-0 w-4 h-4 rounded border border-content-ghost group-hover/subtask:border-content-muted transition-colors"></span>
+            <% end %>
+            <span class="text-xs <%= subtask.done? ? 'line-through text-content-muted' : 'text-content-secondary' %>"><%= subtask.title %></span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

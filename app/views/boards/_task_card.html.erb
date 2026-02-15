@@ -1,6 +1,6 @@
 <% has_current_user = defined?(current_user) && current_user %>
 <li id="task_<%= task.id %>"
-    class="group bg-bg-elevated border border-border rounded-md cursor-pointer transition-all hover:bg-bg-hover <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
+    class="group bg-bg-elevated border border-border-card hover:border-border-hover rounded-md cursor-pointer transition-[border-color] duration-[120ms] hover:bg-bg-hover <%= 'border-l-4 border-l-status-warning' if task.blocked? %>"
     <% if has_current_user %>
       data-controller="dropdown delete-confirm"
       data-action="contextmenu->dropdown#openAtCursor"

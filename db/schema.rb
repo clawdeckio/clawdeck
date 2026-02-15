@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_134003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
   end
 
+  create_table "subtasks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "done", default: false
+    t.integer "position"
+    t.bigint "task_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id"], name: "index_subtasks_on_task_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "color", default: "gray", null: false
     t.datetime "created_at", null: false
@@ -155,6 +165,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
 
   create_table "tasks", force: :cascade do |t|
     t.datetime "agent_claimed_at"
+    t.text "agent_hint"
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
@@ -211,6 +222,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
   add_foreign_key "boards", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "subtasks", "tasks"
   add_foreign_key "tags", "projects"
   add_foreign_key "tags", "users"
   add_foreign_key "task_activities", "tasks"
