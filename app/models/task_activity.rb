@@ -5,7 +5,7 @@ class TaskActivity < ApplicationRecord
   validates :action, presence: true
 
   ACTIONS = %w[created updated moved].freeze
-  TRACKED_FIELDS = %w[name priority due_date].freeze
+  TRACKED_FIELDS = %w[name due_date].freeze
 
   scope :recent, -> { order(created_at: :desc) }
 

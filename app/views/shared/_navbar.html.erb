@@ -3,7 +3,7 @@
 <% navbar_boards = authenticated? ? (defined?(@boards) && @boards ? @boards : current_user.boards) : [] %>
 <% navbar_current_board = @board || navbar_boards.first %>
 
-<header class="relative flex-shrink-0 flex items-center justify-between h-[52px] px-6 bg-transparent border-b border-white/5" style="position: sticky; top: 0; z-index: 100; background: #161619;">
+<header class="relative flex-shrink-0 flex items-center justify-between h-[52px] bg-transparent" style="position: sticky; top: 0; z-index: 100; background: #161619; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.06);">
   <%# Left section: Board switcher + nav tabs %>
   <div class="flex items-center gap-5">
     <% if authenticated? && navbar_current_board %>
@@ -16,8 +16,17 @@
           <% if @board %>
             <span class="text-lg"><%= navbar_current_board.icon %></span>
             <span class="text-sm font-extrabold text-[#e0e0e0] tracking-[-0.02em]"><%= navbar_current_board.name %></span>
+          <% elsif controller_name == "profiles" %>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="opacity-50">
+              <circle cx="8" cy="8" r="2.5" stroke="#888" stroke-width="1.5"/>
+              <path d="M8 1V3M8 13V15M1 8H3M13 8H15M3.05 3.05L4.46 4.46M11.54 11.54L12.95 12.95M12.95 3.05L11.54 4.46M4.46 11.54L3.05 12.95" stroke="#888" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="text-sm font-extrabold text-[#e0e0e0] tracking-[-0.02em]">Settings</span>
           <% else %>
-            <span class="text-sm">🏠</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="opacity-50">
+              <path d="M2 8.5L8 3L14 8.5" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3.5 7.5V13.5H6.5V10.5H9.5V13.5H12.5V7.5" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <span class="text-sm font-extrabold text-[#e0e0e0] tracking-[-0.02em]">Home</span>
           <% end %>
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="opacity-30 ml-0.5 transition-transform" data-dropdown-target="chevron">
@@ -30,12 +39,18 @@
              class="hidden absolute left-0 top-full mt-1.5 w-60 p-1.5 rounded-xl border border-white/[0.08] z-50 animate-drop-in <%= @board ? 'bg-bg-card' : 'bg-bg-surface' %>"
              style="box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
           <%# Home link %>
+          <% is_home = !@board && controller_name != "profiles" %>
           <%= link_to home_path,
-              class: "flex items-center gap-2.5 w-full px-2.5 py-[9px] rounded-lg transition-colors #{!@board ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]'}",
+              class: "flex items-center gap-2.5 w-full px-2.5 py-[9px] rounded-lg transition-colors #{is_home ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]'}",
               data: { turbo_frame: "_top" } do %>
-            <span class="text-sm w-6 text-center">🏠</span>
-            <span class="text-[13px] font-semibold flex-1 truncate <%= !@board ? 'text-[#e0e0e0]' : 'text-[#777]' %>">Home</span>
-            <% unless @board %>
+            <span class="w-6 flex items-center justify-center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8.5L8 3L14 8.5" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3.5 7.5V13.5H6.5V10.5H9.5V13.5H12.5V7.5" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="text-[13px] font-semibold flex-1 truncate <%= is_home ? 'text-[#e0e0e0]' : 'text-[#777]' %>">Home</span>
+            <% if is_home %>
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8.5L6.5 12L13 4" stroke="#f0f0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -110,22 +125,10 @@
       <%# Command bar trigger %>
       <button type="button"
               onclick="document.dispatchEvent(new CustomEvent('command-bar:toggle'))"
-              class="cursor-pointer inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#888] bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-colors">
-        <span class="text-[11px] opacity-50">⌘</span>K
+              class="cursor-pointer flex items-center gap-[5px]"
+              style="font-size:12px;font-weight:600;color:#888;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:5px 12px;border-radius:8px">
+        <span style="font-size:11px;opacity:0.5">⌘</span>K
       </button>
-
-      <%# Board settings button (board pages only) %>
-      <% if @board %>
-        <button type="button"
-                onclick="document.getElementById('board-settings-modal').classList.remove('hidden')"
-                class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-[#888] font-semibold bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          </svg>
-          <span class="hidden sm:inline">Settings</span>
-        </button>
-      <% end %>
 
       <%# Agent indicator %>
       <% if current_user.agent_last_active_at.present? %>
@@ -135,6 +138,21 @@
             <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-status-success rounded-full border border-bg-base"></span>
           <% end %>
         </div>
+      <% end %>
+
+      <%# Board settings button (only on board pages) %>
+      <% if @board %>
+        <button type="button"
+                onclick="document.getElementById('board-settings-modal').classList.remove('hidden')"
+                class="cursor-pointer flex items-center gap-[5px]"
+                style="font-size:12px;font-weight:600;color:#888;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:5px 12px;border-radius:8px"
+                title="Board settings">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;opacity:0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          Board settings
+        </button>
       <% end %>
 
       <%# User avatar dropdown %>
@@ -161,8 +179,12 @@
           <%# User info header %>
           <div class="px-2.5 py-2.5 border-b border-white/[0.06] mb-1">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-sm font-bold text-[#e0e0e0]">
-                <%= current_user.email_address.first.upcase %>
+              <div class="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-sm font-bold text-[#e0e0e0] overflow-hidden">
+                <% if current_user.has_avatar? %>
+                  <%= image_tag current_user.avatar_source, class: "w-full h-full object-cover", alt: "" %>
+                <% else %>
+                  <%= current_user.email_address.first.upcase %>
+                <% end %>
               </div>
               <div class="min-w-0">
                 <div class="text-[13px] font-bold text-[#e0e0e0] truncate"><%= current_user.email_address.split('@').first %></div>

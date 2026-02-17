@@ -19,7 +19,7 @@
         <%= form.text_field :name,
             required: true,
             placeholder: "e.g., Work, Personal, Side Project",
-            class: "w-full px-3 py-2 text-sm bg-bg-card border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-project-amber text-content placeholder-content-muted" %>
+            class: "w-full px-3 py-2 text-sm bg-bg-card border border-white/[0.08] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-content placeholder-content-muted" %>
       </div>
 
       <div>
@@ -33,7 +33,7 @@
             <button type="button"
                     onclick="selectBoardIcon(this, '<%= icon %>')"
                     data-icon="<%= icon %>"
-                    class="w-10 h-10 flex items-center justify-center rounded-lg bg-bg-card hover:bg-white/[0.08] transition-colors text-xl cursor-pointer <%= icon == '📋' ? 'ring-2 ring-project-amber' : '' %>">
+                    class="w-10 h-10 flex items-center justify-center rounded-lg bg-bg-card hover:bg-white/[0.08] transition-colors text-xl cursor-pointer <%= icon == '📋' ? 'ring-2 ring-accent' : '' %>">
               <%= icon %>
             </button>
           <% end %>
@@ -44,10 +44,10 @@
       <div class="flex items-center justify-end gap-3 pt-2">
         <button type="button"
                 onclick="document.getElementById('new-board-modal').classList.add('hidden')"
-                class="px-4 py-2 text-sm rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-content-secondary transition-colors cursor-pointer">
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-content-secondary transition-colors cursor-pointer">
           Cancel
         </button>
-        <%= form.submit "Create Board", class: "px-4 py-2 text-sm rounded-lg bg-project-amber text-[#161619] font-semibold hover:brightness-110 transition-all cursor-pointer" %>
+        <%= form.submit "Create Board", class: "px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent text-content hover:bg-accent-hover transition-colors cursor-pointer" %>
       </div>
     <% end %>
   </div>
@@ -57,8 +57,8 @@
   function selectBoardIcon(btn, icon) {
     document.getElementById('board-icon-field').value = icon;
     document.querySelectorAll('#icon-group button').forEach(b => {
-      b.classList.remove('ring-2', 'ring-project-amber');
+      b.classList.remove('ring-2', 'ring-accent');
     });
-    btn.classList.add('ring-2', 'ring-project-amber');
+    btn.classList.add('ring-2', 'ring-accent');
   }
 </script>

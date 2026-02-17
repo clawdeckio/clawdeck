@@ -1,28 +1,45 @@
-<div id="task-activities-<%= task.id %>" class="space-y-3">
-  <% task.activities.reload.recent.limit(10).each do |activity| %>
-    <div class="flex items-start gap-3">
-      <!-- Activity icon -->
-      <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center <%= activity_icon_bg(activity) %>">
-        <%= activity_icon(activity) %>
-      </div>
-      <!-- Activity content -->
-      <div class="flex-1 min-w-0">
-        <p class="text-sm text-content-secondary"><%= activity.description %></p>
-        <% if activity.note.present? %>
-          <p class="text-sm text-content-muted mt-1 italic">"<%= activity.note %>"</p>
-        <% end %>
-        <p class="text-xs text-content-muted mt-0.5">
-          <%= time_ago_in_words(activity.created_at) %> ago
-          <% if activity.actor_type == "agent" %>
-            <span class="inline-flex items-center ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent/20 text-accent">
-              <%= activity.actor_emoji || "🦞" %> <%= activity.actor_name || "Agent" %>
-            </span>
-          <% end %>
-        </p>
-      </div>
+<%
+  activities = task.activities.reload.recent.limit(10)
+%>
+<div id="task-activities-<%= task.id %>">
+  <% if activities.any? %>
+    <div style="display:flex;flex-direction:column;gap:0;position:relative">
+      <%# Vertical connector line %>
+      <div style="position:absolute;left:13px;top:14px;bottom:14px;width:1px;background:rgba(255,255,255,0.04)"></div>
+
+      <% activities.each do |activity| %>
+        <%
+          # Determine icon style by activity type
+          if activity.actor_type == "agent"
+            icon = { bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.2)", color: "#fbbf24", symbol: "🤖", size: "11px" }
+          elsif activity.action == "created"
+            icon = { bg: "rgba(96,165,250,0.12)", border: "rgba(96,165,250,0.2)", color: "#60a5fa", symbol: "+", size: "12px" }
+          elsif activity.action == "moved"
+            icon = { bg: "rgba(167,139,250,0.12)", border: "rgba(167,139,250,0.2)", color: "#a78bfa", symbol: "→", size: "12px" }
+          elsif activity.action == "updated" && activity.field_name == "priority"
+            icon = { bg: "rgba(52,211,153,0.12)", border: "rgba(52,211,153,0.2)", color: "#34d399", symbol: "!", size: "12px" }
+          elsif activity.action == "updated"
+            icon = { bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.2)", color: "#fbbf24", symbol: "✎", size: "11px" }
+          else
+            icon = { bg: "rgba(255,255,255,0.06)", border: "rgba(255,255,255,0.08)", color: "#666", symbol: "•", size: "12px" }
+          end
+        %>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;position:relative">
+          <div style="width:26px;height:26px;min-width:26px;border-radius:50%;background:<%= icon[:bg] %>;border:1px solid <%= icon[:border] %>;display:flex;align-items:center;justify-content:center;font-size:<%= icon[:size] %>;font-weight:700;color:<%= icon[:color] %>;z-index:1">
+            <%= icon[:symbol] %>
+          </div>
+          <div style="flex:1;padding-top:2px">
+            <div style="font-size:12px;font-weight:500;color:#999;line-height:1.4">
+              <%= activity.description %>
+            </div>
+            <div style="font-size:10px;font-weight:500;color:#333;margin-top:2px">
+              <%= time_ago_in_words(activity.created_at) %> ago
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
-  <% end %>
-  <% if task.activities.empty? %>
-    <p class="text-sm text-content-muted italic">No activity yet</p>
+  <% else %>
+    <div style="font-size:12px;font-weight:500;color:#444;font-style:italic">No activity yet</div>
   <% end %>
 </div>

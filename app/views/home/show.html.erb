@@ -9,8 +9,15 @@
         <%= Date.today.strftime("%A, %B %-d") %>
       </div>
       <h1 class="text-[28px] font-extrabold text-[#f0f0f0] tracking-[-0.03em] leading-[1.15]">
-        <%= time_greeting %>, <%= current_user.email_address.split('@').first.capitalize %>
+        <span id="time-greeting"><%= time_greeting %></span>
       </h1>
+      <script>
+        (function() {
+          var h = new Date().getHours();
+          var g = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+          document.getElementById("time-greeting").textContent = g;
+        })();
+      </script>
     </div>
     <div class="flex items-center gap-3.5">
       <div class="text-right">
