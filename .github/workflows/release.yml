@@ -20,7 +20,7 @@ jobs:
           args: --latest --strip header
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           body: ${{ steps.changelog.outputs.content }}
           draft: false
