@@ -181,6 +181,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 ## Links
 
 - 🐙 **GitHub:** [clawdeckio/clawdeck](https://github.com/clawdeckio/clawdeck)
+- 💬 **Discord:** [Join the community](https://discord.gg/bJQrNasMC6)
 - 📝 **Story:** [How ClawDeck went from weekend project to real users](https://mx.works/notes/clawdeck-is-taking-off/)
 - 🔜 **What it evolved into:** [lst.so](https://lst.so)
 
