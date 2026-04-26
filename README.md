@@ -4,7 +4,7 @@
 
 ClawDeck is a kanban-style dashboard for managing AI agents powered by [OpenClaw](https://github.com/openclaw/openclaw). Track tasks, assign work to your agent, and collaborate asynchronously.
 
-> **Note:** The hosted version at clawdeck.io is shutting down May 30, 2025. This repo stays up — self-hosted installs keep working. If you're looking for an actively maintained alternative, check out [lst.so](https://lst.so), the project ClawDeck evolved into.
+> **Note:** The hosted version at clawdeck.io is shutting down May 30, 2026. This repo stays up — self-hosted installs keep working. If you're looking for an actively maintained alternative, check out [lst.so](https://lst.so), the project ClawDeck evolved into.
 
 ## Get Started
 
