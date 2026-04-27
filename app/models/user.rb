@@ -4,7 +4,14 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :boards, dependent: :destroy
   has_many :tasks, dependent: :destroy
+  has_many :agents, dependent: :destroy
   has_many :api_tokens, dependent: :destroy
+  has_many :join_tokens, dependent: :destroy
+  has_many :created_join_tokens,
+           class_name: "JoinToken",
+           foreign_key: :created_by_user_id,
+           dependent: :nullify,
+           inverse_of: :created_by_user
   has_one_attached :avatar
 
   # Primary API token for agent integration

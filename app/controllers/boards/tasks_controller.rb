@@ -59,7 +59,17 @@ class Boards::TasksController < ApplicationController
 
   def assign
     @task.activity_source = "web"
-    @task.assign_to_agent!
+    agent_id = params[:agent_id]
+    if agent_id.present? && agent_id != ""
+      @agent = current_user.agents.find_by(id: agent_id)
+      if @agent
+        @task.update!(assigned_agent_id: @agent.id, assigned_to_agent: true, assigned_at: Time.current)
+      else
+        @task.update!(assigned_agent_id: nil, assigned_to_agent: true, assigned_at: Time.current)
+      end
+    else
+      @task.update!(assigned_agent_id: nil, assigned_to_agent: true, assigned_at: Time.current)
+    end
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: [
@@ -73,7 +83,7 @@ class Boards::TasksController < ApplicationController
 
   def unassign
     @task.activity_source = "web"
-    @task.unassign_from_agent!
+    @task.update!(assigned_agent_id: nil, assigned_to_agent: false, assigned_at: nil)
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: [
@@ -96,7 +106,7 @@ class Boards::TasksController < ApplicationController
   end
 
   def task_params
-    permitted = params.require(:task).permit(:name, :title, :description, :priority, :status, :blocked, :due_date, :completed, :agent_hint, tags: [])
+    permitted = params.require(:task).permit(:name, :title, :description, :priority, :status, :blocked, :due_date, :completed, :agent_hint, :assigned_agent_id, tags: [])
     # Allow 'title' as alias for 'name'
     permitted[:name] = permitted.delete(:title) if permitted[:title].present? && permitted[:name].blank?
     permitted

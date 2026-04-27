@@ -4,6 +4,28 @@ Rails.application.routes.draw do
     namespace :v1 do
       resource :settings, only: [ :show, :update ]
 
+      resources :agents, only: [ :index, :show, :update ] do
+        collection do
+          post :register
+        end
+
+        member do
+          post :heartbeat
+          post :commands, to: "agent_commands#enqueue"
+        end
+      end
+
+      resources :agent_commands, only: [] do
+        collection do
+          get :next, to: "agent_commands#next"
+        end
+
+        member do
+          patch :ack, to: "agent_commands#ack"
+          patch :complete, to: "agent_commands#complete"
+        end
+      end
+
       resources :boards, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :tasks, only: [ :index, :show, :create, :update, :destroy ] do
@@ -25,6 +47,10 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
     resources :users, only: [ :index ]
+  end
+
+  resources :agents, only: [ :index, :show ] do
+    resources :commands, only: [ :create ], controller: "agent_commands"
   end
 
   resource :session, only: [:new, :create, :destroy]

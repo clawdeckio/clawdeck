@@ -1,18 +1,20 @@
 class TaskActivity < ApplicationRecord
   belongs_to :task
   belongs_to :user, optional: true
+  belongs_to :actor_agent, class_name: "Agent", optional: true
 
   validates :action, presence: true
 
   ACTIONS = %w[created updated moved].freeze
-  TRACKED_FIELDS = %w[name due_date].freeze
+  TRACKED_FIELDS = %w[name due_date claimed_by_agent_id].freeze
 
   scope :recent, -> { order(created_at: :desc) }
 
-  def self.record_creation(task, source: "web", actor_name: nil, actor_emoji: nil, note: nil)
+  def self.record_creation(task, source: "web", actor_user: nil, actor_agent: nil, actor_name: nil, actor_emoji: nil, note: nil)
     create!(
       task: task,
-      user: task.user,
+      user: actor_user || task.user,
+      actor_agent: actor_agent,
       action: "created",
       source: source,
       actor_type: source == "api" ? "agent" : "user",
@@ -22,10 +24,11 @@ class TaskActivity < ApplicationRecord
     )
   end
 
-  def self.record_status_change(task, old_status:, new_status:, source: "web", actor_name: nil, actor_emoji: nil, note: nil)
+  def self.record_status_change(task, old_status:, new_status:, source: "web", actor_user: nil, actor_agent: nil, actor_name: nil, actor_emoji: nil, note: nil)
     create!(
       task: task,
-      user: Current.user,
+      user: actor_user || Current.user || task.user,
+      actor_agent: actor_agent,
       action: "moved",
       field_name: "status",
       old_value: old_status,
@@ -38,14 +41,15 @@ class TaskActivity < ApplicationRecord
     )
   end
 
-  def self.record_changes(task, changes, source: "web", actor_name: nil, actor_emoji: nil, note: nil)
+  def self.record_changes(task, changes, source: "web", actor_user: nil, actor_agent: nil, actor_name: nil, actor_emoji: nil, note: nil)
     TRACKED_FIELDS.each do |field|
       next unless changes.key?(field)
 
       old_val, new_val = changes[field]
       create!(
         task: task,
-        user: Current.user,
+        user: actor_user || Current.user || task.user,
+        actor_agent: actor_agent,
         action: "updated",
         field_name: field,
         old_value: format_value(field, old_val),

@@ -1,8 +1,7 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
   name: Test Task One
   user: one
+  board: one
   status: inbox
   priority: none
   completed: false
@@ -10,6 +9,7 @@ one:
 two:
   name: Test Task Two
   user: two
+  board: two
   status: in_progress
   priority: high
   completed: false

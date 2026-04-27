@@ -1,0 +1,72 @@
+<% content_for :title, "Agents - clawdeck" %>
+<% @board_page = false %>
+
+<div class="py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-extrabold text-[#e0e0e0] tracking-tight">Agents</h1>
+      <p class="text-sm text-[#666] mt-1">Manage your fleet of OpenClaw agents</p>
+    </div>
+    <%= link_to settings_path(anchor: "agents"), class: "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-[#888] transition-colors" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      Register Agent
+    <% end %>
+  </div>
+
+  <% if @agents.any? %>
+    <div class="space-y-2">
+      <% @agents.each do |agent| %>
+        <%= link_to agent_path(agent), class: "block p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.1] transition-all" do %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center text-lg">
+                <%= agent.status == "online" ? "🟢" : agent.status == "draining" ? "🟡" : agent.status == "disabled" ? "🔴" : "⚫" %>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-[#e0e0e0]"><%= agent.name %></span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded <%= agent.status == "online" ? "bg-emerald-500/20 text-emerald-400" : agent.status == "draining" ? "bg-yellow-500/20 text-yellow-400" : agent.status == "disabled" ? "bg-red-500/20 text-red-400" : "bg-white/[0.06] text-[#666]" %>"><%= agent.status.humanize %></span>
+                </div>
+                <div class="text-xs text-[#555] mt-0.5 flex items-center gap-2">
+                  <% if agent.hostname.present? %>
+                    <span><%= agent.hostname %></span>
+                  <% end %>
+                  <% if agent.version.present? %>
+                    <span class="text-[#444]">v<%= agent.version %></span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <% if agent.last_heartbeat_at %>
+                <div class="text-xs text-[#555]">
+                  <%= time_ago_in_words(agent.last_heartbeat_at) %> ago
+                </div>
+              <% else %>
+                <div class="text-xs text-[#444]">Never connected</div>
+              <% end %>
+              <% if agent.tags.any? %>
+                <div class="flex gap-1 mt-1 justify-end">
+                  <% agent.tags.first(3).each do |tag| %>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] text-[#666]"><%= tag %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-16">
+      <div class="text-4xl mb-4">🤖</div>
+      <h3 class="text-lg font-bold text-[#888] mb-2">No agents registered</h3>
+      <p class="text-sm text-[#555] mb-4">Get started by registering an agent using a join token.</p>
+      <%= link_to settings_path(anchor: "agents"), class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent/90 transition-colors" do %>
+        Register Agent
+      <% end %>
+    </div>
+  <% end %>
+</div>

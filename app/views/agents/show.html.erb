@@ -1,0 +1,157 @@
+<% content_for :title, "#{@agent.name} - Agents - clawdeck" %>
+<% @board_page = false %>
+
+<div class="py-8">
+  <%# Breadcrumb %>
+  <div class="flex items-center gap-2 text-xs text-[#555] mb-6">
+    <%= link_to "Agents", agents_path, class: "hover:text-[#888] transition-colors" %>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+    </svg>
+    <span class="text-[#888]"><%= @agent.name %></span>
+  </div>
+
+  <%# Header %>
+  <div class="flex items-start justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-xl bg-white/[0.06] flex items-center justify-center text-2xl">
+        <%= @agent.status == "online" ? "🟢" : @agent.status == "draining" ? "🟡" : @agent.status == "disabled" ? "🔴" : "⚫" %>
+      </div>
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-extrabold text-[#e0e0e0] tracking-tight"><%= @agent.name %></h1>
+          <span class="text-[11px] font-semibold px-2 py-1 rounded <%= @agent.status == "online" ? "bg-emerald-500/20 text-emerald-400" : @agent.status == "draining" ? "bg-yellow-500/20 text-yellow-400" : @agent.status == "disabled" ? "bg-red-500/20 text-red-400" : "bg-white/[0.06] text-[#666]" %>"><%= @agent.status.humanize %></span>
+        </div>
+        <div class="text-sm text-[#555] mt-1">
+          <% if @agent.hostname.present? %><span><%= @agent.hostname %></span><% end %>
+          <% if @agent.platform.present? %><span class="mx-2">·</span><span><%= @agent.platform %></span><% end %>
+          <% if @agent.version.present? %><span class="mx-2">·</span><span>v<%= @agent.version %></span><% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# Command buttons %>
+    <div class="flex items-center gap-2">
+      <% if @agent.online? || @agent.draining? %>
+        <% if @agent.online? %>
+          <%= button_to agent_commands_path(@agent),
+              params: { agent_command: { kind: "drain", payload: { reason: "manual" }.to_json } },
+              class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-colors",
+              data: { confirm: "Drain this agent? It will stop accepting new tasks." } do %>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h3a2.25 2.25 0 0 0 2.25-2.25V15Z" />
+            </svg>
+            Drain
+          <% end %>
+        <% end %>
+        <% if @agent.draining? %>
+          <%= button_to agent_commands_path(@agent),
+              params: { agent_command: { kind: "resume", payload: {}.to_json } },
+              class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors",
+              data: { confirm: "Resume this agent? It will start accepting new tasks." } do %>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+            </svg>
+            Resume
+          <% end %>
+        <% end %>
+        <%= button_to agent_commands_path(@agent),
+            params: { agent_command: { kind: "restart", payload: {}.to_json } },
+            class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white/[0.04] text-[#888] hover:bg-white/[0.08] transition-colors",
+            data: { confirm: "Restart OpenClaw on this agent?" } do %>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Restart
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Info grid %>
+  <div class="grid grid-cols-2 gap-4 mb-8">
+    <%# Last heartbeat %>
+    <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+      <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-2">Last Heartbeat</div>
+      <div class="text-lg font-bold text-[#e0e0e0]">
+        <%= @agent.last_heartbeat_at ? time_ago_in_words(@agent.last_heartbeat_at) + " ago" : "Never" %>
+      </div>
+    </div>
+
+    <%# Tasks %>
+    <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+      <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-2">Active Tasks</div>
+      <div class="text-lg font-bold text-[#e0e0e0]">
+        <%= @tasks_claimed.count %> claimed
+        <span class="text-[#555] font-normal">/ <%= @tasks_assigned.count %> assigned</span>
+      </div>
+    </div>
+  </div>
+
+  <%# Tags %>
+  <% if @agent.tags.any? %>
+    <div class="mb-8">
+      <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-3">Tags</div>
+      <div class="flex flex-wrap gap-2">
+        <% @agent.tags.each do |tag| %>
+          <span class="px-2.5 py-1 rounded-lg bg-white/[0.06] text-xs font-medium text-[#888]"><%= tag %></span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Metadata %>
+  <% if @agent.metadata.present? && @agent.metadata.any? %>
+    <div class="mb-8">
+      <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-3">Metadata</div>
+      <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <pre class="text-xs text-[#888] overflow-x-auto"><%= JSON.pretty_generate(@agent.metadata) %></pre>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Recent Commands %>
+  <div class="mb-8">
+    <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-3">Recent Commands</div>
+    <% if @commands.any? %>
+      <div class="space-y-2">
+        <% @commands.each do |cmd| %>
+          <div class="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded <%= cmd.state == "completed" ? "bg-emerald-500/20 text-emerald-400" : cmd.state == "failed" ? "bg-red-500/20 text-red-400" : cmd.state == "acknowledged" ? "bg-blue-500/20 text-blue-400" : "bg-white/[0.06] text-[#666]" %>"><%= cmd.state.humanize %></span>
+              <span class="text-sm font-semibold text-[#888]"><%= cmd.kind.humanize %></span>
+            </div>
+            <span class="text-xs text-[#555]"><%= cmd.created_at.strftime("%b %d, %H:%M") %></span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-sm text-[#555] p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">No commands yet</div>
+    <% end %>
+  </div>
+
+  <%# Tasks %>
+  <% if @tasks_claimed.any? || @tasks_assigned.any? %>
+    <div>
+      <div class="text-xs font-semibold text-[#555] uppercase tracking-wider mb-3">Tasks</div>
+      <div class="space-y-2">
+        <% (@tasks_claimed + @tasks_assigned).uniq.first(10).each do |task| %>
+          <%= link_to board_path(task.board), class: "block p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] transition-colors" do %>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold text-[#e0e0e0]"><%= task.name %></div>
+                <div class="text-xs text-[#555] mt-0.5">
+                  <%= task.board.name %> · <%= task.status.humanize %>
+                  <% if task.claimed_by_agent_id == @agent.id %>
+                    <span class="ml-2 text-yellow-400">Claimed</span>
+                  <% end %>
+                </div>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-white/[0.06] text-[#666]"><%= task.status.humanize %></span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

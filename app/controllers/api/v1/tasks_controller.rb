@@ -2,6 +2,7 @@ module Api
   module V1
     class TasksController < BaseController
       before_action :set_task, only: [ :show, :update, :destroy, :complete, :claim, :unclaim, :assign, :unassign ]
+      before_action :require_current_agent!, only: [ :next, :claim, :unclaim ]
 
       # GET /api/v1/tasks/next - get next task for agent to work on
       # Returns highest priority unclaimed task in "up_next" status
@@ -13,10 +14,29 @@ module Api
           return
         end
 
-        @task = current_user.tasks
-          .where(status: :up_next, blocked: false, agent_claimed_at: nil)
-          .reorder(priority: :desc, position: :asc)
-          .first
+        if current_agent.draining?
+          head :no_content
+          return
+        end
+
+        @task = nil
+
+        Task.transaction do
+          @task = current_user.tasks
+            .eligible_for_agent(current_agent)
+            .reorder(priority: :desc, position: :asc)
+            .lock("FOR UPDATE SKIP LOCKED")
+            .first
+
+          if @task
+            set_task_activity_info(@task)
+            @task.update!(
+              claimed_by_agent: current_agent,
+              agent_claimed_at: Time.current,
+              status: :in_progress
+            )
+          end
+        end
 
         if @task
           render json: task_json(@task)
@@ -44,14 +64,18 @@ module Api
       # PATCH /api/v1/tasks/:id/claim - agent claims a task
       def claim
         set_task_activity_info(@task)
-        @task.update!(agent_claimed_at: Time.current, status: :in_progress)
+        @task.update!(
+          claimed_by_agent: current_agent,
+          agent_claimed_at: Time.current,
+          status: :in_progress
+        )
         render json: task_json(@task)
       end
 
       # PATCH /api/v1/tasks/:id/unclaim - agent releases a task
       def unclaim
         set_task_activity_info(@task)
-        @task.update!(agent_claimed_at: nil)
+        @task.update!(claimed_by_agent: nil, agent_claimed_at: nil)
         render json: task_json(@task)
       end
 
@@ -176,9 +200,17 @@ module Api
 
       def set_task_activity_info(task)
         task.activity_source = "api"
+        task.actor_user = current_user
+        task.actor_agent = current_agent
         task.actor_name = request.headers["X-Agent-Name"]
         task.actor_emoji = request.headers["X-Agent-Emoji"]
         task.activity_note = params[:activity_note] || params.dig(:task, :activity_note)
+      end
+
+      def require_current_agent!
+        return if current_agent
+
+        render json: { error: "Unauthorized" }, status: :unauthorized
       end
 
       def task_params
@@ -200,7 +232,9 @@ module Api
           position: task.position,
           assigned_to_agent: task.assigned_to_agent,
           assigned_at: task.assigned_at&.iso8601,
+          assigned_agent_id: task.assigned_agent_id,
           agent_claimed_at: task.agent_claimed_at&.iso8601,
+          claimed_by_agent_id: task.claimed_by_agent_id,
           board_id: task.board_id,
           url: "https://clawdeck.io/boards/#{task.board_id}/tasks/#{task.id}",
           created_at: task.created_at.iso8601,

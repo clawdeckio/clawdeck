@@ -10,3 +10,8 @@ github_user:
   email_address: github@example.com
   provider: github
   uid: "12345"
+
+admin:
+  email_address: admin@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  admin: true

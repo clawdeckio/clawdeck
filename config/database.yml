@@ -41,6 +41,9 @@ development:
 test:
   <<: *default
   database: clawdeck_test
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "mojo") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "mojo") %>
 
 # Production database configuration
 # Uses DATABASE_URL from environment (Render, Railway, etc.)

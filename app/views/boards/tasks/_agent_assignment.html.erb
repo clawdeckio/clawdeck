@@ -1,31 +1,74 @@
-<%# Agent assignment button for task panel %>
-<% agent_connected = current_user.agent_last_active_at.present? %>
-<% agent_name = current_user.agent_name || "Agent" %>
-<% agent_emoji = agent_connected ? (current_user.agent_emoji || "🦞") : "🦞" %>
+<%# Agent assignment dropdown for task panel %>
+<% user_agents = current_user.agents.to_a %>
 
 <div id="task_<%= task.id %>_agent_assignment" class="flex items-center justify-between pb-4 -mt-2">
   <span class="text-sm text-content-muted">Agent</span>
 
-  <% if task.assigned_to_agent? %>
-    <%= button_to unassign_board_task_path(board, task),
-        method: :patch,
-        class: "cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-accent/20 text-accent hover:bg-accent/30 transition-colors",
-        title: "Unassign from #{agent_name}" do %>
-      <span><%= agent_emoji %></span>
-      <span>Assigned</span>
-    <% end %>
-  <% elsif agent_connected %>
-    <%= button_to assign_board_task_path(board, task),
-        method: :patch,
-        class: "cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-bg-elevated hover:bg-bg-hover text-content-secondary transition-colors",
-        title: "Assign to #{agent_name}" do %>
-      <span><%= agent_emoji %></span>
-      <span>Assign</span>
-    <% end %>
+  <% if user_agents.any? %>
+    <div data-controller="dropdown" class="relative">
+      <button type="button"
+              data-action="click->dropdown#toggle"
+              data-dropdown-target="button"
+              class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors
+                     <%= task.assigned_to_agent? || task.assigned_agent_id.present? ? 'bg-accent/20 text-accent hover:bg-accent/30' : 'bg-bg-elevated hover:bg-bg-hover text-content-secondary' %>">
+        <span>🤖</span>
+        <% if task.assigned_agent.present? %>
+          <span><%= task.assigned_agent.name.truncate(12) %></span>
+        <% elsif task.assigned_to_agent? %>
+          <span>Assigned</span>
+        <% else %>
+          <span>Assign</span>
+        <% end %>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 opacity-50">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+      <div data-dropdown-target="menu"
+           class="hidden absolute right-0 top-full mt-1 w-48 py-1 rounded-lg bg-bg-elevated border border-border shadow-lg z-10">
+        <% if task.assigned_to_agent? || task.assigned_agent_id.present? %>
+          <%= button_to unassign_board_task_path(board, task),
+              method: :patch,
+              data: { action: "click->dropdown#close" },
+              class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors" do %>
+            <span class="w-4 text-center">✕</span>
+            Unassign
+          <% end %>
+          <div class="border-t border-border my-1"></div>
+        <% end %>
+        <%= button_to assign_board_task_path(board, task),
+            method: :patch,
+            params: { agent_id: "" },
+            data: { action: "click->dropdown#close" },
+            class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
+          <span class="w-4 text-center">⚡</span>
+          <span class="flex-1">Auto / Any</span>
+          <% if task.assigned_to_agent? && task.assigned_agent_id.nil? %>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-accent">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          <% end %>
+        <% end %>
+        <% user_agents.each do |agent| %>
+          <%= button_to assign_board_task_path(board, task),
+              method: :patch,
+              params: { agent_id: agent.id },
+              data: { action: "click->dropdown#close" },
+              class: "w-full flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:bg-bg-hover transition-colors" do %>
+            <span class="w-4 text-center">🤖</span>
+            <span class="flex-1 truncate"><%= agent.name %></span>
+            <% if task.assigned_agent_id == agent.id %>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-accent">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   <% else %>
-    <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-content-muted bg-bg-elevated cursor-not-allowed" title="Connect an agent in Settings">
-      <span>🦞</span>
-      <span>No agent</span>
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-content-muted bg-bg-elevated cursor-not-allowed" title="Register an agent first">
+      <span>🤖</span>
+      <span>No agents</span>
     </span>
   <% end %>
 </div>

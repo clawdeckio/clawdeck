@@ -5,21 +5,29 @@ module Api
     included do
       before_action :authenticate_api_token
       after_action :track_api_usage
-      attr_reader :current_user
+      attr_reader :current_user, :current_agent
     end
 
     private
 
     def authenticate_api_token
       token = extract_token_from_header
-      @current_user = ApiToken.authenticate(token)
+      agent_token = AgentToken.authenticate(token)
+
+      if agent_token
+        @current_agent = agent_token.agent
+        @current_user = @current_agent.user
+      else
+        @current_agent = nil
+        @current_user = ApiToken.authenticate(token)
+      end
 
       unless @current_user
         render json: { error: "Unauthorized" }, status: :unauthorized
         return
       end
 
-      update_agent_info_from_headers
+      update_agent_info_from_headers if @current_agent.nil?
     end
 
     def extract_token_from_header

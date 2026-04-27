@@ -1,6 +1,8 @@
 class Task < ApplicationRecord
   belongs_to :user
   belongs_to :board
+  belongs_to :assigned_agent, class_name: "Agent", optional: true
+  belongs_to :claimed_by_agent, class_name: "Agent", optional: true
   has_many :activities, class_name: "TaskActivity", dependent: :destroy
   has_many :subtasks, dependent: :destroy
 
@@ -12,7 +14,7 @@ class Task < ApplicationRecord
   validates :status, inclusion: { in: statuses.keys }
 
   # Activity tracking - must be declared before callbacks that use it
-  attr_accessor :activity_source, :actor_name, :actor_emoji, :activity_note
+  attr_accessor :activity_source, :actor_name, :actor_emoji, :activity_note, :actor_user, :actor_agent
 
   # Store activity_source before commit so it survives the transaction
   before_save :store_activity_source_for_broadcast
@@ -35,6 +37,12 @@ class Task < ApplicationRecord
   scope :completed, -> { where(completed: true).reorder(completed_at: :desc) }
   scope :assigned_to_agent, -> { where(assigned_to_agent: true).reorder(assigned_at: :asc) }
   scope :unassigned, -> { where(assigned_to_agent: false) }
+  scope :eligible_for_agent, ->(agent) do
+    return none unless agent
+
+    where(status: :up_next, blocked: false, claimed_by_agent_id: nil)
+      .where(assigned_agent_id: [ nil, agent.id ])
+  end
   default_scope { order(completed: :asc, position: :asc) }
 
   # Agent assignment methods
@@ -77,7 +85,15 @@ class Task < ApplicationRecord
   end
 
   def record_creation_activity
-    TaskActivity.record_creation(self, source: activity_source || "web", actor_name: actor_name, actor_emoji: actor_emoji, note: activity_note)
+    TaskActivity.record_creation(
+      self,
+      source: activity_source || "web",
+      actor_user: actor_user || user,
+      actor_agent: actor_agent,
+      actor_name: actor_name,
+      actor_emoji: actor_emoji,
+      note: activity_note
+    )
   end
 
   def record_update_activities
@@ -86,12 +102,33 @@ class Task < ApplicationRecord
     # Track status/column changes
     if saved_change_to_status?
       old_status, new_status = saved_change_to_status
-      TaskActivity.record_status_change(self, old_status: old_status, new_status: new_status, source: source, actor_name: actor_name, actor_emoji: actor_emoji, note: activity_note)
+      TaskActivity.record_status_change(
+        self,
+        old_status: old_status,
+        new_status: new_status,
+        source: source,
+        actor_user: actor_user || user,
+        actor_agent: actor_agent,
+        actor_name: actor_name,
+        actor_emoji: actor_emoji,
+        note: activity_note
+      )
     end
 
     # Track field changes
     tracked_changes = saved_changes.slice(*TaskActivity::TRACKED_FIELDS)
-    TaskActivity.record_changes(self, tracked_changes, source: source, actor_name: actor_name, actor_emoji: actor_emoji, note: activity_note) if tracked_changes.any?
+    if tracked_changes.any?
+      TaskActivity.record_changes(
+        self,
+        tracked_changes,
+        source: source,
+        actor_user: actor_user || user,
+        actor_agent: actor_agent,
+        actor_name: actor_name,
+        actor_emoji: actor_emoji,
+        note: activity_note
+      )
+    end
   end
 
   # Turbo Streams broadcasts for real-time updates

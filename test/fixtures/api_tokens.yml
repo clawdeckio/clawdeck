@@ -10,3 +10,9 @@ two:
   name: Test Token Two
   user: two
   last_used_at: nil
+
+admin:
+  token: test_token_admin_abc123xyz789
+  name: Admin Token
+  user: admin
+  last_used_at: nil
