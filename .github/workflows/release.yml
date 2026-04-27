@@ -15,7 +15,7 @@ jobs:
       
       - name: Generate changelog
         id: changelog
-        uses: orhun/git-cliff-action@v3
+        uses: orhun/git-cliff-action@v4
         with:
           args: --latest --strip header
       
